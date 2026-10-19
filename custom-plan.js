@@ -15,12 +15,31 @@
  }
  function options(select,items,value){select.replaceChildren();for(const item of items)select.add(new Option(item.name,item.id));if(items.some(i=>i.id===value))select.value=value;}
  function resetAsset(){assetEdit=null;$('assetForm').reset();$('assetSubmit').textContent='Add asset';$('assetCancel').hidden=true;}
- function resetLoan(){loanEdit=null;$('loanForm').reset();$('loanSubmit').textContent='Add loan';$('loanCancel').hidden=true;$('loanEmi').value='';}
+ function resetLoan(){loanEdit=null;$('loanForm').reset();$('loanMode').value='original';$('loanYears').value='0';$('loanExtraMonths').value='0';const now=new Date();$('loanCurrentDate').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');$('loanSubmit').textContent='Add loan';$('loanCancel').hidden=true;setLoanMode();}
  function resetFlow(){flowEdit=null;$('flowForm').reset();$('flowSubmit').textContent='Add cash flow';$('flowCancel').hidden=true;renderFlowTargets();}
  function renderSettings(){
-  for(const [id,key] of Object.entries({planName:'name',currency:'currency',startMonth:'startMonth',duration:'months',defaultSip:'monthlySip',stepup:'annualStepup',inflation:'inflation'}))$(id).value=plan[key];
+  for(const [id,key] of Object.entries({planName:'name',currency:'currency',startMonth:'startMonth',defaultSip:'monthlySip',stepup:'annualStepup',inflation:'inflation'}))$(id).value=plan[key];
+  $('endMonth').value=E.monthKey(E.monthNumber(plan.startMonth)+plan.months-1);
+  updateEndMonth();
   options($('sipTarget'),plan.assets,plan.sipAssetId);
  }
+ function selectedDuration(){
+  const months=E.monthNumber($('endMonth').value)-E.monthNumber($('startMonth').value)+1;
+  if(months<1)throw new Error('End month must be on or after the starting month.');
+  if(months>720)throw new Error('Choose an end month within 60 years (720 months) of the starting month.');
+  return months;
+ }
+ function updateEndMonth(){
+  try{
+   const start=E.monthNumber($('startMonth').value);
+   $('endMonth').min=$('startMonth').value;
+   $('endMonth').max=E.monthKey(start+719);
+   const months=selectedDuration();
+   $('durationHint').textContent=months+' month'+(months===1?'':'s')+' · includes the end month';
+  }catch(e){$('durationHint').textContent=e.message;}
+ }
+ $('startMonth').oninput=updateEndMonth;
+ $('endMonth').oninput=updateEndMonth;
  function renderSummary(){
   const values=[['Projected net wealth',result.netWorth,'Assets minus remaining loans'],['Projected assets',result.balance,'Starting assets: '+money(result.initial.balance)],['Remaining loans',result.debt,'Starting debt: '+money(result.initial.debt)],['New investments',result.contributions,'SIP + extra investments'],['Available for withdrawals',result.available,'Excludes assets you keep untouched'],['Unfunded cash flows',result.shortfall,'Loan payments and one-time costs']];
   $('summary').innerHTML=values.map(([name,value,note],i)=>'<div class="metric '+(i===0?'featured':'')+'"><span>'+escape(name)+'</span><strong class="'+(value<0?'negative':'')+'">'+escape(money(value))+'</strong><small>'+escape(note)+'</small></div>').join('');
@@ -28,7 +47,7 @@
  function buttons(kind,id){return '<div class="actions"><button type="button" data-action="edit-'+kind+'" data-id="'+escape(id)+'">Edit</button><button type="button" data-action="remove-'+kind+'" data-id="'+escape(id)+'">Remove</button></div>';}
  function renderAssets(){
   $('assetList').innerHTML=plan.assets.map(a=>{const projected=result.assets.find(x=>x.id===a.id);return '<div class="entry"><div><strong>'+escape(a.name)+'</strong><p class="helper">'+escape(a.type+' · '+money(a.value)+' at start · '+a.annualReturn+'% return · '+(a.canWithdraw?'Available for withdrawals':'Keep untouched')+(a.id===plan.sipAssetId?' · Default SIP account':''))+'</p><p class="helper">Projected value: '+escape(money(projected.value))+'</p></div>'+buttons('asset',a.id)+'</div>';}).join('');
-  $('loanList').innerHTML=plan.loans.map(l=>{const projected=result.loans.find(x=>x.id===l.id);return '<div class="entry"><div><strong>'+escape(l.name)+'</strong><p class="helper">'+escape(money(l.balance)+' at start · '+l.annualRate+'% interest · '+l.remainingMonths+' months · EMI '+money(projected.emi)+' from '+l.source)+'</p><p class="helper">'+escape('Projected debt: '+money(projected.balance)+(projected.payoffMonth===null?' · Not paid off within plan':' · Paid off '+(projected.payoffMonth===0?'at start':'in '+label(E.monthKey(E.monthNumber(plan.startMonth)+projected.payoffMonth-1)))))+'</p></div>'+buttons('loan',l.id)+'</div>';}).join('')||'<p class="empty">No loans added.</p>';
+  $('loanList').innerHTML=plan.loans.map(l=>{const projected=result.loans.find(x=>x.id===l.id);return '<div class="entry"><div><strong>'+escape(l.name)+'</strong><p class="helper">'+escape(money(l.balance)+' at start'+(l.balanceMode==='original'?' (as of '+l.currentDate+')':'')+' · '+l.annualRate+'% interest · '+l.remainingMonths+' months · EMI '+money(projected.emi)+' from '+l.source)+'</p>'+(l.balanceMode==='original'?'<p class="helper">'+escape('Original '+money(l.originalAmount)+' · '+l.totalMonths+' months total · Started '+l.startDate+' · '+l.paidMonths+' paid / '+l.remainingMonths+' remaining')+'</p>':'')+'<p class="helper">'+escape('Projected debt: '+money(projected.balance)+(projected.payoffMonth===null?' · Not paid off within plan':' · Paid off '+(projected.payoffMonth===0?'at start':'in '+label(E.monthKey(E.monthNumber(plan.startMonth)+projected.payoffMonth-1)))))+'</p></div>'+buttons('loan',l.id)+'</div>';}).join('')||'<p class="empty">No loans added.</p>';
  }
  function renderSchedule(){
   const count=Math.ceil(plan.months/12);year=Math.max(0,Math.min(year,count-1));
@@ -65,12 +84,44 @@
  function render(){renderSettings();renderSummary();renderAssets();renderSchedule();renderMonth();renderChart();}
  function download(text,type,name){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function stage(candidate){pending=E.validate(candidate);$('importDescription').textContent=pending.name+' · '+pending.currency+' · starts '+pending.startMonth+' · '+pending.months+' months · '+pending.assets.length+' assets · '+pending.loans.length+' loans · '+pending.overrides.length+' monthly changes.';$('importPreview').hidden=false;$('importPreview').scrollIntoView({block:'center'});error('');}
- $('settingsForm').onsubmit=event=>{event.preventDefault();const p=clone();Object.assign(p,{name:$('planName').value,currency:$('currency').value,startMonth:$('startMonth').value,months:Number($('duration').value),monthlySip:Number($('defaultSip').value),annualStepup:Number($('stepup').value),inflation:Number($('inflation').value),sipAssetId:$('sipTarget').value});apply(p,'Plan defaults updated. Existing monthly overrides stay on their calendar dates.');};
+ $('settingsForm').onsubmit=event=>{event.preventDefault();try{const p=clone();Object.assign(p,{name:$('planName').value,currency:$('currency').value,startMonth:$('startMonth').value,months:selectedDuration(),monthlySip:Number($('defaultSip').value),annualStepup:Number($('stepup').value),inflation:Number($('inflation').value),sipAssetId:$('sipTarget').value});apply(p,'Plan defaults updated. Existing monthly overrides stay on their calendar dates.');}catch(e){error('Change not applied. '+e.message);}};
  $('assetForm').onsubmit=event=>{event.preventDefault();const p=clone(),entry={id:assetEdit||uid('asset'),name:$('assetName').value.trim(),type:$('assetType').value,value:Number($('assetValue').value),annualReturn:Number($('assetReturn').value),canWithdraw:$('assetLiquid').value==='yes'},index=p.assets.findIndex(a=>a.id===entry.id);if(index<0)p.assets.push(entry);else p.assets[index]=entry;if(apply(p,'Asset saved.'))resetAsset();};
  $('assetCancel').onclick=resetAsset;$('assetType').onchange=()=>{$('assetLiquid').value=$('assetType').value==='Property'?'no':'yes';};
- function updateLoanEmi(){try{const balance=Number($('loanBalance').value),months=Number($('loanMonths').value);$('loanEmi').value=$('loanBalance').value===''||$('loanRate').value===''||$('loanMonths').value===''?'':balance===0?'0.00':GrowthEngine.calculateEmi(balance,Number($('loanRate').value),months).toFixed(2);}catch{$('loanEmi').value='';}}
+ function loanDetails(){
+  const original=$('loanMode').value==='original';
+  const required=original?['loanOriginal','loanRate','loanYears','loanExtraMonths','loanStartDate','loanCurrentDate']:['loanBalance','loanRate','loanMonths'];
+  if(required.some(id=>$(id).value.trim()===''))throw new Error('Complete the loan details to calculate the EMI.');
+  if(original){
+   const years=Number($('loanYears').value),extra=Number($('loanExtraMonths').value);
+   if(!Number.isInteger(years)||years<0||!Number.isInteger(extra)||extra<0||extra>11)throw new Error('Enter whole tenure years and 0–11 additional months.');
+   return E.calculateLoanDetails(Number($('loanOriginal').value),Number($('loanRate').value),years*12+extra,$('loanStartDate').value,$('loanCurrentDate').value);
+  }
+  const balance=Number($('loanBalance').value),remainingMonths=Number($('loanMonths').value),rate=Number($('loanRate').value);
+  if(!Number.isFinite(balance)||balance<0||balance>1e12||!Number.isInteger(remainingMonths)||remainingMonths<0||remainingMonths>1200||!Number.isFinite(rate)||rate<0||rate>60)throw new Error('Enter a valid balance, interest rate and remaining tenure.');
+  return {balance,remainingMonths,emi:balance===0?0:GrowthEngine.calculateEmi(balance,rate,remainingMonths)};
+ }
+ function updateLoanEmi(){
+  const original=$('loanMode').value==='original';
+  try{
+   const details=loanDetails();
+   if(original){$('loanBalance').value=details.balance.toFixed(2);$('loanMonths').value=details.remainingMonths;$('loanPaidMonths').value=details.paidMonths;}
+   $('loanEmi').value=details.emi.toFixed(2);
+   $('loanRemainingTotal').value=(details.emi*details.remainingMonths).toFixed(2);
+   $('loanCalculation').textContent=original?details.paidMonths+' of '+details.totalMonths+' EMIs paid · '+details.remainingMonths+' remaining'+(details.remainingMonths===0?' · Fully repaid':'')+'. Balance estimated as of '+$('loanCurrentDate').value+'.':'EMI calculated from your outstanding balance and remaining months.';
+  }catch(e){
+   if(original)for(const id of ['loanBalance','loanMonths','loanPaidMonths'])$(id).value='';
+   $('loanEmi').value='';$('loanRemainingTotal').value='';$('loanCalculation').textContent=e.message;
+  }
+ }
+ function setLoanMode(){
+  const original=$('loanMode').value==='original';
+  for(const [id,labelId] of [['loanOriginal','loanOriginalLabel'],['loanYears','loanYearsLabel'],['loanExtraMonths','loanExtraMonthsLabel'],['loanStartDate','loanStartLabel'],['loanCurrentDate','loanCurrentLabel']]){$(id).disabled=!original;$(id).required=original;$(labelId).hidden=!original;}
+  $('loanPaidLabel').hidden=!original;$('loanBalance').readOnly=original;$('loanMonths').readOnly=original;
+  updateLoanEmi();
+ }
+ $('loanMode').onchange=setLoanMode;
  $('loanForm').addEventListener('input',updateLoanEmi);
- $('loanForm').onsubmit=event=>{event.preventDefault();const p=clone(),entry={id:loanEdit||uid('loan'),name:$('loanName').value.trim(),balance:Number($('loanBalance').value),annualRate:Number($('loanRate').value),remainingMonths:Number($('loanMonths').value),source:$('loanSource').value},index=p.loans.findIndex(l=>l.id===entry.id);if(index<0)p.loans.push(entry);else p.loans[index]=entry;if(apply(p,'Loan saved.'))resetLoan();};
+ $('loanForm').onsubmit=event=>{event.preventDefault();try{const details=loanDetails(),p=clone(),entry={id:loanEdit||uid('loan'),name:$('loanName').value.trim(),balance:details.balance,annualRate:Number($('loanRate').value),remainingMonths:details.remainingMonths,source:$('loanSource').value};if($('loanMode').value==='original')Object.assign(entry,{balanceMode:'original',originalAmount:Number($('loanOriginal').value),totalMonths:details.totalMonths,startDate:$('loanStartDate').value,currentDate:$('loanCurrentDate').value});const index=p.loans.findIndex(l=>l.id===entry.id);if(index<0)p.loans.push(entry);else p.loans[index]=entry;if(apply(p,'Loan saved.'))resetLoan();}catch(e){error('Loan not saved. '+e.message);}};
  $('loanCancel').onclick=resetLoan;
  $('yearView').onchange=()=>{year=Number($('yearView').value);renderSchedule();};
  $('monthlyRows').addEventListener('change',event=>{const month=event.target.dataset.sipMonth;if(!month)return;const p=clone(),o=changeFor(p,month);o.sip=event.target.value.trim()===''?null:Number(event.target.value);p.overrides=p.overrides.filter(o=>o.sip!==null||o.flows.length||o.note);apply(p,'SIP for '+label(month)+' updated.');});
@@ -83,7 +134,7 @@
   const key=kind==='asset'?'assets':'loans',entry=plan[key].find(x=>x.id===id);if(!entry)return;
   if(action==='remove'){const p=clone();p[key]=p[key].filter(x=>x.id!==id);if(!apply(p,'Entry removed.'))error('Cannot remove this '+kind+' while it is used by the default SIP or a monthly cash flow. Reassign or remove those references first.');else{if(kind==='asset')resetAsset();else resetLoan();}return;}
   if(kind==='asset'){assetEdit=id;$('assetName').value=entry.name;$('assetType').value=entry.type;if(!$('assetType').value)$('assetType').value='Other';$('assetValue').value=entry.value;$('assetReturn').value=entry.annualReturn;$('assetLiquid').value=entry.canWithdraw?'yes':'no';$('assetSubmit').textContent='Save asset';$('assetCancel').hidden=false;$('assetName').focus();}
-  else{loanEdit=id;$('loanName').value=entry.name;$('loanBalance').value=entry.balance;$('loanRate').value=entry.annualRate;$('loanMonths').value=entry.remainingMonths;$('loanSource').value=entry.source;$('loanSubmit').textContent='Save loan';$('loanCancel').hidden=false;updateLoanEmi();$('loanName').focus();}
+  else{loanEdit=id;$('loanName').value=entry.name;$('loanMode').value=entry.balanceMode==='original'?'original':'current';$('loanBalance').value=entry.balance;$('loanRate').value=entry.annualRate;$('loanMonths').value=entry.remainingMonths;$('loanSource').value=entry.source;if(entry.balanceMode==='original'){$('loanOriginal').value=entry.originalAmount;$('loanYears').value=Math.floor(entry.totalMonths/12);$('loanExtraMonths').value=entry.totalMonths%12;$('loanStartDate').value=entry.startDate;$('loanCurrentDate').value=entry.currentDate;}$('loanSubmit').textContent='Save loan';$('loanCancel').hidden=false;setLoanMode();$('loanName').focus();}
  });
  $('exportPlan').onclick=()=>{download(E.exportPlan(plan),'application/json','Custom_plan_'+plan.startMonth+'.json');$('status').textContent='Plan file downloaded. Import this JSON later to continue editing. Form changes must be saved with their Apply/Add/Save button first.';};
  $('exportCsv').onclick=()=>{const fields=['month','sip','extra','contributions','growth','emiPaid','prepaid','loanInterest','expenseDue','expensePaid','incomePayments','portfolioPayments','shortfall','unusedPrepayment','balance','debt','netWorth','available'];const rows=[fields,...result.rows.map(r=>fields.map(k=>typeof r[k]==='number'?Number(r[k].toFixed(2)):r[k]))];download('\ufeff'+rows.map(row=>row.join(',')).join('\r\n'),'text/csv;charset=utf-8','Custom_schedule_'+plan.currency+'.csv');};
@@ -102,5 +153,5 @@
   stage(candidate);
  }catch(e){error('Growth setup not copied. '+e.message);}};
  try{const saved=localStorage.getItem(KEY);if(saved)plan=E.parse(saved);}catch(e){storage=false;error('Saved Custom Plan could not be restored. You can import a plan file. '+e.message);}
- selected=plan.startMonth;result=E.project(plan);render();$('saveState').textContent=storage?'Private · browser saved':'Save a plan file to keep your changes';
+ selected=plan.startMonth;result=E.project(plan);render();resetLoan();$('saveState').textContent=storage?'Private · browser saved':'Save a plan file to keep your changes';
 })();

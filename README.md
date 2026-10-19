@@ -30,7 +30,7 @@ Loans can also be entered from original details: original amount, fixed annual i
 
 The home page now links to `custom-plan.html`, a separate monthly planner with separate browser storage. Growth and Survival calculations keep their existing behavior.
 
-1. Enter your starting month, assets, loans, default monthly SIP, and SIP destination. New investment accounts can start at zero.
+1. Choose your starting and end months using the calendar pickers, then enter assets, loans, default monthly SIP, and SIP destination. The duration is calculated automatically and includes both selected months. New investment accounts can start at zero.
 2. In the monthly table, override any month's SIP (including zero to skip). A blank override uses the default SIP and annual step-up.
 3. Choose a month and add extra investments to specific assets, loan prepayments, or one-time expenses. For example, leave the SIP at 20,000 and add a 50,000 bonus into a Stocks account.
 4. Use **Save plan file** to download the complete editable plan as versioned JSON. **Import plan** validates the file and previews it before replacing the open Custom Plan. CSV downloads contain calculated schedules and cannot restore the plan.
@@ -39,6 +39,8 @@ The home page now links to `custom-plan.html`, a separate monthly planner with s
 Monthly cash flows retain their calendar dates when the plan start or duration changes. Entries outside the projection are kept and excluded. Import does not advance balances or dates automatically. If you update a current balance later, also update the starting month to match that balance date. Edit forms must be applied/saved before exporting; unsaved form text is not part of the plan file.
 
 Custom Plan supports 1–720 months, up to 50 assets, 50 loans and 2,000 dated cash flows. All asset returns are effective annual assumptions compounded monthly. End-of-month deposits start earning in the following month. Scheduled EMIs precede extra loan repayments and expenses. Prepayments keep EMI unchanged and shorten payoff; requests above outstanding debt are capped and the unused amount is not invested automatically. Income-funded payments assume external cash is available. Investment-funded payments use only withdrawable assets. Unfunded payments remain in loans; unfunded one-time costs do not create debt.
+
+Current loans default to original amount and dates: enter the starting amount, annual interest, total tenure in years plus months, loan start date, and current balance date. Completed monthly anniversaries determine paid months; the first EMI is assumed one month after the start date, with month-end clamping. The form calculates remaining EMI count, monthly EMI, estimated outstanding principal, and total remaining payments including interest. These estimates assume all payments were made on time at a fixed rate. For past prepayments, missed payments, or rate changes, use the current outstanding balance method with lender-confirmed figures. Align the plan's starting month with the balance date. Saved loan dates and original details remain editable after import; existing balance-only loans remain supported. Run `node custom-loan.test.js` for date boundaries, independent amortisation, payoff, and saved-file checks.
 
 For GitHub Pages, include the new production files `custom-plan.html`, `custom-plan.css`, `custom-engine.js`, and `custom-plan.js`, plus the updated `index.html` and `planner.css`, along with the existing calculator files. No build or server is required.
 

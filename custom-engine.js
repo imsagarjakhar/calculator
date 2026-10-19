@@ -10,6 +10,20 @@
  function list(value,max,label){if(!Array.isArray(value)||value.length>max)throw new Error(label+' must contain at most '+max+' entries.');return value;}
  function id(value){if(typeof value!=='string'||!/^[-a-zA-Z0-9_]{1,60}$/.test(value))throw new Error('Invalid asset or loan identifier.');return value;}
  function note(value){if(value===undefined)return '';if(typeof value!=='string'||value.length>200)throw new Error('Notes must be text up to 200 characters.');return value;}
+ function loanDate(value){
+  if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))throw new Error('Choose valid loan start and current dates.');
+  const date=new Date(value+'T00:00:00Z');
+  if(!Number.isFinite(date.getTime())||date.toISOString().slice(0,10)!==value||date.getUTCFullYear()<1900||date.getUTCFullYear()>2250)throw new Error('Loan dates must be valid dates between 1900 and 2250.');
+  return date;
+ }
+ function calculateLoanDetails(originalAmount,annualRate,totalMonths,startDate,currentDate){
+  const start=loanDate(startDate),current=loanDate(currentDate);
+  if(current<start)throw new Error('Current date must be on or after the loan start date.');
+  let elapsed=(current.getUTCFullYear()-start.getUTCFullYear())*12+current.getUTCMonth()-start.getUTCMonth();
+  const dueDay=Math.min(start.getUTCDate(),new Date(Date.UTC(current.getUTCFullYear(),current.getUTCMonth()+1,0)).getUTCDate());
+  if(current.getUTCDate()<dueDay)elapsed--;
+  return Growth.calculateLoanFromOriginal(originalAmount,annualRate,totalMonths,Math.min(totalMonths,Math.max(0,elapsed)));
+ }
  function validate(raw){
   if(!raw||typeof raw!=='object'||raw.schema!==SCHEMA||raw.version!==VERSION)throw new Error('This file is not a supported Custom Plan (version 1).');
   const start=monthNumber(raw.startMonth);if(start>2150*12+11)throw new Error('The start month must be no later than 2150.');
@@ -18,7 +32,19 @@
   if(!assets.length)throw new Error('Keep at least one asset for your SIP.');
   const assetIds=new Set(assets.map(a=>a.id));if(assetIds.size!==assets.length)throw new Error('Asset identifiers must be unique.');
   if(!assetIds.has(raw.sipAssetId))throw new Error('Choose an existing asset to receive the monthly SIP.');
-  const loans=list(raw.loans,50,'Loans').map(l=>{if(!l||typeof l!=='object')throw new Error('Invalid loan entry.');if(!['income','investments'].includes(l.source))throw new Error('Choose an EMI payment source.');const balance=number(l.balance,0,1e12,'Loan balance'),remainingMonths=number(l.remainingMonths,balance===0?0:1,1200,'Loan remaining months',true);return {id:id(l.id),name:string(l.name,80,'loan name'),balance,annualRate:number(l.annualRate,0,60,'Loan interest'),remainingMonths,source:l.source};});
+  const loans=list(raw.loans,50,'Loans').map(l=>{
+   if(!l||typeof l!=='object')throw new Error('Invalid loan entry.');
+   if(!['income','investments'].includes(l.source))throw new Error('Choose an EMI payment source.');
+   const common={id:id(l.id),name:string(l.name,80,'loan name'),annualRate:number(l.annualRate,0,60,'Loan interest'),source:l.source};
+   if(l.balanceMode!==undefined&&!['original','current'].includes(l.balanceMode))throw new Error('Choose a valid loan entry method.');
+   if(l.balanceMode==='original'){
+    const originalAmount=number(l.originalAmount,0.01,1e12,'Original loan amount'),totalMonths=number(l.totalMonths,1,1200,'Total loan tenure',true);
+    const details=calculateLoanDetails(originalAmount,common.annualRate,totalMonths,l.startDate,l.currentDate);
+    return {...common,balanceMode:'original',originalAmount,totalMonths,startDate:l.startDate,currentDate:l.currentDate,balance:details.balance,paidMonths:details.paidMonths,remainingMonths:details.remainingMonths};
+   }
+   const balance=number(l.balance,0,1e12,'Loan balance'),remainingMonths=number(l.remainingMonths,balance===0?0:1,1200,'Loan remaining months',true);
+   return {...common,balance,remainingMonths};
+  });
   const loanIds=new Set(loans.map(l=>l.id));if(loanIds.size!==loans.length)throw new Error('Loan identifiers must be unique.');
   let flowCount=0;
   const overrides=list(raw.overrides,720,'Monthly changes').map(o=>{
@@ -68,5 +94,5 @@
   }
   return {initial,...snapshot(),...totals,rows,years,path,assets,loans,outsideMonths:plan.overrides.filter(o=>monthNumber(o.month)<start||monthNumber(o.month)>=start+plan.months).length};
  }
- const api={validate,createPlan,parse,exportPlan,project,monthNumber,monthKey};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomPlan=api;
+ const api={validate,createPlan,parse,exportPlan,project,monthNumber,monthKey,calculateLoanDetails};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomPlan=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
