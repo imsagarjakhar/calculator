@@ -83,3 +83,22 @@ near(actual.netWorth,projectPlan(settings,[],[expense({year:2,amount:50000})],mi
 assert.equal(node('value').textContent,format(actual.netWorth));
 assert.ok(node('exactValue').textContent.includes('remaining debt'));
 console.log('Passed: existing asset CAGR/depreciation, loan amortisation/payoff, income vs portfolio EMIs, illiquid assets, shortfalls, net wealth/goal timing, cash-flow reconciliation, and new table/CSV values.');
+
+// The header Reset clears the whole Growth state across currencies and persists it.
+const resetPositions=new Map([['INR',mixed],['USD',mixed]]),resetExpenses=new Map([['INR',[expense()]],['USD',[expense()]]]),persisted=new Map([['corpus-survival-v1','survival-data'],['intimetec-custom-plan-v1','custom-data']]);
+ui.GrowthHoldings={load:currency=>resetPositions.get(currency)||{assets:[],loans:[]},save:(currency,data)=>resetPositions.set(currency,data)};
+ui.LifeEvents={load:(mode,currency)=>resetExpenses.get(currency)||[],save:(mode,currency,data)=>{assert.equal(mode,'growth');resetExpenses.set(currency,data);}};
+ui.localStorage={getItem:key=>persisted.get(key)||null,setItem:(key,value)=>persisted.set(key,value)};
+node('extraForm').reset=()=>{};
+for(const element of output.values()){let value=String(element.value??'');Object.defineProperty(element,'value',{get:()=>value,set:next=>{value=String(next);},configurable:true});}
+vm.runInContext("currency='USD';selected='Gold';extras=[{id:1,year:1,month:1,amount:500,note:'Bonus'}];view='monthly';page=3;resetCalculator()",ui);
+for(const position of resetPositions.values()){assert.equal(position.assets.length,0);assert.equal(position.loans.length,0);}
+for(const expenses of resetExpenses.values())assert.equal(expenses.length,0);
+assert.equal(vm.runInContext('currency',ui),'INR');assert.equal(vm.runInContext('view',ui),'yearly');assert.equal(vm.runInContext('page',ui),1);
+assert.equal(node('monthly').value,'2000');assert.equal(node('stepup').value,'10');assert.equal(node('years').value,'30');assert.equal(node('pageSize').value,'12');
+assert.equal(node('error').hidden,true,node('error').textContent);
+assert.equal(vm.runInContext('current.o.loanResults.length+current.o.assetResults.length',ui),0);
+assert.equal(vm.runInContext('current.o.expensePaid+current.o.extraTotal',ui),0);
+const resetSaved=JSON.parse(persisted.get('InTimeTec-investment-planner-v2'));assert.equal(resetSaved.currency,'INR');assert.equal(resetSaved.extras.length,0);assert.equal(resetSaved.inputs.monthly,2000);
+assert.equal(persisted.get('corpus-survival-v1'),'survival-data');assert.equal(persisted.get('intimetec-custom-plan-v1'),'custom-data');
+console.log('Passed: complete Growth Reset, cleared multi-currency data, restored defaults/view, persisted state, and separate planner data retained.');
