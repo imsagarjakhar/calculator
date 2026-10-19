@@ -98,7 +98,7 @@ function parseCSV(text){
 for(const which of ['yearly','monthly']){
  context.view=which;vm.runInContext('renderTable()',context);
  const headColumns=(el('tableHead').innerHTML.match(/scope="col"/g)||[]).length;
- assert.equal(headColumns,9);
+ assert.equal(headColumns,13);
  for(const row of el('tableBody').innerHTML.matchAll(/<tr[^>]*>(.*?)<\/tr>/g))assert.equal((row[1].match(/<t[dh][\s>]/g)||[]).length,headColumns);
  const csv=parseCSV(vm.runInContext(`makeCSV('${which}')`,context));
  for(const row of csv.slice(1))assert.equal(row.length,csv[0].length);
