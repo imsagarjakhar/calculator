@@ -26,11 +26,23 @@ vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
 const submit=id=>get(id).onsubmit({preventDefault(){}}),read=()=>E.parse(saved.get('intimetec-custom-plan-v1'));
 const clickAction=(action,id)=>documentListeners.click({target:{closest:()=>({dataset:{action,id}})}});
 assert.ok(get('summary').innerHTML.includes('Projected net wealth'));
+// Keep the six existing cards and add a currency-specific target comparison.
+assert.equal((get('summary').innerHTML.match(/class="metric /g)||[]).length+ (get('summary').innerHTML.match(/class="metric"/g)||[]).length,7);
+assert.ok(get('summary').innerHTML.includes('Below 1 crore (INR)'));
+for(const [value,heading] of [[8000000,'Below'],[12000000,'Above'],[10000000,'Target reached:']]){
+ const targetPlan=E.createPlan(new Date(2026,9,19));targetPlan.months=1;targetPlan.monthlySip=0;targetPlan.assets[0].value=value;targetPlan.assets[0].annualReturn=0;
+ saved.set('intimetec-custom-plan-v1',E.exportPlan(targetPlan));vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
+ assert.ok(get('summary').innerHTML.includes(heading+' 1 crore (INR)'));
+ assert.ok(get('summary').innerHTML.includes('class="metric '+(value<10000000?'target-below':'target-funded')+'"'));
+ assert.ok(get('summary').innerHTML.includes(new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.abs(value-10000000))));
+}
+saved.set('intimetec-custom-plan-v1',E.exportPlan(plan));vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
 // Header currency updates saved/results immediately, preserving amounts and draft forms.
 const originalSip=read().monthlySip;get('defaultSip').value='77777';get('assetName').value='Unsaved asset';
 for(const currency of ['SAR','USD','AED','EUR','GBP','INR']){
  get('currency').value=currency;get('currency').onchange();
  assert.equal(read().currency,currency);assert.equal(read().monthlySip,originalSip);
+ assert.ok(get('summary').innerHTML.includes('Below '+(currency==='INR'?'1 crore':'10 million')+' ('+currency+')'));
  assert.equal(get('defaultSip').value,'77777');assert.equal(get('assetName').value,'Unsaved asset');assert.equal(get('currency').value,currency);
 }
 get('currency').value='INVALID';get('currency').onchange();assert.equal(read().currency,'INR');assert.equal(get('currency').value,'INR');

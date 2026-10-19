@@ -14,6 +14,14 @@ assert.equal((html.match(/<\/script>/g)||[]).length,1);assert.ok(!html.includes(
 assert.ok(html.includes('Content-Security-Policy'));assert.ok(!html.includes('<script src='));assert.ok(!html.includes('<link rel="stylesheet"'));assert.ok(html.includes('@media print'));
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',currencyDisplay:'code',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
 assert.ok(html.includes(money(o.netWorth)));assert.ok(html.includes(money(o.rows.at(-1).netWorth)));assert.ok(html.includes('36'));
+for(const currency of ['INR','USD','SAR','AED','EUR','GBP'])for(const wealth of [-1000000,8000000,10000000,12000000,10000000.01]){
+ const comparison=R.targetComparison(wealth,currency),name=currency==='INR'?'1 crore':'10 million';
+ assert.equal(comparison.target,10000000);assert.equal(comparison.difference,Math.round((wealth-10000000)*100)/100);
+ assert.equal(comparison.heading,(wealth<10000000?'Below ':wealth>10000000?'Above ':'Target reached: ')+name+' ('+currency+')');
+ const sample=E.createPlan(new Date(2026,9,19));sample.currency=currency;sample.months=1;sample.monthlySip=0;sample.assets[0].value=Math.max(0,wealth);sample.assets[0].annualReturn=0;
+ const report=R.build(sample),actual=R.targetComparison(E.project(sample).netWorth,currency);
+ assert.ok(report.includes(actual.heading));assert.ok(report.includes('class="metric '+(actual.difference<0?'target-below':'target-funded')+'"'));assert.ok(report.includes('Based on projected net wealth at plan end. No currency conversion.'));assert.deepEqual(R.read(report),E.validate(sample));
+}
 for(const bad of ['<html>No data</html>',html.replace('custom-plan-data','wrong-data'),html+html,html.replace(/"version": 1/,'"version": 999'),'{bad json'])assert.throws(()=>R.read(bad));
 assert.throws(()=>R.read('x'.repeat(R.MAX_FILE_BYTES+1)));
 const long=E.createPlan(new Date(2026,9,19));long.months=720;const large=R.build(long);assert.deepEqual(R.read(large),E.validate(long));assert.ok(large.length<R.MAX_FILE_BYTES);

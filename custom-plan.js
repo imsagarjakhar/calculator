@@ -43,8 +43,9 @@
  $('startMonth').oninput=updateEndMonth;
  $('endMonth').oninput=updateEndMonth;
  function renderSummary(){
+  const comparison=CustomReport.targetComparison(result.netWorth,plan.currency),exactMoney=n=>new Intl.NumberFormat(plan.currency==='INR'?'en-IN':'en-US',{style:'currency',currency:plan.currency,minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
   const values=[['Projected net wealth',result.netWorth,'Assets minus remaining loans'],['Projected assets',result.balance,'Starting assets: '+money(result.initial.balance)],['Remaining loans',result.debt,'Starting debt: '+money(result.initial.debt)],['New investments',result.contributions,'SIP + extra investments'],['Available for withdrawals',result.available,'Excludes assets you keep untouched'],['Unfunded cash flows',result.shortfall,'Loan payments and one-time costs']];
-  $('summary').innerHTML=values.map(([name,value,note],i)=>'<div class="metric '+(i===0?'featured':'')+'"><span>'+escape(name)+'</span><strong class="'+(value<0?'negative':'')+'">'+escape(money(value))+'</strong><small>'+escape(note)+'</small></div>').join('');
+  $('summary').innerHTML=values.map(([name,value,note],i)=>'<div class="metric '+(i===0?'featured':'')+'"><span>'+escape(name)+'</span><strong class="'+(value<0?'negative':'')+'">'+escape(money(value))+'</strong><small>'+escape(note)+'</small></div>').join('')+'<div class="metric '+(comparison.difference<0?'target-below':'target-funded')+'"><span>'+escape(comparison.heading)+'</span><strong>'+escape(exactMoney(Math.abs(comparison.difference)))+'</strong><small>'+escape('Target: '+exactMoney(comparison.target)+'. Based on projected net wealth at plan end. No currency conversion.')+'</small></div>';
  }
  function buttons(kind,id){return '<div class="actions"><button type="button" data-action="edit-'+kind+'" data-id="'+escape(id)+'">Edit</button><button type="button" data-action="remove-'+kind+'" data-id="'+escape(id)+'">Remove</button></div>';}
  function renderAssets(){
