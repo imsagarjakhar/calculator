@@ -7,7 +7,7 @@
   const get = id => document.getElementById(id);
   const screen = get('survivalScreen');
   screen.innerHTML = `
-    <header class="survival-header"><div><div class="eyebrow">MAKE IT LAST / CORPUS SURVIVAL</div><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="subtitle">Your savings, your monthly needs, and the years ahead.</p></div><div class="header-actions survival-currency"><label for="s-currency">Plan currency<select id="s-currency"><option>INR</option><option>SAR</option><option>USD</option><option>AED</option><option>EUR</option><option>GBP</option></select></label><span class="currency-note">Amounts are entered directly in this currency. No conversion.</span></div></header>
+    <header class="survival-header"><div><div class="eyebrow">MAKE IT LAST / CORPUS SURVIVAL</div><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="subtitle">Your savings, your monthly needs, and the years ahead.</p></div><div class="header-actions survival-currency"><label for="s-currency">Plan currency<select id="s-currency"><option>INR</option><option>SAR</option><option>USD</option><option>AED</option><option>EUR</option><option>GBP</option></select></label><span class="currency-note">Amounts are entered directly in this currency. No conversion.</span><div class="header-report-actions"><button id="survivalReport" class="primary" type="button">Download report</button></div><p id="survivalReportStatus" class="helper" role="status"></p></div></header>
     <div class="layout"><section class="panel"><div class="eyebrow">01 / YOUR STARTING POINT</div><h2 style="margin-top:8px">Set your survival plan</h2><p class="helper">Start today. Your SWP is the monthly spending you want your corpus to fund.</p><form id="survivalForm" novalidate><div class="controls">
     ${Object.keys(ranges).map(key=>`<label for="s-${key}">${labels[key]} ${key==='corpus'||key==='swp'?'(<span class="s-currency-code">INR</span>)':key==='age'||key==='endAge'?'(years)':'(%)'}<input id="s-${key}" type="number" min="${ranges[key][0]}" max="${ranges[key][1]}" step="${key==='age'||key==='endAge'?'1':'any'}" value="${defaults[key]}" inputmode="decimal"></label>`).join('')}
     </div><div id="survivalError" class="error survival-error" role="alert"></div><div class="survival-actions"><button class="primary" type="submit">Calculate survival</button><button id="survivalReset" class="ghost" type="button">Reset example</button></div></form><p class="helper">Inflation increases the SWP budget once per year. Use a return assumption after any expected taxes and costs.</p></section>
@@ -45,9 +45,9 @@
   }
   function update() {
     try {
-      const a=read(),events=LifeEvents.load('survival',a.currency),start=new Date(),o=projectSurvival(a,start,events),without=projectSurvival(a,start,[]),needed=requiredCorpus(a,start,events),money=n=>format(n,a.currency);last={a,o};
+      const a=read(),events=LifeEvents.load('survival',a.currency),start=new Date(),o=projectSurvival(a,start,events),without=projectSurvival(a,start,[]),needed=requiredCorpus(a,start,events),money=n=>format(n,a.currency);last={a,o,events,needed};
       if(eventsEditor){eventsEditor.refresh({currency:a.currency,months:(a.endAge-a.age)*12,inflation:a.inflation,age:a.age});eventsEditor.impact('Scheduled expenses: '+money(o.expenseDue)+'. Funded: '+money(o.expensePaid)+'. Unfunded: '+money(o.expenseShortfall)+', including scheduled costs after depletion. Funded time is '+Math.max(0,Math.floor(without.days-o.days)).toLocaleString()+' days shorter within this horizon than the same plan without life expenses. Ending corpus is '+money(Math.max(0,without.balance-o.balance))+' lower.');}
-      get('survivalError').textContent='';get('survivalExport').disabled=false;
+      get('survivalError').textContent='';get('survivalExport').disabled=false;get('survivalReport').disabled=false;get('survivalReportStatus').textContent='';
       document.querySelectorAll('.s-currency-code').forEach(n=>n.textContent=a.currency);
       const depletionTiming=o.age>=a.endAge-1e-8?'at':'before';
       const dayCount=Math.floor(o.days+1e-8),elapsedYears=Math.floor(o.age-a.age+1e-8),months=Math.floor((o.age-a.age-elapsedYears)*12+1e-7);
@@ -57,7 +57,7 @@
       renderChart(o,a);
       try{localStorage.setItem('corpus-survival-v1',JSON.stringify(a));}catch{}
     } catch(e) {
-      last=null;if(eventsEditor)eventsEditor.impact('Correct the calculator inputs to update the expense impact.');get('survivalError').textContent=e.message;get('survivalExport').disabled=true;
+      last=null;if(eventsEditor)eventsEditor.impact('Correct the calculator inputs to update the expense impact.');get('survivalError').textContent=e.message;get('survivalExport').disabled=true;get('survivalReport').disabled=true;get('survivalReportStatus').textContent='';
       get('survivalOutput').innerHTML='<p class="survival-empty">Correct your inputs to see your corpus runway.</p>';
       get('survivalPlot').replaceChildren();get('survivalRows').replaceChildren();get('survivalTableNote').textContent='';
     }
@@ -67,6 +67,7 @@
   get('survivalForm').addEventListener('submit',event=>{event.preventDefault();update();});
   get('survivalForm').addEventListener('input',update);get('s-currency').addEventListener('change',update);
   get('survivalReset').onclick=()=>{restore(defaults);update();};
+  get('survivalReport').onclick=()=>{if(!last)return;try{CalculatorReport.download(CalculatorReport.survival(last),'survival',last.a.currency);get('survivalReportStatus').textContent='Report downloaded. Open the HTML file offline or print it as PDF.';}catch(e){get('survivalError').textContent='Report could not be created. '+e.message;}};
   get('survivalExport').onclick=()=>{
     if(!last)return;const {a,o}=last;
     const rows=[['Age at start','Opening corpus ('+a.currency+')','Monthly SWP budget','Funded withdrawals','Return or loss','Life expenses due','Life expenses funded','Event shortfall','Closing corpus','Funded days'],...o.rows.map(r=>[r.age,r.opening,r.budget,r.withdrawals,r.growth,r.expenseDue,r.expense,r.shortfall,r.balance,r.days].map(n=>Number(n.toFixed(2))))];

@@ -70,12 +70,12 @@
  }
  function update(){
   try{
-   const a=read(),events=LifeEvents.load('freedom',a.currency),o=E.project(a,events);current={a,o};
+   const a=read(),events=LifeEvents.load('freedom',a.currency),o=E.project(a,events);current={a,o,events};
    if(editor){editor.refresh({currency:a.currency,months:o.months,inflation:a.inflation,age:a.age});editor.impact('Included future one-off costs: '+money(o.totalFutureExpenses,a.currency)+'. '+(o.outsideEvents?o.outsideEvents+' enabled expense(s) are outside the planning horizon and excluded. ':'')+'Costs before freedom are paid while working; later costs remain in the retirement target.');}
-   render(o,a,events);$('freedomError').textContent='';$('freedomCsv').disabled=false;
+   render(o,a,events);$('freedomError').textContent='';$('freedomCsv').disabled=false;$('freedomReport').disabled=false;$('freedomReportStatus').textContent='';
    try{localStorage.setItem(KEY,JSON.stringify(a));$('freedomSave').textContent='Saved privately in this browser. Each calculator and currency has its own future-expense list.'+migrationMessage;}catch{$('freedomSave').textContent='Browser saving is unavailable. Keep a downloaded schedule.';}
   }catch(e){
-   current=null;$('freedomError').textContent=e.message;$('freedomCsv').disabled=true;$('freedomOutput').textContent='Complete valid inputs to see your freedom estimate.';
+   current=null;$('freedomError').textContent=e.message;$('freedomCsv').disabled=true;$('freedomReport').disabled=true;$('freedomReportStatus').textContent='';$('freedomOutput').textContent='Complete valid inputs to see your freedom estimate.';
    for(const id of ['freedomTarget','freedomScenarios','freedomChart','freedomRows','investmentScheduleHead','investmentScheduleRows'])$(id).replaceChildren();$('surplusHint').textContent='';$('investmentScheduleNote').textContent='Complete valid inputs to see the investment schedule.';$('investmentScheduleTotal').textContent='';
    if(editor)editor.impact('Correct your inputs to update the freedom estimate.');
   }
@@ -90,6 +90,7 @@
  });$('f-currency').onchange=update;
  for(const id of ['freedomReset','freedomResetTop'])$(id).onclick=()=>{migrationMessage='';restore(E.defaults);update();};
  for(const [id,view] of [['investmentMonthly','monthly'],['investmentYearly','yearly']])$(id).onclick=()=>{investmentView=view;if(current)renderInvestmentSchedule(current.o,current.a);};
+ $('freedomReport').onclick=()=>{if(!current)return;try{CalculatorReport.download(CalculatorReport.freedom(current),'freedom',current.a.currency);$('freedomReportStatus').textContent='Report downloaded. Open the HTML file offline or print it as PDF.';}catch(e){$('freedomError').textContent='Report could not be created. '+e.message;}};
  $('freedomCsv').onclick=()=>{
   if(!current)return;const {a,o}=current,headers=['Month','Age at month end','Stage','Investment ('+a.currency+')','Living withdrawals','Future expenses','Return or loss','Unfunded costs','Closing corpus'];
   const rows=[headers,...o.rows.map(row=>[row.index,Number(row.age.toFixed(4)),row.retired?'After work':'Working',...['investment','living','event','growth','shortfall','balance'].map(key=>Number(row[key].toFixed(2)))])];
