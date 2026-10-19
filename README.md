@@ -2,6 +2,14 @@
 
 Open `index.html` in a browser. No build or external dependencies are required.
 
+## Search visibility
+
+The production domain in `CNAME` is `intimetec.org`. Both pages include unique titles and descriptions, canonical HTTPS URLs, sharing metadata and JSON-LD page information. The home page also declares the Intimetec Money Planner site name and includes visible descriptions of the calculators. `robots.txt` permits crawling and points to `sitemap.xml`, which lists the two indexable pages. Growth and Survival are views of the home page, not separate sitemap URLs.
+
+Deploy `robots.txt` and `sitemap.xml` at the domain root along with the production HTML, CSS and JavaScript files. If the production domain changes, update `CNAME`, both pages' canonical/sharing/JSON-LD URLs, and the robots/sitemap URLs together.
+
+After publishing, verify ownership of `https://intimetec.org/` in [Google Search Console](https://search.google.com/search-console/), submit `https://intimetec.org/sitemap.xml`, and inspect/request indexing for the home and Custom Plan URLs. Verification requires the domain or Search Console owner; do not add a fabricated verification token. Check that the live pages return HTTP 200, HTTPS works, and alternate hosts redirect to the canonical domain. Search Console reports indexing and actual search performance. Crawl permission, sitemap submission and structured data do not guarantee indexing or ranking. Useful, accurate content and relevant links to the calculators can support discovery; avoid keyword stuffing or purchased links.
+
 - **Check Growth:** starting assets, loans, SIP, annual step-up, extra investments, life expenses, and a net wealth goal.
 - **Check Survival:** current corpus, age, monthly SWP, inflation, effective annual return, and end age, with estimated funded days, depletion age, a chart, yearly balances, and CSV download.
 
@@ -43,6 +51,8 @@ Custom Plan supports 1–720 months, up to 50 assets, 50 loans and 2,000 dated c
 Current loans default to original amount and dates: enter the starting amount, annual interest, total tenure in years plus months, loan start date, and current balance date. Completed monthly anniversaries determine paid months; the first EMI is assumed one month after the start date, with month-end clamping. The form calculates remaining EMI count, monthly EMI, estimated outstanding principal, and total remaining payments including interest. These estimates assume all payments were made on time at a fixed rate. For past prepayments, missed payments, or rate changes, use the current outstanding balance method with lender-confirmed figures. Align the plan's starting month with the balance date. Saved loan dates and original details remain editable after import; existing balance-only loans remain supported. Run `node custom-loan.test.js` for date boundaries, independent amortisation, payoff, and saved-file checks.
 
 For GitHub Pages, include the new production files `custom-plan.html`, `custom-plan.css`, `custom-engine.js`, and `custom-plan.js`, plus the updated `index.html` and `planner.css`, along with the existing calculator files. No build or server is required.
+
+Custom Plan also requires `calendar.css` and `calendar.js`. They provide matching month/year pickers and day calendars, with direct year entry, Today/This month shortcuts, keyboard navigation, and the same date limits as the underlying fields. Values remain ISO dates/months for calculation and saved-plan compatibility. Run `node calendar.test.js` for picker interactions and date boundaries; its DOM harness does not verify browser rendering. The calendars use the browser's native modal dialog for focus containment and Escape dismissal.
 
 Run `node custom-plan.test.js` and `node custom-ui.test.js` for the custom calculation, JSON round-trip, file validation, date preservation, page handlers, CSV export, staged import, and read-only Growth-copy checks. The page handler tests cover data interactions, not visual browser layout.
 

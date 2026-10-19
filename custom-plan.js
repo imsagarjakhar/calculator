@@ -1,6 +1,7 @@
 (function(){
  'use strict';
  const E=CustomPlan,$=id=>document.getElementById(id),KEY='intimetec-custom-plan-v1';
+ const refreshCalendars=()=>{if(typeof window!=='undefined')window.PlannerCalendar?.refresh();};
  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let plan=E.createPlan(),result,assetEdit=null,loanEdit=null,flowEdit=null,pending=null,year=0,selected=plan.startMonth,storage=true;
  const uid=prefix=>prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
@@ -37,6 +38,7 @@
    const months=selectedDuration();
    $('durationHint').textContent=months+' month'+(months===1?'':'s')+' · includes the end month';
   }catch(e){$('durationHint').textContent=e.message;}
+  refreshCalendars();
  }
  $('startMonth').oninput=updateEndMonth;
  $('endMonth').oninput=updateEndMonth;
@@ -69,7 +71,7 @@
   $('monthContext').textContent=label(selected)+(row?' · Applied SIP '+money(row.sip)+' · Add extra investments without changing the SIP.':' · Outside the current horizon. Changes will be saved but excluded from results until the horizon includes this month.');
   if(offset<0||offset>=plan.months)$('monthContext').className='helper';
   $('flowList').innerHTML=(entry?.flows||[]).map((f,index)=>{const target=f.type==='investment'?plan.assets.find(a=>a.id===f.assetId)?.name:f.type==='prepayment'?plan.loans.find(l=>l.id===f.loanId)?.name:'One-time expense';return '<div class="entry"><div><strong>'+escape((f.type==='investment'?'Extra investment':f.type==='prepayment'?'Extra loan payment':'Expense')+' · '+money(f.amount))+'</strong><p class="helper">'+escape(target+(f.type==='prepayment'?' · from '+f.source:'')+(f.type==='expense'&&f.inflate?' · today’s cost, adjusted for inflation':'')+(f.note?' · '+f.note:''))+'</p></div>'+buttons('flow',String(index))+'</div>';}).join('')||'<p class="empty">No extra cash flows for this month. For example: add ₹50,000 to Stocks while leaving the SIP at ₹20,000.</p>';
-  renderFlowTargets();
+  renderFlowTargets();refreshCalendars();
  }
  function renderChart(){
   const w=1000,h=300,l=90,r=20,t=24,b=40,min=Math.min(0,...result.path.map(p=>p.netWorth)),max=Math.max(1,...result.path.map(p=>p.netWorth)),range=max-min||1;
@@ -112,6 +114,7 @@
    if(original)for(const id of ['loanBalance','loanMonths','loanPaidMonths'])$(id).value='';
    $('loanEmi').value='';$('loanRemainingTotal').value='';$('loanCalculation').textContent=e.message;
   }
+  refreshCalendars();
  }
  function setLoanMode(){
   const original=$('loanMode').value==='original';

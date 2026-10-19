@@ -1,8 +1,39 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Custom Plan | Your Money Planner</title><meta name="description" content="Build an editable monthly investment and loan plan. Save a plan file and import it later."><link rel="stylesheet" href="custom-plan.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Intimetec Loan & Monthly Investment Calculator | Custom Plan</title>
+<meta name="description" content="Calculate loan EMIs, paid months and outstanding balances. Plan monthly SIPs, extra investments, loan prepayments and expenses with Intimetec Custom Plan.">
+<link rel="canonical" href="https://intimetec.org/custom-plan.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Intimetec Money Planner">
+<meta property="og:title" content="Intimetec Loan & Monthly Investment Calculator | Custom Plan">
+<meta property="og:description" content="Calculate loan EMIs, paid months and outstanding balances. Plan monthly SIPs, extra investments, loan prepayments and expenses with Intimetec Custom Plan.">
+<meta property="og:url" content="https://intimetec.org/custom-plan.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Intimetec Loan & Monthly Investment Calculator | Custom Plan">
+<meta name="twitter:description" content="Calculate loan EMIs, paid months and outstanding balances. Plan monthly SIPs, extra investments, loan prepayments and expenses with Intimetec Custom Plan.">
+<link rel="stylesheet" href="custom-plan.css"><link rel="stylesheet" href="calendar.css"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://intimetec.org/custom-plan.html#webpage",
+      "name": "Intimetec Loan & Monthly Investment Calculator | Custom Plan",
+      "description": "Calculate loan EMIs, paid months and outstanding balances. Plan monthly SIPs, extra investments, loan prepayments and expenses with Intimetec Custom Plan.",
+      "url": "https://intimetec.org/custom-plan.html",
+      "isPartOf": {
+        "@id": "https://intimetec.org/#website"
+      },
+      "inLanguage": "en"
+    }
+  ]
+}
+</script>
+</head>
 <body><main><noscript><p>Please enable JavaScript to use the Custom Plan calculator.</p></noscript>
-<nav><a href="index.html">← All planners</a><span>LEARN WITH INTIMETEC</span></nav>
-<header><div><p class="eyebrow">03 / PLAN MONTH BY MONTH</p><h1>Your money. Your monthly choices.</h1><p class="muted">Change a SIP. Invest a bonus. Pay a loan sooner. Keep a plan you can revisit.</p></div><div class="actions"><button id="copyGrowth" type="button">Copy Growth setup</button><button id="importButton" type="button">Import plan</button><input id="importFile" type="file" accept=".json,application/json" hidden><button id="exportPlan" class="primary" type="button">Save plan file</button></div></header>
+<nav><a href="index.html">← Intimetec Money Planner</a><span>LEARN WITH INTIMETEC</span></nav>
+<header><div><p class="eyebrow">03 / PLAN MONTH BY MONTH</p><h1>Intimetec loan &amp; monthly investment planner</h1><p class="muted">Change a SIP. Invest a bonus. Pay a loan sooner. Keep a plan you can revisit.</p></div><div class="actions"><button id="copyGrowth" type="button">Copy Growth setup</button><button id="importButton" type="button">Import plan</button><input id="importFile" type="file" accept=".json,application/json" hidden><button id="exportPlan" class="primary" type="button">Save plan file</button></div></header>
 <p id="status" class="status" role="status"></p><p id="error" class="error" role="alert" hidden></p>
 <section id="importPreview" class="card import-preview" hidden><h2>Review this plan</h2><p id="importDescription"></p><p class="muted">Using this plan replaces the Custom Plan currently open here. Your Growth and Survival inputs stay separate. Save your current plan file first if you want to keep it.</p><div class="actions"><button id="confirmImport" class="primary" type="button">Use this plan</button><button id="cancelImport" type="button">Cancel</button></div></section>
 <section class="card" aria-labelledby="defaultsTitle"><div class="section-heading"><div><p class="eyebrow">01 / SET THE BASELINE</p><h2 id="defaultsTitle">Your starting plan</h2></div><span id="saveState" class="badge">Private · browser saved</span></div>
@@ -38,4 +69,4 @@
 <section class="card month-editor" aria-labelledby="monthTitle"><div class="section-heading"><div><p class="eyebrow">05 / EXTRA MONEY &amp; LIFE EVENTS</p><h2 id="monthTitle">Add or update a month's cash flows</h2></div><label>Choose month<input id="editMonth" type="month" min="2000-01" max="2250-12" required></label></div><p id="monthContext" class="helper"></p><form id="flowForm"><div class="fields flow-fields"><label>What happened?<select id="flowType"><option value="investment">Extra investment / bonus</option><option value="prepayment">Extra loan payment</option><option value="expense">One-time expense</option></select></label><label id="flowTargetLabel">Invest into<select id="flowTarget"></select></label><label>Amount<input id="flowAmount" type="number" min="0.01" max="1000000000000" step="any" required></label><label>Note<input id="flowNote" maxlength="200" placeholder="e.g. Bonus invested in stocks"></label><label id="flowSourceLabel" hidden>Payment source<select id="flowSource"><option value="income">Salary / bonus — outside investments</option><option value="investments">Withdraw from investments</option></select></label><label id="flowInflationLabel" hidden>Amount is<select id="flowInflation"><option value="future">The cost at this event</option><option value="today">Today's cost — add inflation</option></select></label></div><div class="actions"><button id="flowSubmit" type="submit">Add cash flow</button><button id="flowCancel" type="button" hidden>Cancel edit</button></div></form><div id="flowList" class="entries"></div></section>
 <section class="card"><p class="eyebrow">06 / SEE THE EFFECT</p><h2>Your projected net wealth</h2><div id="chart"></div><details><summary>Year-by-year summary</summary><div class="table-wrap"><table><thead><tr><th>Plan year</th><th>New investments</th><th>Loan payments</th><th>Expenses</th><th>Assets</th><th>Debt</th><th>Net wealth</th></tr></thead><tbody id="yearRows"></tbody></table></div></details></section>
 <details class="card methods"><summary>Calculation method &amp; using your plan file</summary><p>Each asset grows monthly at the monthly equivalent of its effective annual return. SIPs and extra investments enter at month-end and begin earning returns the following month. A SIP override replaces that month's regular contribution; it does not change other months or your annual step-up schedule.</p><p>Monthly order: investment returns, SIP and extra deposits, loan interest and scheduled EMIs, extra loan payments, then one-time expenses. Income-funded payments are assumed affordable from salary/bonus outside this model; enter your SIP after those commitments. Investment-funded payments and expenses use withdrawable assets, with the SIP account first and other accounts in listed order. Retained assets count toward net wealth but cannot fund payments.</p><p>Loans use fixed interest at annual rate ÷ 12 and a calculated level EMI. Extra payments keep the EMI unchanged and shorten repayment. The final payment is capped at debt due. A requested prepayment above the debt is unused and is not automatically invested elsewhere. Missed investment-funded payments remain in debt and continue accruing interest. Expense shortfalls are reported without creating new debt. No lender fees, rate changes, penalties, taxes or transaction costs are modelled.</p><p>Exported JSON contains your starting inputs, asset and loan details, monthly SIP overrides and dated cash flows. Imported files are validated and previewed before use. Calculated results are regenerated. Keep your saved file private. Browser saving is a convenience; downloaded plan files are your backup. If you later update current asset or loan balances, also set the starting month to the date those balances represent. Earlier monthly changes are retained outside the new horizon and excluded; future changes stay on their calendar months. The model does not track actual market prices or investment transactions.</p><p>All results use fixed assumptions and are planning illustrations. A positive net wealth can include assets you cannot spend.</p></details><footer>Calculations run in your browser · Separate from Growth and Survival · No account needed</footer>
-</main><script src="life-events.js"></script><script src="growth-engine.js"></script><script src="custom-engine.js"></script><script src="custom-plan.js"></script></body></html>
+</main><script src="life-events.js"></script><script src="growth-engine.js"></script><script src="custom-engine.js"></script><script src="custom-plan.js"></script><script src="calendar.js"></script></body></html>
