@@ -38,8 +38,9 @@
     for(let i=0;i<=4;i++){const value=max*i/4,yy=y(value);svg+='<line x1="'+l+'" y1="'+yy+'" x2="'+(w-r)+'" y2="'+yy+'" stroke="#24485c"/><text x="'+(l-12)+'" y="'+(yy+4)+'" text-anchor="end" fill="#b0c3cf" font-size="12">'+new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(value)+'</text>';}
     for(let i=0;i<=5;i++){const age=a.age+(a.endAge-a.age)*i/5;svg+='<text x="'+x(age)+'" y="'+(h-12)+'" text-anchor="middle" fill="#b0c3cf" font-size="12">'+age.toFixed(0)+'</text>';}
     const line=o.path.map((p,i)=>(i?'L':'M')+x(p.age).toFixed(2)+' '+y(p.balance).toFixed(2)).join(' ');
-    svg+='<path d="'+line+' L'+x(o.age)+' '+y(0)+' L'+x(a.age)+' '+y(0)+' Z" fill="#ffce96" opacity=".07"/><path d="'+line+'" fill="none" stroke="#ffce96" stroke-width="3"/><circle cx="'+x(o.age)+'" cy="'+y(o.balance)+'" r="5" fill="#ffce96"/></svg><p class="helper">Horizontal axis: age · Vertical axis: corpus ('+a.currency+'). '+(o.depleted?'The line ends when the corpus is depleted.':'Projection ends at your selected age.')+'</p>';
+    svg+='<path d="'+line+' L'+x(o.age)+' '+y(0)+' L'+x(a.age)+' '+y(0)+' Z" fill="#ffce96" opacity=".07"/><path d="'+line+'" fill="none" stroke="#ffce96" stroke-width="3"/><circle cx="'+x(o.age)+'" cy="'+y(o.balance)+'" r="5" fill="#ffce96"/></svg><p class="helper">Hover, tap, or use arrow keys on the chart for full amounts. Horizontal axis: age · Vertical axis: corpus ('+a.currency+'). '+(o.depleted?'The line ends when the corpus is depleted.':'Projection ends at your selected age.')+'</p>';
     get('survivalPlot').innerHTML=svg;
+    if(typeof ChartHover!=='undefined')ChartHover.attach(get('survivalPlot'),{currency:a.currency,top:t,bottom:h-b,points:o.path.map((p,i)=>({x:x(p.age),ys:[y(p.balance)],title:'Age '+p.age.toFixed(2)+(o.path[i+1]?.age===p.age?' · Before expense':o.path[i-1]?.age===p.age?' · After expense':''),rows:[['Remaining corpus',p.balance]]}))});
   }
   function update() {
     try {

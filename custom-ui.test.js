@@ -2,7 +2,7 @@
 // Exercise the real page handlers with captured DOM/storage/download surfaces.
 // This covers data interactions; it does not replace a visual browser check.
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const E=require('./custom-engine'),Growth=require('./growth-engine');
+const E=require('./custom-engine'),Growth=require('./growth-engine'),Report=require('./custom-report');
 class Node {
  constructor(id,value=''){this.id=id;this._value=String(value);this.initial=String(value);this.options=[];this.listeners={};this.hidden=false;this.innerHTML='';this.textContent='';this.firstChild={textContent:''};this.files=[];this.dataset={};}
  get value(){return this._value;}set value(v){this._value=String(v);}
@@ -18,7 +18,7 @@ const members={assetForm:['assetName','assetType','assetValue','assetReturn','as
 const get=id=>{assert.ok(nodes.has(id),'Missing HTML element '+id);return nodes.get(id);};
 const plan=E.createPlan(new Date(2026,9,19));plan.months=12;plan.assets[0].annualReturn=0;
 const saved=new Map([['intimetec-custom-plan-v1',E.exportPlan(plan)]]),downloads=[],documentListeners={};
-const ctx=vm.createContext({CustomPlan:E,GrowthEngine:Growth,Option:function(name,value){this.name=name;this.value=value;},Blob,
+const ctx=vm.createContext({CustomPlan:E,CustomReport:Report,GrowthEngine:Growth,Option:function(name,value){this.name=name;this.value=value;},Blob,
  localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},
  URL:{createObjectURL(blob){downloads.push(blob);return 'download-url';},revokeObjectURL(){}},setTimeout:fn=>fn(),
  document:{getElementById:get,createElement:()=>new Node('download'),body:{append(){}},addEventListener:(type,handler)=>documentListeners[type]=handler}});
@@ -65,11 +65,23 @@ async function checkFiles(){
  const before=saved.get('intimetec-custom-plan-v1');get('importFile').files=[{size:12,text:async()=>'{bad json'}];await get('importFile').onchange();assert.equal(saved.get('intimetec-custom-plan-v1'),before);assert.ok(get('error').textContent.includes('Import not applied'));
  exported.name='Future revision';exported.monthlySip=12345;const text=E.exportPlan(exported);get('importFile').files=[{size:text.length,text:async()=>text}];await get('importFile').onchange();assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),before,'Import must wait for the preview action');assert.ok(get('importDescription').textContent.includes('Future revision'));
  get('confirmImport').onclick();assert.deepEqual(read(),exported);assert.equal(get('importPreview').hidden,true);assert.equal(get('planName').value,'Future revision');
+ get('exportReport').onclick();const html=await downloads.at(-1).text();assert.ok(html.startsWith('<!doctype html>'));assert.deepEqual(Report.read(html),read());
+ get('importFile').files=[{size:html.length,text:async()=>html}];const beforeReport=saved.get('intimetec-custom-plan-v1');await get('importFile').onchange();
+ assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),beforeReport);get('confirmImport').onclick();assert.deepEqual(read(),exported);
+ get('importFile').files=[{size:20,text:async()=>'<html>Other report</html>'}];await get('importFile').onchange();assert.equal(saved.get('intimetec-custom-plan-v1'),beforeReport);assert.ok(get('error').textContent.includes('not an importable'));
  // Copying Growth must preserve the original calculator and produce matching output.
  const settings={monthly:2000,stepup:10,years:1,rate:12,goal:1e9,inflation:5},position={assets:[{name:'Gold',type:'Gold',amount:10000,rate:8,liquid:true}],loans:[{name:'Home',balance:12000,rate:0,totalMonths:24,remainingMonths:12,source:'income'}]},extras=[{year:1,month:2,amount:50000,note:'Bonus'}],events=[{name:'Education',amount:3000,year:1,month:6,inflate:false,enabled:true}];
  const original=new Map([['InTimeTec-investment-planner-v2',JSON.stringify({version:3,currency:'INR',inputs:settings,extras})],['growth-position-v1-INR',JSON.stringify(position)],['life-events-v1-growth-INR',JSON.stringify(events)]]);for(const [k,v] of original)saved.set(k,v);
  get('copyGrowth').onclick();assert.equal(get('importPreview').hidden,false);get('confirmImport').onclick();
  const copied=read(),actual=E.project(copied),expected=Growth.projectPlan(settings,extras,events,position);assert.ok(Math.abs(actual.netWorth-expected.netWorth)<1e-6);for(const [k,v] of original)assert.equal(saved.get(k),v,'Growth inputs must stay untouched');
+ saved.set('corpus-survival-v1','survival-preserved');
+ get('resetPlan').onclick();assert.equal(get('resetPreview').hidden,false);assert.deepEqual(read(),copied);
+ get('cancelReset').onclick();assert.equal(get('resetPreview').hidden,true);assert.deepEqual(read(),copied);
+ // Reset also discards a pending import and clears all Custom Plan form/edit state.
+ get('copyGrowth').onclick();get('resetPlan').onclick();get('assetName').value='Unsaved asset';get('confirmReset').onclick();
+ const reset=read();assert.equal(reset.name,'My custom plan');assert.equal(reset.currency,'INR');assert.equal(reset.months,120);assert.equal(reset.assets.length,1);assert.equal(reset.assets[0].value,0);assert.equal(reset.loans.length,0);assert.equal(reset.overrides.length,0);
+ assert.equal(get('assetName').value,'');assert.equal(get('loanName').value,'');assert.equal(get('loanMode').value,'original');assert.equal(get('editMonth').value,reset.startMonth);assert.equal(get('importPreview').hidden,true);assert.equal(get('resetPreview').hidden,true);
+ get('confirmImport').onclick();assert.deepEqual(read(),reset);assert.equal(saved.get('corpus-survival-v1'),'survival-preserved');for(const [k,v] of original)assert.equal(saved.get(k),v);
  console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/JSON download, staged import/restore, and read-only Growth copying.');
 }
 checkFiles().catch(e=>{console.error(e);process.exitCode=1;});

@@ -79,8 +79,9 @@
   let svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Projected net wealth by month"><title>Net wealth from '+escape(plan.startMonth)+' for '+plan.months+' months</title>';
   for(let i=0;i<=4;i++){const value=min+range*i/4,yy=y(value);svg+='<line x1="'+l+'" y1="'+yy+'" x2="'+(w-r)+'" y2="'+yy+'" stroke="#24485c"/><text x="'+(l-10)+'" y="'+(yy+4)+'" fill="#b0c3cf" text-anchor="end" font-size="12">'+new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(value)+'</text>';}
   for(let i=0;i<=4;i++){const index=Math.round(plan.months*i/4);svg+='<text x="'+x(index)+'" y="'+(h-12)+'" fill="#b0c3cf" text-anchor="middle" font-size="12">'+index+' mo</text>';}
-  svg+='<path d="'+result.path.map((p,i)=>(i?'L':'M')+x(p.index).toFixed(2)+' '+y(p.netWorth).toFixed(2)).join(' ')+'" fill="none" stroke="#2bdbb0" stroke-width="3"/></svg><p class="helper">Nominal future values in '+plan.currency+'. This is a fixed-return illustration; actual market returns vary.</p>';
+  svg+='<path d="'+result.path.map((p,i)=>(i?'L':'M')+x(p.index).toFixed(2)+' '+y(p.netWorth).toFixed(2)).join(' ')+'" fill="none" stroke="#2bdbb0" stroke-width="3"/></svg><p class="helper">Hover, tap, or use arrow keys on the chart for full monthly amounts. Nominal future values in '+plan.currency+'. This is a fixed-return illustration; actual market returns vary.</p>';
   $('chart').innerHTML=svg;
+  if(typeof ChartHover!=='undefined')ChartHover.attach($('chart'),{currency:plan.currency,top:t,bottom:h-b,points:result.path.map(p=>({x:x(p.index),ys:[y(p.netWorth)],title:p.index?'End of '+label(E.monthKey(E.monthNumber(plan.startMonth)+p.index-1)):'Starting position',rows:[['Net wealth',p.netWorth],['Total assets',p.balance],['Remaining loans',p.debt],['Available for withdrawals',p.available]]}))});
   $('yearRows').innerHTML=result.years.map(r=>'<tr><th scope="row">Year '+r.year+'</th>'+[r.contributions,r.emiPaid+r.prepaid,r.expensePaid,r.balance,r.debt,r.netWorth].map(n=>'<td>'+escape(money(n))+'</td>').join('')+'</tr>').join('');
  }
  function render(){renderSettings();renderSummary();renderAssets();renderSchedule();renderMonth();renderChart();}
@@ -140,9 +141,18 @@
   else{loanEdit=id;$('loanName').value=entry.name;$('loanMode').value=entry.balanceMode==='original'?'original':'current';$('loanBalance').value=entry.balance;$('loanRate').value=entry.annualRate;$('loanMonths').value=entry.remainingMonths;$('loanSource').value=entry.source;if(entry.balanceMode==='original'){$('loanOriginal').value=entry.originalAmount;$('loanYears').value=Math.floor(entry.totalMonths/12);$('loanExtraMonths').value=entry.totalMonths%12;$('loanStartDate').value=entry.startDate;$('loanCurrentDate').value=entry.currentDate;}$('loanSubmit').textContent='Save loan';$('loanCancel').hidden=false;setLoanMode();$('loanName').focus();}
  });
  $('exportPlan').onclick=()=>{download(E.exportPlan(plan),'application/json','Custom_plan_'+plan.startMonth+'.json');$('status').textContent='Plan file downloaded. Import this JSON later to continue editing. Form changes must be saved with their Apply/Add/Save button first.';};
+ $('exportReport').onclick=()=>{try{download(CustomReport.build(plan),'text/html;charset=utf-8','Custom_plan_report_'+plan.startMonth+'.html');$('status').textContent='Report downloaded. Open it in a browser to read or print. Import this original HTML report to continue editing. Only applied/saved changes are included.';error('');}catch(e){error('Report could not be created. '+e.message);}};
+ $('resetPlan').onclick=()=>{$('resetPreview').hidden=false;$('resetPreview').scrollIntoView({block:'center'});$('cancelReset').focus({preventScroll:true});};
+ $('cancelReset').onclick=()=>{$('resetPreview').hidden=true;$('resetPlan').focus({preventScroll:true});};
+ $('confirmReset').onclick=()=>{
+  if(apply(E.createPlan(),'Custom Plan reset to defaults. Growth and Survival are unchanged.')){
+   pending=null;year=0;selected=plan.startMonth;$('importPreview').hidden=true;$('resetPreview').hidden=true;
+   resetAsset();resetLoan();resetFlow();render();$('planName').focus({preventScroll:true});
+  }
+ };
  $('exportCsv').onclick=()=>{const fields=['month','sip','extra','contributions','growth','emiPaid','prepaid','loanInterest','expenseDue','expensePaid','incomePayments','portfolioPayments','shortfall','unusedPrepayment','balance','debt','netWorth','available'];const rows=[fields,...result.rows.map(r=>fields.map(k=>typeof r[k]==='number'?Number(r[k].toFixed(2)):r[k]))];download('\ufeff'+rows.map(row=>row.join(',')).join('\r\n'),'text/csv;charset=utf-8','Custom_schedule_'+plan.currency+'.csv');};
  $('importButton').onclick=()=>$('importFile').click();
- $('importFile').onchange=async()=>{const file=$('importFile').files[0];if(!file)return;pending=null;$('importPreview').hidden=true;try{if(file.size>2*1024*1024)throw new Error('Choose a JSON plan file smaller than 2 MB.');stage(E.parse(await file.text()));}catch(e){error('Import not applied. '+e.message);}finally{$('importFile').value='';}};
+ $('importFile').onchange=async()=>{const file=$('importFile').files[0];if(!file)return;pending=null;$('importPreview').hidden=true;try{if(file.size>CustomReport.MAX_FILE_BYTES)throw new Error('Choose a JSON plan or HTML report smaller than 10 MB.');stage(CustomReport.read(await file.text()));}catch(e){error('Import not applied. '+e.message);}finally{$('importFile').value='';}};
  $('cancelImport').onclick=()=>{pending=null;$('importPreview').hidden=true;};
  $('confirmImport').onclick=()=>{if(!pending)return;const candidate=pending;if(apply(candidate,'Plan restored. You can edit any starting value or monthly entry.')){pending=null;year=0;selected=plan.startMonth;resetAsset();resetLoan();resetFlow();$('importPreview').hidden=true;render();}};
  $('copyGrowth').onclick=()=>{try{
