@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),{securePage,digest}=require('./security-policy'),R=require('./calculator-report'),E=require('./bucket-engine');
+const html=fs.readFileSync('bucket-plan.html','utf8');assert.equal(html,securePage(html));
+const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];for(const rule of ["default-src 'none'","connect-src 'none'","script-src-attr 'none'","object-src 'none'"])assert.ok(csp.includes(rule));
+for(const [,src,integrity] of html.matchAll(/<script src="([^"]+)"[^>]*integrity="([^"]+)"/g))assert.equal(integrity,digest(fs.readFileSync(src)));
+assert.ok(html.includes('noindex,nofollow'));assert.ok(!/\son\w+="/i.test(html));
+const event={id:'test',name:'</script><svg onload=alert(1)>',amount:1000,month:1,inflate:false},o=E.project(E.defaults,[event]);
+const report=R.build({kind:'buckets',title:'Bucket test',currency:'INR',inputs:{},snapshot:{inputs:E.defaults,events:[event],results:o},metrics:[],points:[],sections:[{title:'Expenses',headers:['Name','Cost'],rows:[[event.name,1000]]}],notes:[]});
+assert.ok(!report.includes('<svg onload='));assert.equal((report.match(/<script\b/g)||[]).length,1);assert.ok(report.includes("script-src 'none'"));
+const raw=JSON.parse(report.match(/<script id="intimetec-calculation-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);assert.equal(raw.events[0].name,event.name);
+assert.ok(fs.readFileSync('index.html','utf8').includes('class="choice bucket-choice" href="bucket-plan.html"'));assert.ok(fs.readFileSync('bucket-plan.html','utf8').includes('class="back-to-planners" href="index.html"'));
+console.log('Bucket security passed: standalone CSP/SRI, no inline handlers or network dependencies, escaped expenses, inert full-precision report data and home-page navigation.');

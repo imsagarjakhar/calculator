@@ -1,0 +1,41 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),E=require('./bucket-engine'),R=require('./calculator-report');
+class Node{
+ constructor(id){this.id=id;this.value='';this.innerHTML='';this.textContent='';this.listeners={};this.attrs={};this.dataset={};}
+ get value(){return this._value;}set value(n){this._value=String(n);}
+ setAttribute(k,v){this.attrs[k]=v;}addEventListener(k,fn){this.listeners[k]=fn;}replaceChildren(){this.innerHTML='';}reset(){for(const id of ['eventName','eventAmount'])get(id).value='';get('eventYear').value='5';get('eventMonth').value='1';get('eventBasis').value='today';}
+}
+const nodes=new Map([...fs.readFileSync('bucket-plan.html','utf8').matchAll(/id="([^"]+)"/g)].map(m=>[m[1],new Node(m[1])]));
+const get=id=>{assert.ok(nodes.has(id),'Missing '+id);return nodes.get(id);},saved=new Map([['intimetec-custom-plan-v1','keep-custom'],['intimetec-freedom-v1','keep-freedom'],['corpus-survival-v1','keep-survival'],['InTimeTec-investment-planner-v2','keep-growth']]);let chart,download;
+const timers=new Map();let timerId=0;
+const context=vm.createContext({BucketPlanner:E,CalculatorReport:{...R,download(html,kind,currency){download={html,kind,currency};}},ChartHover:{attach(host,data){chart=data;}},setTimeout(fn){const id=++timerId;timers.set(id,fn);return id;},clearTimeout(id){timers.delete(id);},localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},document:{getElementById:get,querySelectorAll:()=>[]}});
+const source=fs.readFileSync('bucket-plan.js','utf8');vm.runInContext(source,context);
+const submit=()=>get('bucketForm').listeners.submit({preventDefault(){}}),set=(key,value)=>get('b-'+key).value=String(value),read=()=>JSON.parse(saved.get('intimetec-bucket-preview-v1'));
+assert.equal(get('bucketError').textContent,'');assert.ok(get('bucketCards').innerHTML.includes('Living costs'));assert.ok(get('bucketCards').innerHTML.includes('Emergency reserve'));assert.ok(get('bucketCards').innerHTML.includes('Long-term growth'));assert.equal(chart.points.length,421);assert.equal(chart.currency,'INR');
+const counts=id=>(get(id).innerHTML.match(/<tr>/g)||[]).length;
+assert.equal(counts('bucketTableRows'),35);get('bucketMonthly').onclick();assert.equal(counts('bucketTableRows'),420);assert.equal(get('bucketMonthly').attrs['aria-pressed'],'true');
+get('eventName').value='<img src=x onerror=alert(1)>';get('eventAmount').value='500000';get('eventYear').value='5';get('eventMonth').value='1';get('eventBasis').value='today';get('emergencyForm').listeners.submit({preventDefault(){}});
+assert.equal(get('eventError').textContent,'');assert.equal(read().events.length,1);assert.ok(get('bucketEvents').innerHTML.includes('&lt;img'));assert.ok(!get('bucketEvents').innerHTML.includes('<img'));assert.ok(get('transferRows').innerHTML.includes('Emergency expense'));
+set('currency','USD');get('b-currency').onchange();assert.equal(chart.currency,'USD');assert.equal(read().events.length,1);assert.equal(read().settings.corpus,E.defaults.corpus);
+get('bucketReport').onclick();assert.equal(download.kind,'buckets');assert.equal(download.currency,'USD');assert.ok(download.html.includes('Complete monthly schedule'));assert.ok(download.html.includes('Saved emergency expenses'));assert.ok(!download.html.includes('<img src=x'));
+const snapshot=JSON.parse(download.html.match(/<script id="intimetec-calculation-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);assert.equal(snapshot.calculator,'buckets');assert.equal(snapshot.events.length,1);assert.deepEqual(snapshot.results,E.project(read().settings,read().events));
+set('endAge',62);set('shockPercent',0);submit();assert.equal(get('bucketError').textContent,'');assert.ok(get('bucketEvents').innerHTML.includes('Outside this plan'));assert.equal(read().events.length,1);
+set('monthly','');submit();assert.equal(get('bucketReport').disabled,true);assert.equal(get('bucketCards').innerHTML,'');assert.equal(get('bucketTableRows').innerHTML,'');assert.ok(get('bucketError').textContent.includes('monthly spending'));
+get('bucketReset').onclick();assert.deepEqual(read().settings,E.defaults);assert.equal(read().events.length,0);assert.equal(get('bucketError').textContent,'');assert.equal(get('bucketReport').disabled,false);
+set('corpus',100000);submit();assert.ok(get('allocationSummary').innerHTML.includes('more to fully fund'));assert.ok(get('bucketOutcome').innerHTML.includes('First unpaid withdrawal'));assert.ok(get('bucketOutcome').className.includes('shortfall'));
+get('bucketReset').onclick();set('shockPercent',30);set('shockYear',1);submit();assert.ok(get('bucketOutcome').innerHTML.includes('30% one-off equity fall'));assert.ok(E.project(read().settings).rows[0].shock<0);
+for(const [key,value] of [['intimetec-custom-plan-v1','keep-custom'],['intimetec-freedom-v1','keep-freedom'],['corpus-survival-v1','keep-survival'],['InTimeTec-investment-planner-v2','keep-growth']])assert.equal(saved.get(key),value);
+saved.set('intimetec-bucket-preview-v1','{invalid');vm.runInContext(source,context);assert.deepEqual(read().settings,E.defaults);
+assert.ok(fs.readFileSync('index.html','utf8').includes('class="choice bucket-choice" href="bucket-plan.html"'));assert.ok(fs.readFileSync('bucket-plan.html','utf8').includes('class="back-to-planners" href="index.html"'));
+// Inspect ₹70k withdrawals and a new, inflated five-year reserve after a complete year.
+get('bucketReset').onclick();set('startMonth','2026-10');set('monthly',70000);set('spendingReturn',0);set('emergencyReturn',0);set('equityReturn',0);submit();
+const initial=E.project(read().settings),amounts=()=>[...get('bucketCards').innerHTML.matchAll(/class="bucket-value">([^<]+)/g)].map(m=>m[1]),money0=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
+assert.equal(amounts()[0],money0(initial.initial.spending));get('bucketStep').onclick();assert.equal(amounts()[0],money0(initial.initial.spending-70000));assert.ok(get('bucketStageStatus').textContent.includes('Monthly living withdrawal'));assert.ok(get('bucketMonthLedger').innerHTML.includes('−'));
+get('bucketDate').value='2027-10';get('bucketDate').onchange();assert.equal(amounts()[0],money0(initial.initial.spending-70000*12));get('bucketStep').onclick();assert.ok(get('bucketStageStatus').textContent.includes('Scheduled refill'));assert.equal(amounts()[0],money0(E.spendingTarget(read().settings,12)));assert.ok(get('rollingWindow').textContent.includes('Oct 2027'));
+get('bucketStep').onclick();assert.equal(amounts()[0],money0(E.spendingTarget(read().settings,12)-73500));assert.ok(get('rollingWindow').textContent.includes('Nov 2027'));assert.equal(counts('fiveYearRows'),6);
+get('bucketReport').onclick();const explored=JSON.parse(download.html.match(/<script id="intimetec-calculation-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);assert.equal(explored.inspection.date,'2027-10');assert.equal(explored.inspection.phase,'withdrawal');assert.equal(explored.inspection.nextSpendingIndex,13);assert.ok(download.html.includes('Rolling five-year spending window'));
+get('bucketDate').value='2026-10';get('bucketDate').onchange();get('bucketNextRefill').onclick();assert.equal(get('bucketDate').value,'2027-10');assert.ok(get('bucketStageStatus').textContent.includes('Scheduled refill'));
+get('bucketPlay').onclick();assert.equal(get('bucketPlay').attrs['aria-pressed'],'true');assert.equal(timers.size,1);const [id,tick]=[...timers][0];timers.delete(id);tick();assert.ok(get('bucketStageStatus').textContent.includes('Monthly living withdrawal'));get('bucketPlay').onclick();assert.equal(timers.size,0);assert.equal(get('bucketPlay').attrs['aria-pressed'],'false');
+get('bucketDate').value='1900-01';get('bucketDate').onchange();assert.ok(get('bucketDateError').textContent.includes('Choose a month'));assert.equal(get('bucketDate').value,'2027-10');
+get('bucketReset').onclick();assert.equal(get('bucketDateError').textContent,'');assert.equal(get('bucketDate').value,E.defaults.startMonth);
+console.log('Bucket preview UI passed: isolated storage/reset, reactive allocation, chart amounts, monthly/yearly schedules, emergency escaping/preservation, currency units, reports, invalid/stale results and market-fall scenario.');
