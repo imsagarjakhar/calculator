@@ -112,7 +112,7 @@ async function checkSurvivalOutput(){
  const get=id=>{if(!sNodes.has(id))sNodes.set(id,{value:String(input[id.slice(2)]??''),setAttribute(){},replaceChildren(){this.innerHTML='';},innerHTML:'',textContent:''});return sNodes.get(id);};
  const testEvents=[expense({month:3}),expense({year:2,month:4})];
  const ctx=vm.createContext({get,ranges:{corpus:[0,1e12],age:[18,119],swp:[0,1e9],inflation:[0,30],returns:[-50,40],endAge:[19,120]},labels:{},last:null,eventsEditor:null,
-  projectSurvival:(a,unused,events)=>projectSurvival(a,new Date(2024,1,29),events),LifeEvents:{load:()=>testEvents},format:n=>String(Math.round(n)),
+  projectSurvival:(a,unused,events)=>projectSurvival(a,new Date(2024,1,29),events),requiredCorpus:(a,unused,events)=>require('./survival-engine').requiredCorpus(a,new Date(2024,1,29),events),LifeEvents:{load:()=>testEvents},format:n=>String(Math.round(n)),
   localStorage:{setItem(){}},document:{querySelectorAll:()=>[],body:{append(){}},createElement:()=>({click(){},remove(){}})},
   Blob,URL:{createObjectURL(blob){captured=blob;return 'test-download';},revokeObjectURL(){}},setTimeout:fn=>fn()});
  vm.runInContext(source.slice(source.indexOf('  function read()'),source.indexOf('  function restore(')),ctx);

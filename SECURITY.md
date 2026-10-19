@@ -4,7 +4,7 @@ This is a static, browser-only calculator. It has no application server, databas
 
 ## Protections implemented
 
-- Both app pages declare a Content Security Policy early in the document. Scripts must be local or explicitly hash-authorized. Inline event attributes and dynamic code evaluation are not permitted. The policy blocks fetch/XHR/WebSocket connections, embedded frames/objects/workers, form submissions, and changes to the document base URL. Existing inline styles remain permitted for the interface.
+- All app pages declare a Content Security Policy early in the document. Scripts must be local or explicitly hash-authorized. Inline event attributes and dynamic code evaluation are not permitted. The policy blocks fetch/XHR/WebSocket connections, embedded frames/objects/workers, form submissions, and changes to the document base URL. Existing inline styles remain permitted for the interface.
 - Every external production script has a SHA-384 integrity attribute. Inline script blocks have SHA-256 CSP hashes. This detects unexpected changes to an individual script when its referencing HTML remains trusted. It does not protect against an attacker who can replace the HTML and scripts together.
 - Referrer metadata prevents outgoing links from sending this page's URL. External links opened in another tab use `noopener`.
 - Imported JSON and report data are validated before the replacement preview. Imported HTML is never inserted into the document, opened, or executed by the import feature. Only the bounded embedded JSON block is read. User-entered text is escaped in HTML lists/reports or assigned through DOM text/value properties. Input lengths, amounts, dates, references, file sizes and array sizes are constrained.

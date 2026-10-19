@@ -1,6 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),{securePage,digest}=require('./security-policy'),E=require('./custom-engine'),R=require('./custom-report');
-for(const page of ['index.html','custom-plan.html']){
+for(const page of ['index.html','custom-plan.html','freedom.html']){
  const html=fs.readFileSync(page,'utf8');assert.equal(securePage(html),html,'Security metadata must be current and deterministic: '+page);
  const policy=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/)[1];
  for(const directive of ["default-src 'none'","connect-src 'none'","base-uri 'none'","object-src 'none'","form-action 'none'","frame-src 'none'","worker-src 'none'","script-src-attr 'none'"])assert.ok(policy.includes(directive),directive);
