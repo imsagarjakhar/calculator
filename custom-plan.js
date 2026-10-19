@@ -88,6 +88,14 @@
  function download(text,type,name){const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
  function stage(candidate){pending=E.validate(candidate);$('importDescription').textContent=pending.name+' · '+pending.currency+' · starts '+pending.startMonth+' · '+pending.months+' months · '+pending.assets.length+' assets · '+pending.loans.length+' loans · '+pending.overrides.length+' monthly changes.';$('importPreview').hidden=false;$('importPreview').scrollIntoView({block:'center'});error('');}
  $('settingsForm').onsubmit=event=>{event.preventDefault();try{const p=clone();Object.assign(p,{name:$('planName').value,currency:$('currency').value,startMonth:$('startMonth').value,months:selectedDuration(),monthlySip:Number($('defaultSip').value),annualStepup:Number($('stepup').value),inflation:Number($('inflation').value),sipAssetId:$('sipTarget').value});apply(p,'Plan defaults updated. Existing monthly overrides stay on their calendar dates.');}catch(e){error('Change not applied. '+e.message);}};
+ $('currency').onchange=()=>{
+  const draft=Object.fromEntries(['planName','startMonth','endMonth','defaultSip','stepup','inflation','sipTarget'].map(id=>[id,$(id).value]));
+  const p=clone();p.currency=$('currency').value;
+  if(apply(p,'Plan currency changed to '+p.currency+'. Amounts retain their entered values; no exchange-rate conversion was applied.')){
+   for(const [id,value] of Object.entries(draft))$(id).value=value;
+   updateEndMonth();
+  }else $('currency').value=plan.currency;
+ };
  $('assetForm').onsubmit=event=>{event.preventDefault();const p=clone(),entry={id:assetEdit||uid('asset'),name:$('assetName').value.trim(),type:$('assetType').value,value:Number($('assetValue').value),annualReturn:Number($('assetReturn').value),canWithdraw:$('assetLiquid').value==='yes'},index=p.assets.findIndex(a=>a.id===entry.id);if(index<0)p.assets.push(entry);else p.assets[index]=entry;if(apply(p,'Asset saved.'))resetAsset();};
  $('assetCancel').onclick=resetAsset;$('assetType').onchange=()=>{$('assetLiquid').value=$('assetType').value==='Property'?'no':'yes';};
  function loanDetails(){

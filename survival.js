@@ -22,6 +22,7 @@
   const format = (n,code) => new Intl.NumberFormat(code==='INR'?'en-IN':'en-US',{style:'currency',currency:code,maximumFractionDigits:0}).format(n);
   function read() {
     const a={currency:get('s-currency').value};let error='';
+    if(!['INR','SAR','USD','AED','EUR','GBP'].includes(a.currency))throw new Error('Choose a supported currency.');
     for(const [key,[min,max]] of Object.entries(ranges)) {
       const input=get('s-'+key),value=Number(input.value),invalid=input.value.trim()===''||!Number.isFinite(value)||value<min||value>max||((key==='age'||key==='endAge')&&!Number.isInteger(value));
       input.setAttribute('aria-invalid',String(invalid));

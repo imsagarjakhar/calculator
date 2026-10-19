@@ -26,6 +26,15 @@ vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
 const submit=id=>get(id).onsubmit({preventDefault(){}}),read=()=>E.parse(saved.get('intimetec-custom-plan-v1'));
 const clickAction=(action,id)=>documentListeners.click({target:{closest:()=>({dataset:{action,id}})}});
 assert.ok(get('summary').innerHTML.includes('Projected net wealth'));
+// Header currency updates saved/results immediately, preserving amounts and draft forms.
+const originalSip=read().monthlySip;get('defaultSip').value='77777';get('assetName').value='Unsaved asset';
+for(const currency of ['SAR','USD','AED','EUR','GBP','INR']){
+ get('currency').value=currency;get('currency').onchange();
+ assert.equal(read().currency,currency);assert.equal(read().monthlySip,originalSip);
+ assert.equal(get('defaultSip').value,'77777');assert.equal(get('assetName').value,'Unsaved asset');assert.equal(get('currency').value,currency);
+}
+get('currency').value='INVALID';get('currency').onchange();assert.equal(read().currency,'INR');assert.equal(get('currency').value,'INR');
+get('defaultSip').value=originalSip;get('assetName').value='';
 // End month is inclusive, restores from stored duration, and validates calendar ranges.
 assert.equal(get('endMonth').value,'2027-09');
 assert.equal(get('endMonth').min,'2026-10');assert.equal(get('endMonth').max,'2086-09');
@@ -63,8 +72,9 @@ async function checkFiles(){
  const exported=E.parse(await downloads[0].text());assert.deepEqual(exported,read());
  get('exportCsv').onclick();const csv=await downloads[1].text();assert.ok(csv.includes('portfolioPayments'));assert.equal(csv.trim().split('\r\n').length,13);
  const before=saved.get('intimetec-custom-plan-v1');get('importFile').files=[{size:12,text:async()=>'{bad json'}];await get('importFile').onchange();assert.equal(saved.get('intimetec-custom-plan-v1'),before);assert.ok(get('error').textContent.includes('Import not applied'));
- exported.name='Future revision';exported.monthlySip=12345;const text=E.exportPlan(exported);get('importFile').files=[{size:text.length,text:async()=>text}];await get('importFile').onchange();assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),before,'Import must wait for the preview action');assert.ok(get('importDescription').textContent.includes('Future revision'));
+ exported.name='Future revision';exported.currency='EUR';exported.monthlySip=12345;const text=E.exportPlan(exported);get('importFile').files=[{size:text.length,text:async()=>text}];await get('importFile').onchange();assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),before,'Import must wait for the preview action');assert.ok(get('importDescription').textContent.includes('Future revision'));
  get('confirmImport').onclick();assert.deepEqual(read(),exported);assert.equal(get('importPreview').hidden,true);assert.equal(get('planName').value,'Future revision');
+ assert.equal(get('currency').value,'EUR');
  get('exportReport').onclick();const html=await downloads.at(-1).text();assert.ok(html.startsWith('<!doctype html>'));assert.deepEqual(Report.read(html),read());
  get('importFile').files=[{size:html.length,text:async()=>html}];const beforeReport=saved.get('intimetec-custom-plan-v1');await get('importFile').onchange();
  assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),beforeReport);get('confirmImport').onclick();assert.deepEqual(read(),exported);
@@ -82,6 +92,12 @@ async function checkFiles(){
  const reset=read();assert.equal(reset.name,'My custom plan');assert.equal(reset.currency,'INR');assert.equal(reset.months,120);assert.equal(reset.assets.length,1);assert.equal(reset.assets[0].value,0);assert.equal(reset.loans.length,0);assert.equal(reset.overrides.length,0);
  assert.equal(get('assetName').value,'');assert.equal(get('loanName').value,'');assert.equal(get('loanMode').value,'original');assert.equal(get('editMonth').value,reset.startMonth);assert.equal(get('importPreview').hidden,true);assert.equal(get('resetPreview').hidden,true);
  get('confirmImport').onclick();assert.deepEqual(read(),reset);assert.equal(saved.get('corpus-survival-v1'),'survival-preserved');for(const [k,v] of original)assert.equal(saved.get(k),v);
+ // Imported labels are rendered as text, including in HTML-built entry lists.
+ const hostile=E.createPlan(),payload='<img src=x onerror=attacked=true>';hostile.name=payload;hostile.assets[0].name=payload;hostile.assets[0].type=payload;
+ hostile.loans=[{id:'test',name:payload,balance:1000,annualRate:0,remainingMonths:10,source:'income'}];hostile.overrides=[{month:hostile.startMonth,sip:null,note:payload,flows:[{type:'expense',amount:10,inflate:false,note:payload}]}];
+ const hostileFile=Report.build(hostile);get('importFile').files=[{size:hostileFile.length,text:async()=>hostileFile}];await get('importFile').onchange();get('confirmImport').onclick();
+ for(const id of ['assetList','loanList','flowList']){assert.ok(!get(id).innerHTML.includes('<img'));assert.ok(get(id).innerHTML.includes('&lt;img'));}
+ assert.equal(get('planName').value,payload);assert.equal(ctx.attacked,undefined);
  console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/JSON download, staged import/restore, and read-only Growth copying.');
 }
 checkFiles().catch(e=>{console.error(e);process.exitCode=1;});

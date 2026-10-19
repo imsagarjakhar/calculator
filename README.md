@@ -1,6 +1,8 @@
 # Growth & Survival Calculator
 
-Open `index.html` in a browser. No build or external dependencies are required.
+Use the hosted HTTPS site, or preview locally with `python -m http.server 8000 --bind 127.0.0.1` and open `http://127.0.0.1:8000/`. No build or external dependencies are required. Serve the hardened pages over HTTP(S): opening them directly with `file://` can fail script-integrity/CORS checks. Downloaded HTML reports remain standalone and open directly without a server.
+
+Security policies and script integrity hashes are checked in with both pages. After changing any production JavaScript, run `node security-policy.js` and deploy the regenerated HTML together with the scripts. Run `node security-policy.js --check` and `node security.test.js` before publishing. See [SECURITY.md](SECURITY.md) for protections, browser-data limitations, and required hosting/account settings. This site is not guaranteed attack-proof.
 
 ## Search visibility
 
@@ -46,11 +48,13 @@ The home page now links to `custom-plan.html`, a separate monthly planner with s
 
 Monthly cash flows retain their calendar dates when the plan start or duration changes. Entries outside the projection are kept and excluded. Import does not advance balances or dates automatically. If you update a current balance later, also update the starting month to match that balance date. Edit forms must be applied/saved before exporting; unsaved form text is not part of the plan file.
 
+The **Plan currency** selector in the Custom Plan header supports INR, SAR, USD, AED, EUR and GBP. Selection saves immediately and updates results, chart amounts and future reports. This sets the unit for the entire plan without converting or clearing entered amounts. Unapplied form edits remain available. Imported plans restore their saved currency; Reset restores INR.
+
 Custom Plan supports 1–720 months, up to 50 assets, 50 loans and 2,000 dated cash flows. All asset returns are effective annual assumptions compounded monthly. End-of-month deposits start earning in the following month. Scheduled EMIs precede extra loan repayments and expenses. Prepayments keep EMI unchanged and shorten payoff; requests above outstanding debt are capped and the unused amount is not invested automatically. Income-funded payments assume external cash is available. Investment-funded payments use only withdrawable assets. Unfunded payments remain in loans; unfunded one-time costs do not create debt.
 
 Current loans default to original amount and dates: enter the starting amount, annual interest, total tenure in years plus months, loan start date, and current balance date. Completed monthly anniversaries determine paid months; the first EMI is assumed one month after the start date, with month-end clamping. The form calculates remaining EMI count, monthly EMI, estimated outstanding principal, and total remaining payments including interest. These estimates assume all payments were made on time at a fixed rate. For past prepayments, missed payments, or rate changes, use the current outstanding balance method with lender-confirmed figures. Align the plan's starting month with the balance date. Saved loan dates and original details remain editable after import; existing balance-only loans remain supported. Run `node custom-loan.test.js` for date boundaries, independent amortisation, payoff, and saved-file checks.
 
-For GitHub Pages, include the new production files `custom-plan.html`, `custom-plan.css`, `custom-engine.js`, and `custom-plan.js`, plus the updated `index.html` and `planner.css`, along with the existing calculator files. No build or server is required.
+For GitHub Pages, include the new production files `custom-plan.html`, `custom-plan.css`, `custom-engine.js`, and `custom-plan.js`, plus the updated `index.html` and `planner.css`, along with the existing calculator files. No application backend or build is required; GitHub Pages serves the files over HTTPS.
 
 Custom Plan also requires `calendar.css` and `calendar.js`. They provide matching month/year pickers and day calendars, with direct year entry, Today/This month shortcuts, keyboard navigation, and the same date limits as the underlying fields. Values remain ISO dates/months for calculation and saved-plan compatibility. Run `node calendar.test.js` for picker interactions and date boundaries; its DOM harness does not verify browser rendering. The calendars use the browser's native modal dialog for focus containment and Escape dismissal.
 
