@@ -45,7 +45,7 @@ Loans can also be entered from original details: original amount, fixed annual i
 
 The home page now links to `custom-plan.html`, a separate monthly planner with separate browser storage. Growth and Survival calculations keep their existing behavior.
 
-1. Choose your starting and end months using the calendar pickers, then enter assets, loans, default monthly SIP, and SIP destination. The duration is calculated automatically and includes both selected months. New investment accounts can start at zero.
+1. Enter your starting and end months using the standard month inputs, then enter assets, loans, default monthly SIP, and SIP destination. The duration is calculated automatically and includes both selected months. New investment accounts can start at zero.
 2. In the monthly table, override any month's SIP (including zero to skip). A blank override uses the default SIP and annual step-up.
 3. Choose a month and add extra investments to specific assets, loan prepayments, or one-time expenses. For example, leave the SIP at 20,000 and add a 50,000 bonus into a Stocks account.
 4. Use **Save JSON** to download the complete editable plan as versioned JSON, or **Download report** for a readable, standalone HTML report. **Import plan / report** accepts either file, validates its embedded plan and previews it before replacing the open Custom Plan. CSV and printed PDF copies cannot restore the plan.
@@ -61,7 +61,7 @@ Current loans default to original amount and dates: enter the starting amount, a
 
 For GitHub Pages, include the new production files `custom-plan.html`, `custom-plan.css`, `custom-engine.js`, and `custom-plan.js`, plus the updated `index.html` and `planner.css`, along with the existing calculator files. No application backend or build is required; GitHub Pages serves the files over HTTPS.
 
-Custom Plan also requires `calendar.css` and `calendar.js`. They provide matching month/year pickers and day calendars, with direct year entry, Today/This month shortcuts, keyboard navigation, and the same date limits as the underlying fields. Values remain ISO dates/months for calculation and saved-plan compatibility. Run `node calendar.test.js` for picker interactions and date boundaries; its DOM harness does not verify browser rendering. The calendars use the browser's native modal dialog for focus containment and Escape dismissal.
+Custom Plan and Bucket Plan use standard browser date/month inputs that support direct entry. The custom modal-calendar enhancement is not loaded, so focusing a field does not open a site dialog or obscure the page. Values and min/max bounds remain ISO dates/months for calculations and saved-plan compatibility. Run `node native-dates.test.js` plus the page-handler tests for input wiring, valid ranges and saved-date restoration.
 
 Deploy `chart-hover.css` and `chart-hover.js` with both planner pages. Growth, Survival and Custom Plan charts show full projected amounts (currency and two decimal places) on hover or tap. Keyboard users can focus a chart and use Left/Right, Home/End, and Escape. Tooltips show the nearest plotted sample: yearly Growth points, Survival ages/event boundaries, and monthly Custom Plan points. They use calculated sample amounts rather than interpolated values. Run `node chart-hover.test.js` for selection, currency formatting, responsive coordinate mapping, touch/keyboard interactions and redraw cleanup. The DOM test does not replace visual browser QA.
 

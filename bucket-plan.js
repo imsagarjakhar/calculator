@@ -9,7 +9,6 @@
  const ageAt=(a,month)=>'Age '+(a.age+Math.floor(month/12))+(month%12?' + '+month%12+' mo':'');
  const monthLabel=value=>new Intl.DateTimeFormat('en',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(value+'-01T00:00:00Z'));
  const canAnimate=()=>typeof window!=='undefined'&&window.matchMedia&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- const refreshCalendars=()=>{if(typeof window!=='undefined')window.PlannerCalendar?.refresh();};
  function restore(a){for(const key of Object.keys(E.defaults))$('b-'+key).value=a[key];}
  function read(){
   const a={currency:$('b-currency').value,startMonth:$('b-startMonth').value,refillMonths:Number($('b-refillMonths').value)};
@@ -111,7 +110,7 @@
   $('fiveYearTotal').innerHTML='<tr><th scope="row">Full rolling reserve</th><td>60 months</td><td>Inflation adjusted</td><td>'+escape(exact(target))+'</td></tr>';
   const signed=n=>Math.abs(n)<.005?'—':(n>0?'+':'−')+exact(Math.abs(n));
   $('bucketMonthLedger').innerHTML=row.phases.map((p,i)=>{const prev=row.phases[i-1],balance=i===0,cells=['spending','emergency','equity','total'].map(k=>balance?exact(p[k]):signed(p[k]-prev[k]));return '<tr'+(i===selectedPhase?' class="inspected-step"':'')+'><th scope="row">'+escape(p.label)+(p.missing>.005?' · unpaid '+escape(exact(p.missing)):'')+'</th>'+cells.map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>';}).join('')+'<tr class="ledger-closing"><th scope="row">Closing balances</th>'+['spending','emergency','equity','total'].map(k=>'<td>'+escape(exact(row[k]))+'</td>').join('')+'</tr>';
-  renderHistory();renderRefill();refreshCalendars();
+  renderHistory();renderRefill();
  }
  function findNextRefill(){
   if(!current)return null;
@@ -177,11 +176,11 @@
  $('refillMotion').onclick=()=>{refillPaused=!refillPaused;const host=$('refillDiagram');host.dataset.paused=String(refillPaused);$('refillMotion').setAttribute('aria-pressed',String(refillPaused));$('refillMotion').textContent=refillPaused?'▶ Animate':'Ⅱ Pause animation';$('refillMotion').setAttribute('aria-label',refillPaused?'Play refill animation':'Pause refill animation');};
  $('refillInspect').onclick=()=>{if(current&&refillPreview){pausePlayback();selectedMonth=refillPreview.month;selectedPhase=refillPreview.phase;renderExplorer();$('bucketNavigator').scrollIntoView?.({block:'start',behavior:canAnimate()?'smooth':'auto'});}};
  $('bucketNextRefill').onclick=()=>{pausePlayback();const next=findNextRefill();if(next){selectedMonth=next.month;selectedPhase=next.phase;renderExplorer();}};
- $('bucketDate').onchange=()=>{pausePlayback();if(!current)return;const date=$('bucketDate').value,index=E.monthIndex(date)-E.monthIndex(current.a.startMonth);if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(date)||index<0||index>=current.o.months){$('bucketDateError').textContent='Choose a month from '+monthLabel(current.a.startMonth)+' to '+monthLabel(E.monthKey(current.a.startMonth,current.o.months-1))+'.';$('bucketDate').value=E.monthKey(current.a.startMonth,selectedMonth);refreshCalendars();return;}$('bucketDateError').textContent='';selectMonth(index);};
+ $('bucketDate').onchange=()=>{pausePlayback();if(!current)return;const date=$('bucketDate').value,index=E.monthIndex(date)-E.monthIndex(current.a.startMonth);if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(date)||index<0||index>=current.o.months){$('bucketDateError').textContent='Choose a month from '+monthLabel(current.a.startMonth)+' to '+monthLabel(E.monthKey(current.a.startMonth,current.o.months-1))+'.';$('bucketDate').value=E.monthKey(current.a.startMonth,selectedMonth);return;}$('bucketDateError').textContent='';selectMonth(index);};
  $('bucketStages').addEventListener('click',e=>{const button=e.target.closest('[data-inspect-phase]');if(button&&current){pausePlayback();selectedPhase=Number(button.dataset.inspectPhase);renderExplorer();}});
  $('bucketCards').addEventListener('click',e=>{
   const extra=e.target.closest('[data-extra-withdrawal]');
-  if(extra?.dataset.extraWithdrawal&&current){pausePlayback();$('extraWithdrawalPanel').hidden=false;$('extraDate').min=current.a.startMonth;$('extraDate').max=E.monthKey(current.a.startMonth,current.o.months-1);$('extraDate').value=current.o.rows[selectedMonth].date;$('extraRefill').value='scheduled';$('extraWithdrawalError').textContent='';$('extraWithdrawalSaved').textContent='';renderExplorer();refreshCalendars();$('extraWithdrawalPanel').scrollIntoView?.({block:'nearest',behavior:canAnimate()?'smooth':'auto'});$('extraReason').focus?.();return;}
+  if(extra?.dataset.extraWithdrawal&&current){pausePlayback();$('extraWithdrawalPanel').hidden=false;$('extraDate').min=current.a.startMonth;$('extraDate').max=E.monthKey(current.a.startMonth,current.o.months-1);$('extraDate').value=current.o.rows[selectedMonth].date;$('extraRefill').value='scheduled';$('extraWithdrawalError').textContent='';$('extraWithdrawalSaved').textContent='';renderExplorer();$('extraWithdrawalPanel').scrollIntoView?.({block:'nearest',behavior:canAnimate()?'smooth':'auto'});$('extraReason').focus?.();return;}
   const button=e.target.closest('[data-history-open]');if(button&&current){pausePlayback();historyBucket=button.dataset.historyOpen;renderExplorer();$('bucketHistory').scrollIntoView?.({block:'nearest',behavior:canAnimate()?'smooth':'auto'});}
  });
  $('extraWithdrawalClose').onclick=()=>{$('extraWithdrawalPanel').hidden=true;if(current)renderExplorer();};

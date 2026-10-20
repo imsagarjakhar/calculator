@@ -1,7 +1,6 @@
 (function(){
  'use strict';
  const E=CustomPlan,$=id=>document.getElementById(id),KEY='intimetec-custom-plan-v1';
- const refreshCalendars=()=>{if(typeof window!=='undefined')window.PlannerCalendar?.refresh();};
  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let plan=E.createPlan(),result,assetEdit=null,loanEdit=null,flowEdit=null,transactionEdit=null,pending=null,year=0,selected=plan.startMonth,storage=true,importVersion=0;
  const uid=prefix=>prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
@@ -43,7 +42,7 @@
   $('transactionTotals').textContent=rows.length+' transaction'+(rows.length===1?'':'s')+' · Recorded '+transactionMoney(rows.reduce((sum,t)=>sum+t.amount,0))+' · Included in this plan '+transactionMoney(rows.filter(inside).reduce((sum,t)=>sum+t.amount,0));
   $('transactionCategories').innerHTML=[...categories].map(([category,amount])=>'<span>'+escape(category)+' <strong>'+escape(transactionMoney(amount))+'</strong></span>').join('');
   $('transactionRows').innerHTML=rows.map(t=>{const asset=plan.assets.find(a=>a.id===t.assetId);return '<tr><th scope="row">'+escape(t.date)+'</th><td>'+escape(asset.name)+'</td><td>'+escape(asset.type)+'</td><td>'+escape(transactionMoney(t.amount))+'</td><td class="transaction-note">'+escape(t.note)+'</td><td>'+ (inside(t)?'Recorded · replaces forecast':'Outside plan · kept in history')+'</td><td>'+buttons('transaction',t.id)+'</td></tr>';}).join('')||'<tr><td colspan="7">No transactions in this view. Add an entry for each investment you made.</td></tr>';
-  refreshCalendars();
+  
  }
  function renderSettings(){
   for(const [id,key] of Object.entries({planName:'name',currency:'currency',startMonth:'startMonth',targetToday:'targetToday',defaultSip:'monthlySip',stepup:'annualStepup',inflation:'inflation'}))$(id).value=plan[key];
@@ -80,7 +79,7 @@
    const months=selectedDuration();
    $('durationHint').textContent=months+' month'+(months===1?'':'s')+' · includes the end month';
   }catch(e){$('durationHint').textContent=e.message;}
-  refreshCalendars();
+  
  }
  $('startMonth').oninput=updateEndMonth;
  $('endMonth').oninput=updateEndMonth;
@@ -116,7 +115,7 @@
   if(offset<0||offset>=plan.months)$('monthContext').className='helper';
   $('flowList').innerHTML=(entry?.flows||[]).map((f,index)=>{const target=f.type==='investment'?plan.assets.find(a=>a.id===f.assetId)?.name:f.type==='prepayment'?plan.loans.find(l=>l.id===f.loanId)?.name:'One-time expense';return '<div class="entry"><div><strong>'+escape((f.type==='investment'?'Extra investment':f.type==='prepayment'?'Extra loan payment':'Expense')+' · '+money(f.amount))+'</strong><p class="helper">'+escape(target+(f.type==='prepayment'?' · from '+f.source:'')+(f.type==='expense'&&f.inflate?' · today’s cost, adjusted for inflation':'')+(f.note?' · '+f.note:''))+'</p></div>'+buttons('flow',String(index))+'</div>';}).join('')||'<p class="empty">No extra cash flows for this month. For example: add ₹50,000 to Stocks while leaving the SIP at ₹20,000.</p>';
   if(plan.transactions.some(t=>t.date.slice(0,7)===selected))$('monthContext').textContent+=' Recorded investments replace the planned SIP and extra deposits for this month. Add investment transactions in the history section.';
-  renderFlowTargets();refreshCalendars();
+  renderFlowTargets();
  }
  function renderChart(){
   const w=1000,h=300,l=90,r=20,t=24,b=40,min=Math.min(0,...result.path.map(p=>p.netWorth)),max=Math.max(1,...result.path.map(p=>p.netWorth)),range=max-min||1;
@@ -170,7 +169,7 @@
    if(original)for(const id of ['loanBalance','loanMonths','loanPaidMonths'])$(id).value='';
    $('loanEmi').value='';$('loanRemainingTotal').value='';$('loanCalculation').textContent=e.message;
   }
-  refreshCalendars();
+  
  }
  function setLoanMode(){
   const original=$('loanMode').value==='original';
