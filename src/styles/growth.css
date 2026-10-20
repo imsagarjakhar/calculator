@@ -1320,6 +1320,14 @@ header {
 }
 
 /* Landing page benefits and transparent projections. */
+.planner-choices .choice {
+  color: var(--ink);
+  text-decoration: none;
+}
+.planner-choices .choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
 .welcome-intro {
   max-width: 850px;
   margin-top: 48px;
