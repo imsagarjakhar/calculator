@@ -1,4 +1,5 @@
 import { plannerHref } from "../runtime/routes";
+import "../styles/search.css";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useTables } from "../runtime/useTables";
 

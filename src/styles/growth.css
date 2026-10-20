@@ -1370,6 +1370,11 @@ header {
   font-weight: 700;
   text-decoration: none;
 }
+.welcome-actions a.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #061c24;
+}
 .welcome-actions a {
   border: 1px solid var(--line);
   background: var(--soft);

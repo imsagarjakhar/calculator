@@ -7,11 +7,13 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { HomeContent } from "./HomeContent";
 import { GrowthPage } from "./GrowthPage";
 import { SurvivalPage } from "./SurvivalPage";
+import { updateSearchMetadata } from "../runtime/searchMetadata";
 
 type Screen = "home" | "growth" | "survival";
 const readScreen = homeScreenFromLocation;
 export function HomePage() {
   const [screen, setScreen] = useState<Screen>(readScreen);
+  useEffect(() => updateSearchMetadata(screen), [screen]);
   useEffect(() => {
     const pop = () => {
       normalizePlannerUrl();
@@ -60,6 +62,8 @@ export function HomePage() {
     );
     const next = button?.dataset.screen;
     if (next !== "home" && next !== "growth" && next !== "survival") return;
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
     history.pushState(null, "", plannerHref(next));
     setScreen(next);
   }

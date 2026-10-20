@@ -75,7 +75,7 @@ test("clean routes support navigation, reloads, browser history and old bookmark
     path: info.outputPath("landing.png"),
     fullPage: false,
   });
-  await page.getByRole("button", { name: "Explore my future" }).click();
+  await page.getByRole("link", { name: "Explore my future" }).click();
   expect(new URL(page.url()).pathname).toBe(appPath("/growth/"));
   await page.reload();
   await expect(page.locator("h1:visible")).toContainText("From your salary");

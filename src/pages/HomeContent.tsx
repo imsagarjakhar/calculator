@@ -5,14 +5,14 @@ export function HomeContent() {
       <div className="eyebrow">INTIMETEC / SMART FINANCIAL PLANNING</div>
       <div className="welcome-intro">
         <span className="welcome-kicker">
-          Your personal money planning workspace
+          INTIMETEC Money Planner
         </span>
         <h1 id="welcomeTitle" tabIndex={-1}>
           Smarter money moves.
           <br />A clearer future.
         </h1>
         <p>
-          Turn “what if?” into a plan you can see. Explore your SIP,
+          Turn “what if?” into a plan you can see with INTIMETEC's free financial calculators. Explore your SIP,
           investments, loans and retirement together—with instant projections
           that respond to your assumptions.
         </p>
@@ -22,9 +22,9 @@ export function HomeContent() {
           <span>Private by design</span>
         </div>
         <div className="welcome-actions">
-          <button type="button" className="primary" data-screen="growth">
+          <a href={plannerHref("growth")} className="primary" data-screen="growth">
             Explore my future <span aria-hidden="true">↗</span>
-          </button>
+          </a>
           <a href={plannerHref("custom-plan")}>
             Build my monthly plan <span aria-hidden="true">→</span>
           </a>
@@ -35,8 +35,8 @@ export function HomeContent() {
         </small>
       </div>
       <div className="planner-choices has-custom has-freedom">
-        <button
-          type="button"
+        <a
+          href={plannerHref("growth")}
           className="choice growth-choice"
           data-screen="growth"
         >
@@ -52,9 +52,9 @@ export function HomeContent() {
           <span className="choice-link">
             Open SIP planner <span aria-hidden="true">↗</span>
           </span>
-        </button>
-        <button
-          type="button"
+        </a>
+        <a
+          href={plannerHref("survival")}
           className="choice survival-choice"
           data-screen="survival"
         >
@@ -70,7 +70,7 @@ export function HomeContent() {
           <span className="choice-link">
             Explore corpus survival <span aria-hidden="true">↗</span>
           </span>
-        </button>
+        </a>
         <a className="choice custom-choice" href={plannerHref("custom-plan")}>
           <span className="choice-icon" aria-hidden="true">
             ✎
@@ -141,13 +141,13 @@ export function HomeContent() {
         </p>
         <h3>SIP and investment growth calculator</h3>
         <p>
-          Use Check Growth to estimate future investment value from a monthly
+          <a href={plannerHref("growth")}>Use the SIP growth calculator</a> to estimate future investment value from a monthly
           SIP, annual increases and one-time deposits. Include existing assets,
           loans and planned life expenses to explore projected net wealth.
         </p>
         <h3>Retirement withdrawals and savings calculator</h3>
         <p>
-          Use Check Survival to estimate how long your current savings may
+          <a href={plannerHref("survival")}>Use the retirement withdrawal calculator</a> to estimate how long your current savings may
           support regular withdrawals. Adjust inflation, expected returns and
           future expenses to compare scenarios.
         </p>

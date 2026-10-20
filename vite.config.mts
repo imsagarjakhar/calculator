@@ -2,6 +2,31 @@ import { defineConfig, type Plugin } from "vite";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { buildBase } from "./scripts/build-base.cjs";
+import { searchPages, canonicalUrl, searchGraph, type SearchPage } from "./src/content/search.mjs";
+
+function searchMetadata(): Plugin {
+  return {
+    name: "search-metadata-and-crawlable-directory",
+    transformIndexHtml(html, context) {
+      const segment = context.path.split("/").filter(Boolean)[0];
+      const page: SearchPage = segment && segment in searchPages ? segment as SearchPage : "home";
+      const info = searchPages[page];
+      const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
+      html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(info.title)}</title>`);
+      html = html.replace(/<meta\b[^>]*\b(?:name|property)="(description|og:title|og:description|og:url|twitter:title|twitter:description)"[^>]*>/g, (tag, name: string) => {
+        const value = name.endsWith("title") ? info.title : name === "og:url" ? canonicalUrl(page) : info.description;
+        return tag.replace(/content="[^"]*"/, `content="${escape(value)}"`);
+      });
+      html = html.replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonicalUrl(page)}" />`);
+      const data = `<script type="application/ld+json">${JSON.stringify(searchGraph(page)).replaceAll("<", "\\u003c")}</script>`;
+      html = /<script type="application\/ld\+json">/.test(html)
+        ? html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, data)
+        : html.replace("</head>", data + "</head>");
+      const footer = readFileSync(resolve("src/content/site-footer.html"), "utf8").replaceAll("{{base}}", buildBase());
+      return { html, tags: [{ tag: "footer", attrs: { class: "site-footer" }, children: footer, injectTo: "body" }] };
+    },
+  };
+}
 
 // Bundle the tested engines and controllers as isolated ES modules. No script
 // injection, eval, global API installation, or second copy of the calculations.
@@ -163,7 +188,7 @@ export default defineConfig({
   resolve: { alias: { "/src": resolve("src") } },
   base: buildBase(),
   publicDir: "../public",
-  plugins: [compatibilityModules()],
+  plugins: [compatibilityModules(), searchMetadata()],
   build: {
     outDir: "../dist",
     emptyOutDir: true,
