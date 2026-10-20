@@ -20,7 +20,7 @@ for(const currency of ['INR','USD','SAR','AED','EUR','GBP'])for(const wealth of 
  assert.equal(comparison.heading,(wealth<10000000?'Below ':wealth>10000000?'Above ':'Target reached: ')+name+' ('+currency+')');
  const sample=E.createPlan(new Date(2026,9,19));sample.currency=currency;sample.months=1;sample.monthlySip=0;sample.assets[0].value=Math.max(0,wealth);sample.assets[0].annualReturn=0;
  const report=R.build(sample),actual=R.targetComparison(E.project(sample).netWorth,currency);
- assert.ok(report.includes(actual.heading));assert.ok(report.includes('class="metric '+(actual.difference<0?'target-below':'target-funded')+'"'));assert.ok(report.includes('Based on projected net wealth at plan end. No currency conversion.'));assert.deepEqual(R.read(report),E.validate(sample));
+ assert.ok(report.includes('Projected net worth'));assert.ok(report.includes('Combined XIRR'));assert.ok(report.includes('Inflation-adjusted gain'));assert.equal((report.match(/data-metric=/g)||[]).length,7);assert.deepEqual(R.read(report),E.validate(sample));
 }
 for(const bad of ['<html>No data</html>',html.replace('custom-plan-data','wrong-data'),html+html,html.replace(/"version": 1/,'"version": 999'),'{bad json'])assert.throws(()=>R.read(bad));
 assert.throws(()=>R.read('x'.repeat(R.MAX_FILE_BYTES+1)));

@@ -97,5 +97,10 @@
   const csv='\ufeff'+rows.map(row=>row.join(',')).join('\r\n'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download='Financial_freedom_'+a.currency+'.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
  editor=LifeEvents.mount($('freedomEvents'),'freedom',{currency:$('f-currency').value,months:(Number($('f-endAge').value)-Number($('f-age').value))*12,inflation:Number($('f-inflation').value),age:Number($('f-age').value)},update);
+ if(typeof CalculatorReport!=='undefined')CalculatorReport.bindImport({button:$('freedomImport'),input:$('freedomImportFile'),status:$('freedomImportStatus'),kind:'freedom',restore(saved){
+  const a=E.validate(saved.inputs),events=LifeEvents.validate(saved.events);E.project(a,events);
+  LifeEvents.save('freedom',a.currency,events);migrationMessage='';restore(a);
+  editor?.reset?.({currency:a.currency,months:(a.endAge-a.age)*12,inflation:a.inflation,age:a.age});update();
+ }});
  update();
 })();

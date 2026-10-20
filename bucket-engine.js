@@ -12,12 +12,12 @@
   const a={currency:raw.currency,startMonth};
   for(const [key,[min,max]] of Object.entries(ranges)){const n=raw[key];if(!Number.isFinite(n)||n<min||n>max||(['age','endAge','shockYear'].includes(key)&&!Number.isInteger(n)))throw new Error('Check '+key+': enter '+min+' to '+max+'.');a[key]=n;}
   if(a.endAge<=a.age)throw new Error('Plan until an age later than your current age.');
-  if(![1,12,60].includes(raw.refillMonths))throw new Error('Choose monthly, yearly or five-yearly refills.');a.refillMonths=raw.refillMonths;
+  if(![1,12,24,36,48,60].includes(raw.refillMonths))throw new Error('Choose monthly refills or an interval of 1 to 5 years.');a.refillMonths=raw.refillMonths;
   if(a.shockPercent>0&&a.shockYear>a.endAge-a.age)throw new Error('Choose a market-fall year within your plan.');return a;
  }
  function validateEvents(events,months){
   if(!Array.isArray(events)||events.length>100)throw new Error('Keep up to 100 emergency expenses.');
-  return events.map(e=>{if(!e||typeof e.id!=='string'||!e.id||e.id.length>80||typeof e.name!=='string'||!e.name.trim()||e.name.length>80||!Number.isFinite(e.amount)||e.amount<=0||e.amount>1e12||!Number.isInteger(e.month)||e.month<1||e.month>1224||typeof e.inflate!=='boolean')throw new Error('Emergency expenses need a name, positive amount and a plan month from 1 to 1224.');return {...e,name:e.name.trim()};});
+  return events.map(e=>{if(!e||typeof e.id!=='string'||!e.id||e.id.length>80||typeof e.name!=='string'||!e.name.trim()||e.name.length>80||!Number.isFinite(e.amount)||e.amount<=0||e.amount>1e12||!Number.isInteger(e.month)||e.month<1||e.month>1224||typeof e.inflate!=='boolean'||(e.refill!==undefined&&!['immediate','scheduled'].includes(e.refill)))throw new Error('Emergency expenses need a name, positive amount, valid refill choice and a plan month from 1 to 1224.');return {...e,name:e.name.trim(),refill:e.refill||'immediate'};});
  }
  const spendingAt=(a,month)=>a.monthly*Math.pow(1+a.inflation/100,Math.floor(month/12));
  // Undiscounted spending reserve: future fund returns do not reduce the initial five-year amount.
@@ -28,9 +28,9 @@
  function project(raw,rawEvents=[]){
   const a=validate(raw),months=(a.endAge-a.age)*12,events=validateEvents(rawEvents,months),target1=spendingTarget(a),target2=a.emergency;
   const initial={spending:Math.min(a.corpus,target1),emergency:Math.min(Math.max(0,a.corpus-target1),target2),equity:Math.max(0,a.corpus-target1-target2)};
-  let b1=initial.spending,b2=initial.emergency,b3=initial.equity,firstShortfall=null,totalGrowth=0,totalLiving=0,totalEmergency=0,totalUnfunded=0;
-  const factors=[a.spendingReturn,a.emergencyReturn,a.equityReturn].map(r=>Math.pow(1+r/100,1/12)),rows=[],years=[],transfers=[],path=[{month:0,age:a.age,...initial,total:a.corpus}];
-  const costs=new Map();for(const e of events)costs.set(e.month,(costs.get(e.month)||0)+e.amount*Math.pow(1+a.inflation/100,e.inflate?(e.month-1)/12:0));
+  let b1=initial.spending,b2=initial.emergency,b3=initial.equity,deferredEmergency=0,firstShortfall=null,totalGrowth=0,totalLiving=0,totalEmergency=0,totalUnfunded=0;
+  const rates=[a.spendingReturn,a.emergencyReturn,a.equityReturn].map(r=>r/100),pending=[0,0,0],rows=[],years=[],transfers=[],path=[{month:0,age:a.age,...initial,total:a.corpus}];
+  const costs=new Map();for(const e of events){const cost=costs.get(e.month)||{total:0,immediate:0},amount=e.amount*Math.pow(1+a.inflation/100,e.inflate?(e.month-1)/12:0);cost.total+=amount;if(e.refill==='immediate')cost.immediate+=amount;costs.set(e.month,cost);}
   for(let m=1;m<=months;m++){
    const index=m-1,year=Math.floor(index/12),opening=b1+b2+b3,shock=a.shockPercent>0&&b3>0&&m===(a.shockYear-1)*12+1?-b3*a.shockPercent/100:0;
    const openingSpending=b1,openingEmergency=b2,openingEquity=b3,phases=[];
@@ -39,16 +39,21 @@
    const targetSpending=spendingTarget(a,index),targetEmergency=a.emergency*Math.pow(1+a.inflation/100,year),review=m>1&&index%a.refillMonths===0;
    function fillSpending(amount){const transfer=Math.min(b3,Math.max(0,amount));b3-=transfer;b1+=transfer;toSpending+=transfer;}
    function fillEmergency(amount){const transfer=Math.min(b3,Math.max(0,amount));b3-=transfer;b2+=transfer;toEmergency+=transfer;}
-   if(review){fillSpending(targetSpending-b1);fillEmergency(targetEmergency-b2);capture('review',toSpending+toEmergency>.005?'Scheduled refill':'Scheduled review · no transfer',true);}
-   const dueEmergency=costs.get(m)||0;
+   if(review){deferredEmergency=0;fillSpending(targetSpending-b1);fillEmergency(targetEmergency-b2);capture('review',toSpending+toEmergency>.005?'Scheduled refill':'Scheduled review · no transfer',true);}
+   const emergencyCost=costs.get(m)||{total:0,immediate:0},dueEmergency=emergencyCost.total;
    if(dueEmergency>b2){fillEmergency(dueEmergency-b2);capture('emergencyTopup','Emergency top-up before payment');}
-   const paidEmergency=Math.min(b2,dueEmergency);b2-=paidEmergency;if(dueEmergency>0)capture('emergencyWithdrawal','Emergency expense paid',true,dueEmergency-paidEmergency);
+   const paidEmergency=Math.min(b2,dueEmergency);b2-=paidEmergency;deferredEmergency+=Math.max(0,paidEmergency-emergencyCost.immediate);if(dueEmergency>0)capture('emergencyWithdrawal','Emergency expense / extra withdrawal paid',true,dueEmergency-paidEmergency);
    const dueLiving=spendingAt(a,index);if(dueLiving>b1){fillSpending(dueLiving-b1);capture('spendingTopup','Living-cost top-up before withdrawal');}
    const paidLiving=Math.min(b1,dueLiving);b1-=paidLiving;capture('withdrawal','Monthly living withdrawal',true,dueLiving-paidLiving);
-   if(dueEmergency>0){fillEmergency(targetEmergency-b2);capture('emergencyRefill','Emergency reserve replenished');}
-   const growth1=b1*(factors[0]-1),growth2=b2*(factors[1]-1),growth3=b3*(factors[2]-1),growth=shock+growth1+growth2+growth3;
-   b1=Math.max(0,b1+growth1);b2=Math.max(0,b2+growth2);b3=Math.max(0,b3+growth3);
-   capture('closing','Month end · returns applied',true);
+   if(emergencyCost.immediate>0){fillEmergency(targetEmergency-deferredEmergency-b2);capture('emergencyRefill','Emergency reserve replenished');}
+   // Accumulate return on each month's invested balance; credit only after 12 plan months.
+   // Uncredited returns cannot fund withdrawals or earn further returns within the year.
+   const balances=[b1,b2,b3],yearEnd=m%12===0;
+   balances.forEach((balance,i)=>{pending[i]+=balance*rates[i]/12;});
+   const credited=balances.map((balance,i)=>yearEnd?Math.max(-balance,pending[i]):0);
+   const growth=shock+credited.reduce((sum,value)=>sum+value,0);
+   b1+=credited[0];b2+=credited[1];b3+=credited[2];
+   if(yearEnd){pending.fill(0);capture('closing','Year end · returns applied',true);}
    const unfunded=Math.max(0,dueLiving-paidLiving)+Math.max(0,dueEmergency-paidEmergency),total=b1+b2+b3;
    if(unfunded>0.005&&firstShortfall===null)firstShortfall=m;
    totalGrowth+=growth;totalLiving+=paidLiving;totalEmergency+=paidEmergency;totalUnfunded+=unfunded;

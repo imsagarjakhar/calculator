@@ -22,21 +22,50 @@ const review=steps.rows[12].phases.find(p=>p.key==='review');near(review.spendin
 const event={id:'medical',name:'Medical',amount:25000,month:15,inflate:false},withEvent=E.project(base,[event]);near(withEvent.rows[14].emergencyPaid,25000);near(withEvent.rows[14].toEmergency,25000);near(withEvent.rows[14].emergency,100000);near(withEvent.ending,p.ending-25000);
 const big=E.project(base,[{...event,amount:150000,month:1}]);near(big.rows[0].emergencyPaid,150000);near(big.rows[0].toEmergency,150000);
 const inflatedEvent=E.project(inflation,[{...event,amount:10000,month:13,inflate:true}]);near(inflatedEvent.rows[12].dueEmergency,10500);
+// A deferred extra withdrawal stays deducted until review, even with later immediate expenses.
+const deferredEvent={...event,month:5,refill:'scheduled'},deferred=E.project(base,[deferredEvent]);
+near(deferred.rows[4].emergency,75000);near(deferred.rows[4].toEmergency,0);near(deferred.rows[11].emergency,75000);near(deferred.rows[12].emergency,100000);near(deferred.rows[12].toEmergency,25000);
+const mixed=E.project(base,[deferredEvent,{...event,id:'immediate',month:5,amount:10000,refill:'immediate'},{...event,id:'later-immediate',month:7,amount:10000,refill:'immediate'}]);
+near(mixed.rows[4].emergency,75000);near(mixed.rows[4].toEmergency,10000);near(mixed.rows[6].emergency,75000);near(mixed.rows[6].toEmergency,10000);near(mixed.rows[12].toEmergency,25000);
+near(mixed.ending,base.corpus-mixed.totalLiving-mixed.totalEmergency);
+const deferredLarge=E.project(base,[{...deferredEvent,amount:150000}]);near(deferredLarge.rows[4].emergency,0);near(deferredLarge.rows[4].toEmergency,50000);near(deferredLarge.rows[4].emergencyPaid,150000);near(deferredLarge.rows[12].emergency,100000);
+assert.equal(E.validateEvents([event])[0].refill,'immediate');assert.throws(()=>E.project(base,[{...event,refill:'invalid'}]));
 const outside=E.project(base,[{...event,month:121}]);near(outside.totalEmergency,0);assert.equal(outside.events.length,1);
 // Annual / monthly / five-year reviews and immediate withdrawals all respect available equity.
 near(E.project({...base,refillMonths:1}).rows[1].toSpending,1000);const five=E.project({...base,refillMonths:60});near(five.rows[59].toSpending,0);near(five.rows[60].toSpending,60000);
+for(const interval of [12,24,36,48,60]){
+ const scheduled=E.project({...base,refillMonths:interval});
+ assert.equal(scheduled.rows.slice(0,interval).some(row=>row.review),false);
+ assert.equal(scheduled.rows[interval].review,true);near(scheduled.rows[interval].toSpending,interval*1000);
+ near(scheduled.rows[interval].phases.find(phase=>phase.key==='review').spending,60000);
+ assert.equal(scheduled.rows[interval+1].review,false);
+}
 const small=E.project({...base,corpus:50000});assert.equal(small.setupGap,110000);assert.equal(small.initial.equity,0);assert.equal(small.firstShortfall,51);near(small.totalUnfunded,70000);near(small.ending,0);
 const noEquity=E.project({...base,corpus:160000});assert.equal(noEquity.firstShortfall,61);near(noEquity.ending,100000,'Emergency reserve is not spent on living costs');
 const empty=E.project({...base,corpus:0,monthly:0,emergency:0});assert.equal(empty.firstShortfall,null);near(empty.ending,0);
 const fall=E.project({...base,shockPercent:30,shockYear:1});near(fall.rows[0].shock,-840000*.3);near(fall.totalGrowth,-252000);near(fall.ending,628000);
-// Independent compound-interest and annuity-due formulas verify return timing.
+// Annual credits follow the plan anniversary, independent of calendar year end.
+const annual=E.project({...base,startMonth:'2026-10',spendingReturn:6,emergencyReturn:5,equityReturn:10});
+for(let i=0;i<11;i++){near(annual.rows[i].growth,0);assert.ok(!annual.rows[i].phases.some(p=>p.key==='closing'));}
+assert.equal(annual.rows[11].date,'2027-09');assert.equal(annual.rows[11].phases.at(-1).label,'Year end · returns applied');
+near(annual.rows[11].growth,(60000-6500)*.06+100000*.05+840000*.1);
+near(annual.rows[12].growth,0);assert.equal(annual.rows[23].date,'2028-09');
+// Independent annual compounding and average-balance formulas verify returns.
 for(const equityReturn of [-40,-10,0,6,20]){const onlyEquity={...base,monthly:0,emergency:0,equityReturn},o=E.project(onlyEquity);near(o.ending,onlyEquity.corpus*(1+equityReturn/100)**10);}
-for(const spendingReturn of [0,6,20]){const onlyLiving={...base,corpus:60000,emergency:0,endAge:65,spendingReturn},o=E.project(onlyLiving),q=(1+spendingReturn/100)**(1/12),expected=q===1?0:60000*q**60-1000*q*(q**60-1)/(q-1);near(o.ending,expected);}
+for(const spendingReturn of [0,6,20]){const onlyLiving={...base,corpus:60000,emergency:0,endAge:65,spendingReturn},o=E.project(onlyLiving);let expected=60000;for(let year=0;year<5;year++)expected=expected-12000+(expected-6500)*spendingReturn/100;near(o.ending,expected);}
+// Transfers change the invested balance only from their month; no return is credited early.
+const monthlyRefill=E.project({...base,refillMonths:1,spendingReturn:12,equityReturn:0});
+near(monthlyRefill.rows[11].spending,59000+59000*.12);
+const annualExpense=E.project({...base,emergencyReturn:12,equityReturn:0},[{...event,month:6}]);
+near(annualExpense.rows[11].emergency,112000);
+// Losses cannot exceed a depleted bucket, and cash-flow totals still reconcile.
+const depleted=E.project({...base,corpus:12000,monthly:1000,emergency:0,spendingReturn:-50});
+near(depleted.rows[11].spending,0);near(depleted.rows[11].growth,0);
 // Independent deterministic cash-flow checks across returns, inflation, shocks, reviews and shortfalls.
 let seed=876;
 const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/2**32;};
 for(let i=0;i<100;i++){
- const a={...base,corpus:50000+random()*2000000,monthly:random()*10000,emergency:random()*300000,inflation:random()*10,spendingReturn:-20+random()*40,emergencyReturn:-10+random()*25,equityReturn:-30+random()*60,refillMonths:[1,12,60][i%3],shockPercent:i%2?30:0,shockYear:2};
+ const a={...base,corpus:50000+random()*2000000,monthly:random()*10000,emergency:random()*300000,inflation:random()*10,spendingReturn:-20+random()*40,emergencyReturn:-10+random()*25,equityReturn:-30+random()*60,refillMonths:[1,12,24,36,48,60][i%6],shockPercent:i%2?30:0,shockYear:2};
  const events=[{...event,amount:10000+random()*100000,month:18,inflate:true},{...event,id:'later',month:70,amount:50000}],o=E.project(a,events);
  near(o.initial.spending+o.initial.emergency+o.initial.equity,a.corpus);
  near(a.corpus+o.totalGrowth-o.totalLiving-o.totalEmergency,o.ending);
