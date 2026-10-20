@@ -105,6 +105,97 @@ test("clean routes support navigation, reloads, browser history and old bookmark
   expect(new URL(page.url()).hash).toBe("");
 });
 
+test("search engines can read content, links and consistent metadata without JavaScript", async ({
+  browser,
+  request,
+}) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: `http://127.0.0.1:${process.env.PREVIEW_PORT || "4173"}`,
+  });
+  const staticPage = await context.newPage();
+  try {
+    await staticPage.goto(appPath("/"));
+    await expect(staticPage.locator("#welcomeTitle")).toContainText(
+      "Smarter money moves",
+    );
+    await expect(staticPage.locator(".welcome-kicker")).toHaveText(
+      "INTIMETEC Money Planner",
+    );
+    await expect(staticPage.locator(".growth-choice")).toHaveAttribute(
+      "href",
+      appPath("/growth/"),
+    );
+    await expect(staticPage.locator(".survival-choice")).toHaveAttribute(
+      "href",
+      appPath("/survival/"),
+    );
+    await staticPage.locator(".growth-choice").click();
+    await expect(staticPage.locator("h1")).toContainText("SIP");
+    for (const route of [
+      "",
+      "growth/",
+      "survival/",
+      "custom-plan/",
+      "freedom/",
+    ]) {
+      await staticPage.goto(appPath(route));
+      const canonical = "https://intimetec.org/" + route;
+      await expect(staticPage.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        canonical,
+      );
+      const title = await staticPage.title();
+      expect(title).toContain("INTIMETEC");
+      const graph = JSON.parse(
+        (await staticPage
+          .locator('script[type="application/ld+json"]')
+          .textContent()) || "{}",
+      )["@graph"];
+      expect(
+        graph.find((item: any) => item["@type"] === "WebSite").alternateName,
+      ).toContain("INTIMETEC");
+      expect(graph.find((item: any) => item["@type"] === "WebPage").url).toBe(
+        canonical,
+      );
+      await expect(
+        staticPage.locator('meta[name="robots"]'),
+      ).not.toHaveAttribute("content", /noindex/);
+      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(4);
+    }
+    const sitemap = await (await request.get(appPath("sitemap.xml"))).text();
+    for (const route of [
+      "",
+      "growth/",
+      "survival/",
+      "custom-plan/",
+      "freedom/",
+    ])
+      expect(sitemap).toContain(`<loc>https://intimetec.org/${route}</loc>`);
+  } finally {
+    await context.close();
+  }
+});
+
+test("search metadata follows client navigation and browser history", async ({
+  page,
+}) => {
+  await page.goto(appPath("/"));
+  const homeTitle = await page.title();
+  await page.getByRole("link", { name: "Explore my future" }).click();
+  await expect(page).toHaveTitle(/SIP & Investment Growth Calculator/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://intimetec.org/growth/",
+  );
+  await page.locator('#plannerNav [data-screen="survival"]').click();
+  await expect(page).toHaveTitle(/Retirement & SWP Calculator/);
+  await page.goBack();
+  await expect(page).toHaveTitle(/SIP & Investment Growth Calculator/);
+  await page.goBack();
+  await expect(page).toHaveTitle(homeTitle);
+});
+
 test("all five calculators load with consistent controls, native dates and responsive layouts", async ({
   page,
 }, info) => {

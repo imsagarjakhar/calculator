@@ -185,3 +185,22 @@ npm run check
 The homepage uses smart-planning language and an AI FAQ that explicitly describes the calculation-based model. No AI service, AI-generated advice, or market-price prediction is introduced.
 
 Canonical routes are `/`, `/growth/`, `/survival/`, `/custom-plan/`, `/freedom/` and `/bucket-plan/`, all relative to the configured base path. Each calculator has a real directory index in the build, so direct visits and reloads work on GitHub Pages without server rewrite rules. Old `.html` calculator bookmarks remain available and normalize to the clean route after JavaScript loads; old `/#growth` and `/#survival` links normalize too. Saved plans and report formats are unchanged. Canonical metadata and the sitemap use the new URLs.
+
+## Search visibility and release checks
+
+The preferred brand is **INTIMETEC Money Planner**, with INTIMETEC and intimetec.org as site-name alternatives. It describes this financial planning site; do not copy another company's profile, reviews, address or social accounts into structured data.
+
+`src/content/search.mts` is the shared source of titles, descriptions, canonical URLs and JSON-LD. Vite applies it to every HTML entry in development and production. The browser updates Growth/Survival metadata when their history-based navigation changes the screen. The homepage uses real links to calculators, including when JavaScript is disabled.
+
+`npm run build` pre-renders the public homepage from its actual React component and creates short, relevant calculator introductions. A shared visible footer provides calculator links and method/privacy information on every page. This needs no database, browser download or server at deployment. Financial inputs and saved browser plans are never used for pre-rendering. CSP and resource integrity are applied after pre-rendering. The experimental bucket page stays `noindex` and out of the sitemap.
+
+After deploying to intimetec.org:
+
+1. Add the **Domain property** `intimetec.org` in [Google Search Console](https://search.google.com/search-console). Copy the exact Google-provided TXT verification record into GoDaddy DNS. Keep the existing GitHub Pages DNS records.
+2. After verification, submit `https://intimetec.org/sitemap.xml` under **Sitemaps**.
+3. Inspect `https://intimetec.org/` using **URL inspection**, run **Test live URL**, then **Request indexing**. Inspect `/growth/`, `/survival/`, `/custom-plan/` and `/freedom/` as well. Do this after the new deployment has succeeded.
+4. Review **Page indexing** for crawl/canonical problems and **Performance** for queries containing `intimetec`. Track impressions, clicks and average position over time rather than relying on one personalised search.
+
+Google decides what it indexes and how it ranks results. These changes improve crawlability and brand clarity; they cannot guarantee first place or a particular indexing date. Earn relevant mentions and links from real users or sites; avoid paid link schemes, keyword stuffing and fake review/rating markup.
+
+References: [Google's JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [site-name guidance](https://developers.google.com/search/docs/appearance/site-names), and [Search Console setup](https://developers.google.com/search/docs/monitor-debug/search-console-start).

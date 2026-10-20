@@ -62,7 +62,14 @@ export function HomePage() {
     );
     const next = button?.dataset.screen;
     if (next !== "home" && next !== "growth" && next !== "survival") return;
-    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    )
+      return;
     event.preventDefault();
     history.pushState(null, "", plannerHref(next));
     setScreen(next);

@@ -4,17 +4,16 @@ export function HomeContent() {
     <section id="homeScreen" className="welcome" aria-labelledby="welcomeTitle">
       <div className="eyebrow">INTIMETEC / SMART FINANCIAL PLANNING</div>
       <div className="welcome-intro">
-        <span className="welcome-kicker">
-          INTIMETEC Money Planner
-        </span>
+        <span className="welcome-kicker">INTIMETEC Money Planner</span>
         <h1 id="welcomeTitle" tabIndex={-1}>
           Smarter money moves.
           <br />A clearer future.
         </h1>
         <p>
-          Turn “what if?” into a plan you can see with INTIMETEC's free financial calculators. Explore your SIP,
-          investments, loans and retirement together—with instant projections
-          that respond to your assumptions.
+          Turn “what if?” into a plan you can see with INTIMETEC's free
+          financial calculators. Explore your SIP, investments, loans and
+          retirement together—with instant projections that respond to your
+          assumptions.
         </p>
         <div className="welcome-benefits" aria-label="Planner features">
           <span>Instant insights</span>
@@ -22,7 +21,11 @@ export function HomeContent() {
           <span>Private by design</span>
         </div>
         <div className="welcome-actions">
-          <a href={plannerHref("growth")} className="primary" data-screen="growth">
+          <a
+            href={plannerHref("growth")}
+            className="primary"
+            data-screen="growth"
+          >
             Explore my future <span aria-hidden="true">↗</span>
           </a>
           <a href={plannerHref("custom-plan")}>
@@ -141,15 +144,19 @@ export function HomeContent() {
         </p>
         <h3>SIP and investment growth calculator</h3>
         <p>
-          <a href={plannerHref("growth")}>Use the SIP growth calculator</a> to estimate future investment value from a monthly
-          SIP, annual increases and one-time deposits. Include existing assets,
-          loans and planned life expenses to explore projected net wealth.
+          <a href={plannerHref("growth")}>Use the SIP growth calculator</a> to
+          estimate future investment value from a monthly SIP, annual increases
+          and one-time deposits. Include existing assets, loans and planned life
+          expenses to explore projected net wealth.
         </p>
         <h3>Retirement withdrawals and savings calculator</h3>
         <p>
-          <a href={plannerHref("survival")}>Use the retirement withdrawal calculator</a> to estimate how long your current savings may
-          support regular withdrawals. Adjust inflation, expected returns and
-          future expenses to compare scenarios.
+          <a href={plannerHref("survival")}>
+            Use the retirement withdrawal calculator
+          </a>{" "}
+          to estimate how long your current savings may support regular
+          withdrawals. Adjust inflation, expected returns and future expenses to
+          compare scenarios.
         </p>
         <h3>Financial freedom age calculator</h3>
         <p>
