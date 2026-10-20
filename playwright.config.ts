@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const previewPort = Number(process.env.PREVIEW_PORT || "4173");
+const previewOrigin = `http://127.0.0.1:${previewPort}`;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -8,7 +11,7 @@ export default defineConfig({
   workers: 2,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: previewOrigin,
     channel: "chromium",
     trace: "retain-on-failure",
   },
@@ -17,9 +20,8 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
-    command:
-      "node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173 --strictPort",
-    url: "http://127.0.0.1:4173",
+    command: `node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port ${previewPort} --strictPort`,
+    url: previewOrigin + (process.env.VITE_BASE_PATH || "/"),
     reuseExistingServer: !process.env.CI,
   },
 });

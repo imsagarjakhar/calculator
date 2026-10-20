@@ -93,9 +93,39 @@ Open the repository's **Actions** tab and check **Test and deploy planners**. Pu
 
 Only the branch selected by `PAGES_DEPLOY_BRANCH` deploys; when unset, this defaults to `main`. A failed test/build blocks deployment. Pull requests never deploy, and manual runs must also match the configured branch. There is no PAT, database password or other application secret to configure.
 
-The app uses Vite's `/` base because production uses a custom domain. Deploying it instead at `username.github.io/Calculator/` would require adjusting the base, resource-integrity path handling and public URLs; it is not the deployment configured here.
+The build supports both a custom-domain root (`/`) and a GitHub project path such as `/calculator/`. Set the repository Actions variable `PAGES_BASE_PATH` to the required path, including its leading and trailing slashes. The workflow passes this as `VITE_BASE_PATH` to the build and browser tests. Script/style integrity is generated against the same path.
 
 References: [Vite GitHub Pages deployment](https://vite.dev/guide/static-deploy.html), [GitHub custom Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+## Set up Pages in the new repository without moving the domain
+
+Use this first to verify the React application at **https://imsagarjakhar.github.io/calculator/**. The existing `intimetec.org` site stays attached to the old repository during this test.
+
+1. In `imsagarjakhar/calculator`, open **Settings → Pages** and set **Build and deployment → Source → GitHub Actions**. Do not choose branch/root publishing for the React source.
+2. Leave **Custom domain empty** in this new repository for now. The `CNAME` file in the built artifact does not configure a custom domain for an Actions-based Pages deployment; the repository's Pages settings control it.
+3. Open **Settings → Secrets and variables → Actions → Variables** and create these **repository variables** (not secrets):
+
+   | Name                  | Value          |
+   | --------------------- | -------------- |
+   | `PAGES_DEPLOY_BRANCH` | `react`        |
+   | `PAGES_BASE_PATH`     | `/calculator/` |
+
+4. If **Settings → Environments → github-pages → Deployment branches and tags** restricts deployments, allow the `react` branch. Preserve any review/approval requirements you want.
+5. Push the commit that adds project-path support to `react`, or rerun **all jobs** of that latest workflow after saving the settings. A run from the older code cannot build the project path correctly. If deployment remains skipped after changing variables, trigger a fresh push so the new run receives the settings.
+6. In **Actions → Test and deploy planners**, wait for **Tests and production build** and **Deploy selected branch to GitHub Pages** to finish successfully. Then use the deployment URL shown by GitHub or visit the project URL above. Browser tests in this run use the `/calculator/` path too.
+7. Verify all five calculators, imports, downloads and reload persistence before moving the existing domain.
+
+Later, moving `intimetec.org` to the new repository is a separate release step: change `PAGES_BASE_PATH` back to `/`, transfer the custom-domain association from the old repository to the new one, verify domain ownership for the new account where required, and update the `www` DNS CNAME to `imsagarjakhar.github.io` when switching. The root GitHub Pages A records do not change simply because the account changed. Rebuild with the `/` base for that domain. Keep the original site running until this switch is planned.
+
+To test the project path locally in PowerShell:
+
+```powershell
+$env:VITE_BASE_PATH = "/calculator/"
+npm run build
+npm run preview
+```
+
+Open `http://127.0.0.1:4173/calculator/`. Stop any existing preview first so the server loads the matching base configuration. To return to the normal root build, run `Remove-Item Env:VITE_BASE_PATH` and rebuild. The base-path variable is a per-terminal environment setting, not a secret.
 
 ## Test `react` on the live domain without merging
 
@@ -130,7 +160,7 @@ For an ordinary application change, revert the release commit/merge with a new G
 | `vite.config.mts`                | Multi-page build and compatibility-module bundling                     |
 | `scripts/secure-build.cjs`       | CSP and script/style/preload integrity for built pages                 |
 | `e2e/`                           | Real production-browser regression tests                               |
-| `.github/workflows/pages.yml`    | Branch/PR checks and selected-branch deployment                              |
+| `.github/workflows/pages.yml`    | Branch/PR checks and selected-branch deployment                        |
 
 This migration makes every calculator available through React, but does not pretend every original JavaScript function has been rewritten into TypeScript or React state. The financial engines and existing event-driven form/result controllers are deliberately reused as bundled, isolated modules. React owns the page layout; controllers own mutable inputs/result containers. Memoized page boundaries prevent React navigation from reconciling those mutable subtrees. The adapters install no engine APIs on `window`, inject no scripts and use no `eval`.
 

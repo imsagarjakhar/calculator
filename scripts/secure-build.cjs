@@ -2,7 +2,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { buildBase } = require("./build-base.cjs");
 const output = path.resolve("dist");
+const base = buildBase();
 const digest = (bytes, algorithm = "sha384") =>
   algorithm + "-" + crypto.createHash(algorithm).update(bytes).digest("base64");
 for (const page of [
@@ -28,9 +30,9 @@ for (const page of [
       return tag;
     const resource = tag.match(/(?:src|href)="([^"]+)"/);
     if (!resource) return tag;
-    if (!resource[1].startsWith("/assets/"))
+    if (!resource[1].startsWith(base + "assets/"))
       throw new Error("Unexpected build resource: " + resource[1]);
-    const resourcePath = path.resolve(output, "." + resource[1]);
+    const resourcePath = path.resolve(output, resource[1].slice(base.length));
     if (!resourcePath.startsWith(output + path.sep))
       throw new Error("Invalid build resource path");
     const sri = digest(fs.readFileSync(resourcePath));

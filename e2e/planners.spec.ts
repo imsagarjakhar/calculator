@@ -2,6 +2,9 @@ import { test as base, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 
+const appBase = process.env.VITE_BASE_PATH || "/";
+const appPath = (route: string) => appBase + route.replace(/^\//, "");
+
 const load = createRequire(process.cwd() + "/package.json");
 const Growth = load("./bkp/growth-engine.js");
 const Survival = load("./bkp/survival-engine.js");
@@ -59,7 +62,7 @@ test("all five calculators load with consistent controls, native dates and respo
   page,
 }, info) => {
   for (const [route, heading] of routes) {
-    await page.goto(route);
+    await page.goto(appPath(route));
     await expect(page.locator("h1:visible")).toContainText(heading);
     const toolbar = page.locator(".planner-toolbar:visible");
     await expect(toolbar.locator(".planner-toolbar-actions button")).toHaveText(
@@ -92,7 +95,7 @@ test("all five calculators load with consistent controls, native dates and respo
 test("Growth matches the existing engine, persists edits, survives navigation, exports and imports", async ({
   page,
 }) => {
-  await page.goto("/#growth");
+  await page.goto(appPath("/#growth"));
   const inputs = {
     monthly: 10000,
     stepup: 5,
@@ -157,7 +160,7 @@ test("Survival imports an old dated plan, preserves its date, and resets through
     events: [],
     needed: Survival.requiredCorpus(a, start, []),
   });
-  await page.goto("/#survival");
+  await page.goto(appPath("/#survival"));
   await upload(page, "#survivalImportFile", html);
   await expect(page.locator("#survivalStartStatus")).toContainText(
     "29 Feb 2024",
@@ -190,13 +193,13 @@ test("Custom Plan restores browser data, updates live, records split investments
   old.months = 24;
   old.monthlySip = 75000;
   old.name = "Existing plan";
-  await page.goto("/");
+  await page.goto(appPath("/"));
   await page.evaluate(
     (plan) =>
       localStorage.setItem("intimetec-custom-plan-v1", JSON.stringify(plan)),
     old,
   );
-  await page.goto("/custom-plan.html");
+  await page.goto(appPath("/custom-plan.html"));
   await expect(page.locator("#planName")).toHaveValue("Existing plan");
   await page.locator("#defaultSip").fill("30000");
   await expect
@@ -263,7 +266,7 @@ test("Custom Plan restores browser data, updates live, records split investments
 test("Freedom responds to returns, retains values across reloads, and explains impossible income targets", async ({
   page,
 }) => {
-  await page.goto("/freedom.html");
+  await page.goto(appPath("/freedom.html"));
   await page.locator("#f-monthlyInvestment").fill("60000");
   await page.locator("#f-expectedReturn").fill("10");
   await page.reload();
@@ -282,7 +285,7 @@ test("Freedom responds to returns, retains values across reloads, and explains i
 test("Buckets retain annual returns, refill inspection, playback, history and emergency withdrawals", async ({
   page,
 }) => {
-  await page.goto("/bucket-plan.html");
+  await page.goto(appPath("/bucket-plan.html"));
   await page.locator("#b-startMonth").fill("2026-06");
   await page
     .locator("details")
@@ -328,7 +331,7 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     "/freedom.html",
     "/bucket-plan.html",
   ]) {
-    const response = await request.get(path);
+    const response = await request.get(appPath(path));
     expect(response.ok()).toBe(true);
     const html = await response.text();
     expect(html).toContain("Content-Security-Policy");
@@ -336,13 +339,13 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     expect(html).not.toContain("'unsafe-eval'");
     expect(html).toMatch(/type="module"[^>]*integrity="sha384-/);
   }
-  expect((await (await request.get("/CNAME")).text()).trim()).toBe(
+  expect((await (await request.get(appPath("/CNAME"))).text()).trim()).toBe(
     "intimetec.org",
   );
-  await page.goto("/#growth");
+  await page.goto(appPath("/#growth"));
   const outgoing: string[] = [];
   page.on("request", (request) => {
-    if (!request.url().startsWith("http://127.0.0.1:4173"))
+    if (!request.url().startsWith(new URL(page.url()).origin))
       outgoing.push(request.url());
   });
   await page.locator("#monthly").fill("12000");
@@ -358,7 +361,7 @@ test("calculators continue working when browser storage is unavailable", async (
       throw new DOMException("Storage unavailable", "QuotaExceededError");
     };
   });
-  await page.goto("/custom-plan.html");
+  await page.goto(appPath("/custom-plan.html"));
   await page.locator("#defaultSip").fill("25000");
   await expect(page.locator("#saveState")).toContainText(
     "Browser saving unavailable",

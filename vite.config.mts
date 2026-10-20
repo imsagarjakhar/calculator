@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from "vite";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { buildBase } from "./scripts/build-base.cjs";
 
 // Bundle the tested engines and controllers as isolated ES modules. No script
 // injection, eval, global API installation, or second copy of the calculations.
@@ -142,7 +143,7 @@ function compatibilityModules(): Plugin {
 export default defineConfig({
   root: "web",
   resolve: { alias: { "/src": resolve("src") } },
-  base: "/",
+  base: buildBase(),
   publicDir: "../public",
   plugins: [compatibilityModules()],
   build: {

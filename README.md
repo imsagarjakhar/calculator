@@ -26,3 +26,5 @@ Deploy **only `dist/`**. The build adds CSP and script/style integrity automatic
 - `.github/workflows/` — checks and deployment.
 
 Generated `dist/`, `node_modules/`, `test-results/` and `playwright-report/` are ignored by Git.
+
+For the new repository preview at `https://imsagarjakhar.github.io/calculator/`, use GitHub Actions with repository variables `PAGES_DEPLOY_BRANCH=react` and `PAGES_BASE_PATH=/calculator/`. Leave the new repository’s custom domain empty during testing. Follow [the Pages setup guide](MIGRATION.md#set-up-pages-in-the-new-repository-without-moving-the-domain).
