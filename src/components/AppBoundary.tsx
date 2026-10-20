@@ -1,4 +1,5 @@
 import { plannerHref } from "../runtime/routes";
+import { CalendarProvider } from "./Calendar";
 import "../styles/search.css";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useTables } from "../runtime/useTables";
@@ -41,7 +42,9 @@ function TableSupport({ children }: { children: ReactNode }) {
 export function AppBoundary({ children }: { children: ReactNode }) {
   return (
     <ErrorBoundary>
-      <TableSupport>{children}</TableSupport>
+      <CalendarProvider>
+        <TableSupport>{children}</TableSupport>
+      </CalendarProvider>
     </ErrorBoundary>
   );
 }

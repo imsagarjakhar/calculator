@@ -1,3 +1,4 @@
+import { DateInput } from "../components/DateInput";
 import { plannerHref } from "../runtime/routes";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -53,7 +54,7 @@ export const CustomPage = memo(function CustomPage() {
               </label>
               <label>
                 Starting month
-                <input
+                <DateInput
                   id="startMonth"
                   type="month"
                   min="2000-01"
@@ -64,7 +65,7 @@ export const CustomPage = memo(function CustomPage() {
               </label>
               <label>
                 End month
-                <input
+                <DateInput
                   id="endMonth"
                   type="month"
                   required
@@ -292,7 +293,7 @@ export const CustomPage = memo(function CustomPage() {
                 </label>
                 <label id="loanStartLabel">
                   Loan start date
-                  <input
+                  <DateInput
                     id="loanStartDate"
                     type="date"
                     min="1900-01-01"
@@ -303,7 +304,7 @@ export const CustomPage = memo(function CustomPage() {
                 </label>
                 <label id="loanCurrentLabel">
                   Current date / balance as of
-                  <input
+                  <DateInput
                     id="loanCurrentDate"
                     type="date"
                     min="1900-01-01"
@@ -492,7 +493,7 @@ export const CustomPage = memo(function CustomPage() {
             <div className="fields flow-fields">
               <label htmlFor="transactionDate">
                 Investment date
-                <input
+                <DateInput
                   id="transactionDate"
                   type="date"
                   min="2000-01-01"
@@ -583,7 +584,7 @@ export const CustomPage = memo(function CustomPage() {
           <div className="transaction-filters">
             <label htmlFor="transactionMonthFilter">
               Filter by month
-              <input
+              <DateInput
                 id="transactionMonthFilter"
                 type="month"
                 min="2000-01"
@@ -633,7 +634,7 @@ export const CustomPage = memo(function CustomPage() {
             </div>
             <label>
               Choose month
-              <input
+              <DateInput
                 id="editMonth"
                 type="month"
                 min="2000-01"

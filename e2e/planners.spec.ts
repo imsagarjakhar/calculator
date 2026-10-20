@@ -196,7 +196,105 @@ test("search metadata follows client navigation and browser history", async ({
   await expect(page).toHaveTitle(homeTitle);
 });
 
-test("all five calculators load with consistent controls, native dates and responsive layouts", async ({
+test("styled calendars select dates and months, respect limits and always dismiss", async ({
+  page,
+}, info) => {
+  await page.goto(appPath("/custom-plan/"));
+  await page.locator("#startMonth").fill("2024-01");
+  await page.locator("#endMonth").fill("2025-12");
+  const openEnd = page.locator("#endMonth").locator("..").getByRole("button");
+  const dialog = page.getByRole("dialog");
+  await openEnd.click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("heading")).toHaveText("End month");
+  await dialog.getByLabel("Calendar year").fill("2026");
+  await dialog
+    .getByRole("button", { name: "February 2026", exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator("#endMonth")).toHaveValue("2026-02");
+  await expect(page.locator("#durationHint")).toContainText("26 months");
+  await expect(openEnd).toBeFocused();
+  for (const mode of ["close", "cancel", "escape", "outside"]) {
+    await openEnd.click();
+    await expect(dialog).toBeVisible();
+    if (mode === "close")
+      await dialog
+        .getByRole("button", { name: "Close calendar", exact: true })
+        .click();
+    if (mode === "cancel")
+      await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+    if (mode === "escape") await page.keyboard.press("Escape");
+    if (mode === "outside") await page.mouse.click(3, 3);
+    await expect(dialog).toHaveCount(0);
+    await expect(page.locator("#endMonth")).toHaveValue("2026-02");
+    await expect(openEnd).toBeFocused();
+  }
+  const openStart = page
+    .locator("#startMonth")
+    .locator("..")
+    .getByRole("button");
+  await openStart.click();
+  await dialog.getByLabel("Calendar year").fill("2000");
+  await expect(
+    dialog.getByRole("button", { name: "Previous year", exact: true }),
+  ).toBeDisabled();
+  await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.locator("#loanStartDate").fill("2024-02-28");
+  await page
+    .locator("#loanStartDate")
+    .locator("..")
+    .getByRole("button")
+    .click();
+  await expect(
+    dialog.getByRole("button", { name: "29 February 2024", exact: true }),
+  ).toBeEnabled();
+  await page.screenshot({ path: info.outputPath("date-calendar.png") });
+  await dialog
+    .getByRole("button", { name: "29 February 2024", exact: true })
+    .click();
+  await expect(page.locator("#loanStartDate")).toHaveValue("2024-02-29");
+  await page
+    .locator("#loanStartDate")
+    .locator("..")
+    .getByRole("button")
+    .click();
+  await dialog.getByLabel("Calendar year").fill("2025");
+  await expect(
+    dialog.getByRole("button", { name: "29 February 2025", exact: true }),
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.locator("#endMonth").fill("2026-03");
+  await expect(page.locator("#durationHint")).toContainText("27 months");
+  await page.reload();
+  await expect(page.locator("#endMonth")).toHaveValue("2026-03");
+});
+
+test("bucket month picker updates the plan and stays within mobile viewport", async ({
+  page,
+}, info) => {
+  await page.goto(appPath("/bucket-plan/"));
+  const input = page.locator("#b-startMonth");
+  await input.locator("..").getByRole("button").click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Calendar year").fill("2027");
+  await page.screenshot({ path: info.outputPath("month-calendar.png") });
+  const box = await dialog.boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await dialog.getByRole("button", { name: "June 2027", exact: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(
+    dialog.getByRole("button", { name: "July 2027", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(input).toHaveValue("2027-07");
+  await page.reload();
+  await expect(input).toHaveValue("2027-07");
+});
+
+test("all five calculators load with consistent controls, editable dates and responsive layouts", async ({
   page,
 }, info) => {
   for (const [route, heading] of routes) {

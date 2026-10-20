@@ -1,3 +1,4 @@
+import { DateInput } from "../components/DateInput";
 import { plannerHref } from "../runtime/routes";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -29,7 +30,7 @@ export const BucketPage = memo(function BucketPage() {
               <div className="fields">
                 <label className="wide" htmlFor="b-startMonth">
                   When do withdrawals start?
-                  <input
+                  <DateInput
                     id="b-startMonth"
                     type="month"
                     min="1900-01"
@@ -240,7 +241,11 @@ export const BucketPage = memo(function BucketPage() {
                 </div>
                 <label htmlFor="bucketDate">
                   Calendar month
-                  <input id="bucketDate" type="month" placeholder="YYYY-MM" />
+                  <DateInput
+                    id="bucketDate"
+                    type="month"
+                    placeholder="YYYY-MM"
+                  />
                 </label>
               </div>
               <div className="playback-controls">
@@ -341,7 +346,7 @@ export const BucketPage = memo(function BucketPage() {
                   </label>
                   <label htmlFor="extraDate">
                     Withdrawal month
-                    <input
+                    <DateInput
                       id="extraDate"
                       type="month"
                       required

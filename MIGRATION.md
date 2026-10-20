@@ -186,6 +186,10 @@ The homepage uses smart-planning language and an AI FAQ that explicitly describe
 
 Canonical routes are `/`, `/growth/`, `/survival/`, `/custom-plan/`, `/freedom/` and `/bucket-plan/`, all relative to the configured base path. Each calculator has a real directory index in the build, so direct visits and reloads work on GitHub Pages without server rewrite rules. Old `.html` calculator bookmarks remain available and normalize to the clean route after JavaScript loads; old `/#growth` and `/#survival` links normalize too. Saved plans and report formats are unchanged. Canonical metadata and the sitemap use the new URLs.
 
+## Styled calendars
+
+Date and month fields in the React Custom and Bucket planners use the shared `DateInput` / `CalendarProvider` components. Their styled calendar supports selection, keyboard navigation, date bounds, Escape, Cancel, Close and backdrop dismissal, returning focus to its trigger. The original editable date/month input remains available, and selections dispatch the normal input/change events to the calculation controllers. The `bkp/` calendar and native-date tests describe the retained legacy pages; the active React picker is covered by desktop/mobile Playwright tests.
+
 ## Search visibility and release checks
 
 The preferred brand is **INTIMETEC Money Planner**, with INTIMETEC and intimetec.org as site-name alternatives. It describes this financial planning site; do not copy another company's profile, reviews, address or social accounts into structured data.
