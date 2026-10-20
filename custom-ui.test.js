@@ -91,12 +91,11 @@ async function checkFiles(){
  get('copyGrowth').onclick();assert.equal(get('importPreview').hidden,false);get('confirmImport').onclick();
  const copied=read(),actual=E.project(copied),expected=Growth.projectPlan(settings,extras,events,position);assert.ok(Math.abs(actual.netWorth-expected.netWorth)<1e-6);for(const [k,v] of original)assert.equal(saved.get(k),v,'Growth inputs must stay untouched');
  saved.set('corpus-survival-v1','survival-preserved');
- get('resetPlan').onclick();assert.equal(get('resetPreview').hidden,false);assert.deepEqual(read(),copied);
- get('cancelReset').onclick();assert.equal(get('resetPreview').hidden,true);assert.deepEqual(read(),copied);
+ get('resetPlan').onclick();assert.equal(read().monthlySip,20000);assert.equal(get('defaultSip').value,'20000');assert.equal(read().loans.length,0);assert.equal(read().overrides.length,0);assert.equal(read().transactions.length,0);
  // Reset also discards a pending import and clears all Custom Plan form/edit state.
- get('copyGrowth').onclick();get('resetPlan').onclick();get('assetName').value='Unsaved asset';get('confirmReset').onclick();
+ get('copyGrowth').onclick();get('assetName').value='Unsaved asset';get('resetPlan').onclick();
  const reset=read();assert.equal(reset.name,'My custom plan');assert.equal(reset.currency,'INR');assert.equal(reset.months,120);assert.equal(reset.assets.length,1);assert.equal(reset.assets[0].value,0);assert.equal(reset.loans.length,0);assert.equal(reset.overrides.length,0);
- assert.equal(get('assetName').value,'');assert.equal(get('loanName').value,'');assert.equal(get('loanMode').value,'original');assert.equal(get('editMonth').value,reset.startMonth);assert.equal(get('importPreview').hidden,true);assert.equal(get('resetPreview').hidden,true);
+ assert.equal(get('assetName').value,'');assert.equal(get('loanName').value,'');assert.equal(get('loanMode').value,'original');assert.equal(get('editMonth').value,reset.startMonth);assert.equal(get('importPreview').hidden,true);
  get('confirmImport').onclick();assert.deepEqual(read(),reset);assert.equal(saved.get('corpus-survival-v1'),'survival-preserved');for(const [k,v] of original)assert.equal(saved.get(k),v);
  // Imported labels are rendered as text, including in HTML-built entry lists.
  const hostile=E.createPlan(),payload='<img src=x onerror=attacked=true>';hostile.name=payload;hostile.assets[0].name=payload;hostile.assets[0].type=payload;
@@ -105,7 +104,7 @@ async function checkFiles(){
  for(const id of ['assetList','loanList','flowList']){assert.ok(!get(id).innerHTML.includes('<img'));assert.ok(get(id).innerHTML.includes('&lt;img'));}
  assert.equal(get('planName').value,payload);assert.equal(ctx.attacked,undefined);
  // Starting-plan inputs recalculate and persist without an Apply/submit action.
- get('resetPlan').onclick();get('confirmReset').onclick();
+ get('resetPlan').onclick();
  const live=(id,value,type='input')=>{get(id).value=value;get('settingsForm').listeners[type]({target:get(id)});};
  get('startMonth').value='2026-06';get('endMonth').value='2031-06';live('defaultSip',70000);
  assert.equal(read().monthlySip,70000);assert.equal(read().months,61);assert.equal(get('error').hidden,true);
@@ -132,19 +131,23 @@ async function checkFiles(){
  assert.equal(read().startMonth,'2026-07');assert.equal(read().months,2);assert.equal(read().overrides[0].month,'2026-07');assert.equal(read().overrides[0].sip,1234);
  get('exportReport').onclick();assert.deepEqual(Report.read(await downloads.at(-1).text()),read());
  // Record salary allocations by account and retain their exact transaction history.
- get('resetPlan').onclick();get('confirmReset').onclick();get('startMonth').value='2026-06';get('endMonth').value='2027-05';live('defaultSip',75000);
+ get('resetPlan').onclick();get('startMonth').value='2026-06';get('endMonth').value='2027-05';live('defaultSip',75000);
  for(const [name,type] of [['My stocks','Stocks'],['My gold ETF','Gold ETF'],['My silver ETF','Silver ETF']]){get('assetName').value=name;get('assetType').value=type;get('assetValue').value=0;get('assetReturn').value=0;get('assetLiquid').value='yes';submit('assetForm');}
  const accounts=read().assets,stocks=accounts.find(a=>a.type==='Stocks'),gold=accounts.find(a=>a.type==='Gold ETF'),silver=accounts.find(a=>a.type==='Silver ETF');
  get('editMonth').value='2026-06';get('editMonth').onchange();get('flowType').value='investment';get('flowTarget').value=gold.id;get('flowAmount').value=5000;get('flowNote').value='Planned extra';submit('flowForm');
  for(const [asset,day,amount] of [[stocks.id,'05',30000],['core','07',25000],[gold.id,'09',10000],[silver.id,'11',5000]]){get('transactionDate').value='2026-06-'+day;get('transactionAsset').value=read().assets.find(a=>a.id===asset).name;get('transactionAmount').value=amount;get('transactionNote').value='Salary <split>';submit('transactionForm');assert.equal(get('transactionError').textContent,'');}
- assert.equal(read().transactions.length,4);assert.equal(E.project(read()).rows[0].recorded,70000);assert.equal(E.project(read()).rows[0].sip,0);assert.equal(E.project(read()).rows[0].extra,0);assert.equal(E.project(read()).rows[1].sip,75000);assert.ok(get('transactionRows').innerHTML.includes('&lt;split&gt;'));assert.ok(get('monthlyRows').innerHTML.includes('Replaced by records'));assert.equal(get('flowSubmit').disabled,true);
+ assert.equal(read().transactions.length,4);assert.equal(E.project(read()).rows[0].recorded,70000);assert.equal(E.project(read()).rows[0].sip,0);assert.equal(E.project(read()).rows[0].extra,0);assert.equal(E.project(read()).rows[1].sip,75000);assert.ok(get('transactionRows').innerHTML.includes('&lt;split&gt;'));assert.ok(get('monthlyRows').innerHTML.includes('Recorded total · edit records below'));assert.equal(get('flowSubmit').disabled,true);
+ const monthInput=(month,recorded)=>get('monthlyRows').innerHTML.match(new RegExp('<input[^>]*data-'+(recorded?'recorded':'sip')+'-month="'+month+'"[^>]*>'))?.[0];
+ assert.ok(monthInput('2026-06',true).includes('value="70000"'));assert.ok(monthInput('2026-06',true).includes('readonly'));assert.ok(!monthInput('2026-06',true).includes('75000'));assert.ok(!monthInput('2026-06',true).includes('disabled'));assert.ok(monthInput('2026-07',false).includes('placeholder="75000"'));
  get('transactionAssetFilter').value=gold.id;get('transactionAssetFilter').onchange();assert.ok(get('transactionTotals').textContent.startsWith('1 transaction'));get('transactionClearFilters').onclick();assert.ok(get('transactionTotals').textContent.startsWith('4 transactions'));
  const stockTransaction=read().transactions.find(t=>t.assetId===stocks.id);clickAction('edit-transaction',stockTransaction.id);get('transactionDate').value='2026-07-05';get('transactionAmount').value=31000;submit('transactionForm');assert.equal(read().transactions.length,4);assert.equal(E.project(read()).rows[0].recorded,40000);assert.equal(E.project(read()).rows[1].recorded,31000);
+ assert.ok(monthInput('2026-06',true).includes('value="40000"'));assert.ok(monthInput('2026-07',true).includes('value="31000"'));
  get('monthlyRows').listeners.click({target:{closest:()=>({dataset:{recordMonth:'2026-06'}})}});assert.equal(get('transactionMonthFilter').value,'2026-06');assert.equal(get('transactionDate').value,'2026-06-01');assert.ok(get('transactionTotals').textContent.startsWith('3 transactions'));
  const beforeTransactions=saved.get('intimetec-custom-plan-v1');get('transactionDate').value='2026-02-30';get('transactionAmount').value=1234;submit('transactionForm');assert.equal(saved.get('intimetec-custom-plan-v1'),beforeTransactions);assert.ok(get('transactionError').textContent);
  clickAction('remove-asset',silver.id);assert.equal(saved.get('intimetec-custom-plan-v1'),beforeTransactions);
  for(const t of read().transactions)clickAction('remove-transaction',t.id);
  assert.equal(E.project(read()).rows[0].sip,75000);assert.equal(E.project(read()).rows[0].extra,5000);assert.equal(get('flowSubmit').disabled,false);
+ assert.equal(monthInput('2026-06',true),undefined);assert.ok(monthInput('2026-06',false).includes('placeholder="75000"'));assert.ok(!monthInput('2026-06',false).includes('readonly'));
  get('transactionDate').value='2030-01-15';get('transactionAsset').value=read().assets.find(a=>a.id===silver.id).name;get('transactionAmount').value=1000;get('transactionNote').value='=SUM(1,2)';submit('transactionForm');get('transactionClearFilters').onclick();assert.ok(get('transactionRows').innerHTML.includes('Outside plan'));
  get('transactionCsv').onclick();const historyCsv=await downloads.at(-1).text();assert.ok(historyCsv.includes('2030-01-15'));assert.ok(historyCsv.includes("'="));
  get('exportReport').onclick();const transactionReport=await downloads.at(-1).text();assert.ok(transactionReport.includes('Investment transaction history'));const transactionPlan=Report.read(transactionReport);assert.deepEqual(transactionPlan.transactions,read().transactions);
@@ -163,16 +166,19 @@ async function checkFiles(){
  assert.match(plainPage,/<input id="transactionAsset" type="text"[^>]*autocomplete="off"/);
  const editableRecord=read().transactions[0];clickAction('edit-transaction',editableRecord.id);
  get('transactionAsset').value='Unfinished new investment';get('transactionAsset').oninput();get('transactionNewCategory').value='Old category';get('transactionNewReturn').value=17;get('transactionAmount').value=999;get('transactionNote').value='Unsaved note';get('transactionMonthFilter').value='2026-08';get('transactionAssetFilter').value=inlineAccount.id;
- get('resetPlan').onclick();get('confirmReset').onclick();
+ get('resetPlan').onclick();
  assert.equal(read().transactions.length,0);assert.equal(read().assets.length,1);assert.equal(read().loans.length,0);assert.equal(read().overrides.length,0);
  for(const id of ['transactionAsset','transactionAmount','transactionNote','transactionMonthFilter','transactionError'])assert.equal(get(id).value||get(id).textContent,'',id);
- assert.equal(get('transactionNewCategory').value,'Other');assert.equal(get('transactionNewReturn').value,'0');assert.equal(get('transactionNewFields').hidden,true);assert.equal(get('transactionNewReturn').required,false);assert.equal(get('transactionCancel').hidden,true);assert.equal(get('transactionSubmit').textContent,'Add transaction');assert.equal(get('transactionAssetFilter').value,'all');assert.equal(get('transactionDate').value,read().startMonth+'-01');assert.ok(get('transactionRows').innerHTML.includes('No transactions'));assert.equal(get('importPreview').hidden,true);assert.equal(get('resetPreview').hidden,true);
+ assert.equal(get('transactionNewCategory').value,'Other');assert.equal(get('transactionNewReturn').value,'0');assert.equal(get('transactionNewFields').hidden,true);assert.equal(get('transactionNewReturn').required,false);assert.equal(get('transactionCancel').hidden,true);assert.equal(get('transactionSubmit').textContent,'Add transaction');assert.equal(get('transactionAssetFilter').value,'all');assert.equal(get('transactionDate').value,read().startMonth+'-01');assert.ok(get('transactionRows').innerHTML.includes('No transactions'));assert.equal(get('importPreview').hidden,true);
  const defaultAfterReset=saved.get('intimetec-custom-plan-v1');
  // A read begun before Reset cannot stage or restore the old plan after completion.
  let finishRead;const delayedRead=new Promise(resolve=>{finishRead=resolve;});get('importFile').files=[{size:transactionReport.length,text:()=>delayedRead}];const inFlight=get('importFile').onchange();
- get('resetPlan').onclick();get('confirmReset').onclick();finishRead(transactionReport);await inFlight;
+ get('resetPlan').onclick();finishRead(transactionReport);await inFlight;
  assert.equal(get('importPreview').hidden,true);get('confirmImport').onclick();assert.equal(saved.get('intimetec-custom-plan-v1'),defaultAfterReset);
  assert.equal(saved.get('corpus-survival-v1'),'survival-preserved');
+ // Reopening the page restores the cleared defaults, rather than the old portfolio.
+ vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
+ assert.equal(get('defaultSip').value,'20000');assert.equal(read().monthlySip,20000);assert.equal(read().transactions.length,0);assert.equal(read().loans.length,0);assert.equal(read().overrides.length,0);assert.equal(read().assets.length,1);assert.equal(read().assets[0].value,0);assert.ok(get('loanList').innerHTML.includes('No loans'));assert.ok(get('transactionRows').innerHTML.includes('No transactions'));
  console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/JSON download, staged import/restore, and read-only Growth copying.');
 }
 checkFiles().catch(e=>{console.error(e);process.exitCode=1;});
