@@ -1,6 +1,14 @@
 # Security and deployment
 
-This is a static, browser-only calculator. It has no application server, database, login, payment flow or third-party scripts. Inputs are stored in the browser's local storage and exported files. Those files and browser data are not encrypted by this app. Someone with access to the browser profile, a privileged extension, or compromised same-origin code can read them. Do not publish real plan/report files in this repository or upload them to hosting.
+This is a static, browser-only calculator. It has no application server, database, login, payment flow, remotely loaded third-party scripts or analytics. Inputs are stored in the browser's local storage and exported files. Those files and browser data are not encrypted by this app. Someone with access to the browser profile, a privileged extension, or compromised same-origin code can read them. Do not publish real plan/report files in this repository or upload them to hosting.
+
+## React production build
+
+The React application is compiled with `npm run build`; deploy only `dist/` through the main-only GitHub Pages workflow. `scripts/secure-build.cjs` generates CSP before any script, hashes inline JSON metadata, and adds SHA-384 integrity to entry scripts, stylesheets and module preloads. Bundled module imports are restricted by `script-src 'self'`; the entry/preload integrity attributes do not independently hash every transitive module import. The policy retains `connect-src 'none'`, no inline event attributes and no `unsafe-eval`. Development uses Vite's local dev server and its development-time module/HMR connections; it does not represent production CSP enforcement.
+
+Run `npm run check` before publishing. It includes Chromium tests against the production build with console/runtime/CSP errors treated as failures, plus calculation and import validation tests. Production dependencies are recorded in `package-lock.json`; keep them reviewed and updated. React itself is not a security guarantee. The workflow runs on the migration branch and PRs, and deploys only `main` after tests pass. It publishes no test files, original source HTML, node_modules or source maps.
+
+The remaining direct-file hash commands below apply to the retained legacy reference pages and their regression tests in `bkp/`. Run those commands with `bkp/` as the working directory (`Push-Location bkp`, then `Pop-Location` when finished). If changing those source scripts, regenerate their legacy metadata too with `node security-policy.js` and `node bucket-security.js` so compatibility/security tests remain current. The React `dist` build uses its own generated metadata.
 
 ## Protections implemented
 
