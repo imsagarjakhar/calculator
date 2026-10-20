@@ -1318,3 +1318,119 @@ header {
     grid-column: 1;
   }
 }
+
+/* Landing page benefits and transparent projections. */
+.welcome-intro {
+  max-width: 850px;
+  margin-top: 48px;
+}
+.welcome-intro h1 {
+  max-width: 850px;
+  font-size: clamp(38px, 5.3vw, 70px);
+}
+.welcome-intro > p {
+  max-width: 650px;
+}
+.welcome-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 24px 0;
+}
+.welcome-benefits span {
+  padding: 8px 13px;
+  border: 1px solid #2bdbb033;
+  border-radius: 30px;
+  background: #2bdbb00a;
+  color: var(--muted);
+  font-size: 12px;
+}
+.welcome-benefits span:before {
+  content: "✦";
+  color: #2bdbb0;
+  margin-right: 7px;
+}
+.welcome-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 26px 0 16px;
+}
+.welcome-actions button,
+.welcome-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 48px;
+  padding: 13px 19px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.welcome-actions a {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--ink);
+}
+.welcome-actions a:hover {
+  border-color: var(--accent);
+}
+.welcome-assumption {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.welcome-faq {
+  margin-top: 36px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+.welcome-faq h2 {
+  margin: 10px 0 22px;
+}
+.welcome-faq details {
+  padding: 17px 0;
+  border-top: 1px solid var(--line);
+}
+.welcome-faq summary {
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.welcome-faq p {
+  max-width: 850px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin: 14px 0 0;
+}
+@media (max-width: 600px) {
+  .welcome-intro {
+    margin-top: 32px;
+  }
+  .welcome-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .welcome-actions button,
+  .welcome-actions a {
+    width: 100%;
+  }
+  .welcome-faq {
+    padding: 20px;
+  }
+  .welcome-benefits {
+    gap: 7px;
+  }
+  .welcome-benefits span {
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+}

@@ -51,12 +51,59 @@ async function upload(
   });
 }
 const routes = [
-  ["/#growth", "From your salary to your goal"],
-  ["/#survival", "How long will your money last?"],
-  ["/custom-plan.html", "Your money, month by month"],
-  ["/freedom.html", "When could you be financially free?"],
-  ["/bucket-plan.html", "Three purposeful buckets."],
+  ["/growth/", "From your salary to your goal"],
+  ["/survival/", "How long will your money last?"],
+  ["/custom-plan/", "Your money, month by month"],
+  ["/freedom/", "When could you be financially free?"],
+  ["/bucket-plan/", "Three purposeful buckets."],
 ] as const;
+
+test("clean routes support navigation, reloads, browser history and old bookmarks", async ({
+  page,
+}, info) => {
+  await page.goto(appPath("/"));
+  await expect(page.locator("h1:visible")).toContainText(
+    "Smarter money moves.",
+  );
+  await page
+    .getByText("Is this an AI financial planner?", { exact: true })
+    .click();
+  await expect(page.locator(".welcome-faq")).toContainText(
+    "do not use generative AI",
+  );
+  await page.screenshot({
+    path: info.outputPath("landing.png"),
+    fullPage: false,
+  });
+  await page.getByRole("button", { name: "Explore my future" }).click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/growth/"));
+  await page.reload();
+  await expect(page.locator("h1:visible")).toContainText("From your salary");
+  await page.locator('#plannerNav [data-screen="survival"]').click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/survival/"));
+  await page.goBack();
+  await expect(page.locator("h1:visible")).toContainText("From your salary");
+  await page.goForward();
+  await expect(page.locator("h1:visible")).toContainText(
+    "How long will your money last?",
+  );
+  await page.locator('#plannerNav [data-screen="home"]').click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/"));
+  await page.locator(".custom-choice").click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/custom-plan/"));
+  await page.locator(".back-to-planners").click();
+  expect(new URL(page.url()).pathname).toBe(appPath("/"));
+  for (const name of ["custom-plan", "freedom", "bucket-plan"]) {
+    await page.goto(appPath("/" + name + ".html"));
+    expect(new URL(page.url()).pathname).toBe(appPath("/" + name + "/"));
+    await page.reload();
+    await expect(page.locator("h1:visible")).toHaveCount(1);
+  }
+  await page.goto(appPath("/index.html#growth"));
+  await expect(page.locator("h1:visible")).toContainText("From your salary");
+  expect(new URL(page.url()).pathname).toBe(appPath("/growth/"));
+  expect(new URL(page.url()).hash).toBe("");
+});
 
 test("all five calculators load with consistent controls, native dates and responsive layouts", async ({
   page,
@@ -95,7 +142,7 @@ test("all five calculators load with consistent controls, native dates and respo
 test("Growth matches the existing engine, persists edits, survives navigation, exports and imports", async ({
   page,
 }) => {
-  await page.goto(appPath("/#growth"));
+  await page.goto(appPath("/growth/"));
   const inputs = {
     monthly: 10000,
     stepup: 5,
@@ -160,7 +207,7 @@ test("Survival imports an old dated plan, preserves its date, and resets through
     events: [],
     needed: Survival.requiredCorpus(a, start, []),
   });
-  await page.goto(appPath("/#survival"));
+  await page.goto(appPath("/survival/"));
   await upload(page, "#survivalImportFile", html);
   await expect(page.locator("#survivalStartStatus")).toContainText(
     "29 Feb 2024",
@@ -199,7 +246,7 @@ test("Custom Plan restores browser data, updates live, records split investments
       localStorage.setItem("intimetec-custom-plan-v1", JSON.stringify(plan)),
     old,
   );
-  await page.goto(appPath("/custom-plan.html"));
+  await page.goto(appPath("/custom-plan/"));
   await expect(page.locator("#planName")).toHaveValue("Existing plan");
   await page.locator("#defaultSip").fill("30000");
   await expect
@@ -266,7 +313,7 @@ test("Custom Plan restores browser data, updates live, records split investments
 test("Freedom responds to returns, retains values across reloads, and explains impossible income targets", async ({
   page,
 }) => {
-  await page.goto(appPath("/freedom.html"));
+  await page.goto(appPath("/freedom/"));
   await page.locator("#f-monthlyInvestment").fill("60000");
   await page.locator("#f-expectedReturn").fill("10");
   await page.reload();
@@ -285,7 +332,7 @@ test("Freedom responds to returns, retains values across reloads, and explains i
 test("Buckets retain annual returns, refill inspection, playback, history and emergency withdrawals", async ({
   page,
 }) => {
-  await page.goto(appPath("/bucket-plan.html"));
+  await page.goto(appPath("/bucket-plan/"));
   await page.locator("#b-startMonth").fill("2026-06");
   await page
     .locator("details")
@@ -327,9 +374,9 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
 }) => {
   for (const path of [
     "/index.html",
-    "/custom-plan.html",
-    "/freedom.html",
-    "/bucket-plan.html",
+    "/custom-plan/",
+    "/freedom/",
+    "/bucket-plan/",
   ]) {
     const response = await request.get(appPath(path));
     expect(response.ok()).toBe(true);
@@ -342,7 +389,7 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
   expect((await (await request.get(appPath("/CNAME"))).text()).trim()).toBe(
     "intimetec.org",
   );
-  await page.goto(appPath("/#growth"));
+  await page.goto(appPath("/growth/"));
   const outgoing: string[] = [];
   page.on("request", (request) => {
     if (!request.url().startsWith(new URL(page.url()).origin))
@@ -361,7 +408,7 @@ test("calculators continue working when browser storage is unavailable", async (
       throw new DOMException("Storage unavailable", "QuotaExceededError");
     };
   });
-  await page.goto(appPath("/custom-plan.html"));
+  await page.goto(appPath("/custom-plan/"));
   await page.locator("#defaultSip").fill("25000");
   await expect(page.locator("#saveState")).toContainText(
     "Browser saving unavailable",

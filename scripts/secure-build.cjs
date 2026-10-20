@@ -9,9 +9,11 @@ const digest = (bytes, algorithm = "sha384") =>
   algorithm + "-" + crypto.createHash(algorithm).update(bytes).digest("base64");
 for (const page of [
   "index.html",
-  "custom-plan.html",
-  "freedom.html",
-  "bucket-plan.html",
+  "growth/index.html",
+  "survival/index.html",
+  "custom-plan/index.html",
+  "freedom/index.html",
+  "bucket-plan/index.html",
 ]) {
   const file = path.join(output, page);
   let source = fs.readFileSync(file, "utf8");
@@ -56,6 +58,13 @@ for (const page of [
   )
     throw new Error("Missing early CSP: " + page);
   fs.writeFileSync(file, source);
+}
+// Preserve old bookmarks; the entry module normalizes them to clean URLs.
+for (const name of ["custom-plan", "freedom", "bucket-plan"]) {
+  fs.copyFileSync(
+    path.join(output, name, "index.html"),
+    path.join(output, name + ".html"),
+  );
 }
 for (const file of ["CNAME", "robots.txt", "sitemap.xml"]) {
   if (

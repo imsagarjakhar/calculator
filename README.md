@@ -1,4 +1,4 @@
-# Intimetec Money Planner — React migration
+# INTIMETEC Money Planner — React migration
 
 All five calculators now have React layouts, shared TypeScript components and a Vite multi-page build, without a database. Existing financial engines and form/result controllers are reused through compatibility modules, preserving calculations, browser storage and report formats. See [MIGRATION.md](MIGRATION.md) for the architecture, local testing, GitHub Pages setup, branch review and rollback steps.
 

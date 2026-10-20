@@ -26,16 +26,16 @@ npm run dev
 
 Open the URL printed by Vite, usually **http://127.0.0.1:5173/**. Use the same hostname and port to retain your local saved plans. Stop with Ctrl+C. Do not use Live Server, `file://`, or the Python server for the React application: they do not compile the React application. The old reference pages are now inside `bkp/`.
 
-The routes remain:
+The calculators use clean directory routes:
 
-| Calculator         | Local URL           |
-| ------------------ | ------------------- |
-| Planner selection  | `/`                 |
-| Growth             | `/#growth`          |
-| Survival           | `/#survival`        |
-| Custom Plan        | `/custom-plan.html` |
-| Financial Freedom  | `/freedom.html`     |
-| Retirement Buckets | `/bucket-plan.html` |
+| Calculator         | Local URL       |
+| ------------------ | --------------- |
+| Planner selection  | `/`             |
+| Growth             | `/growth/`      |
+| Survival           | `/survival/`    |
+| Custom Plan        | `/custom-plan/` |
+| Financial Freedom  | `/freedom/`     |
+| Retirement Buckets | `/bucket-plan/` |
 
 Localhost and the live domain have separate browser storage. To test a live plan locally, download its original HTML report or JSON file from the live site and import it locally. Moving to React on the **same production HTTPS domain** preserves browser storage; switching domains, browsers or profiles does not move that storage.
 
@@ -87,7 +87,7 @@ Open the repository's **Actions** tab and check **Test and deploy planners**. Pu
 3. Under **Build and deployment → Source**, select **GitHub Actions**, replacing the branch/root publishing mode. Do this when you are ready for the migration release; keep the existing publishing setup during branch review.
 4. Keep the existing **Custom domain** as `intimetec.org` and keep **Enforce HTTPS** enabled. No GoDaddy DNS changes are required when the domain and GitHub Pages repository remain the same.
 5. Create a pull request from `react` into `main`, wait for the checks, review and merge it.
-6. In **Actions → Test and deploy planners**, wait for both **Tests and production build** and **Deploy selected branch to GitHub Pages** to succeed. The deployment uploads only `dist/`, which contains the four built HTML entry points, bundled assets, `CNAME`, `robots.txt`, `sitemap.xml` and favicon.
+6. In **Actions → Test and deploy planners**, wait for both **Tests and production build** and **Deploy selected branch to GitHub Pages** to succeed. The deployment uploads only `dist/`, which contains the six built directory-index HTML entry points, bundled assets, `CNAME`, `robots.txt`, `sitemap.xml` and favicon.
 7. If GitHub reports an environment protection error, open **Settings → Environments → github-pages** and ensure the selected deployment branch is allowed to deploy. Keep any existing approval requirements you want for production.
 8. Visit the live domain and all calculator links. Test a saved report import, change an input, reload, download a report and check a reset with a disposable plan. Confirm that the domain still uses HTTPS.
 
@@ -150,7 +150,7 @@ For an ordinary application change, revert the release commit/merge with a new G
 
 | Location                         | Responsibility                                                         |
 | -------------------------------- | ---------------------------------------------------------------------- |
-| `web/*.html`                     | Vite HTML entry points with existing metadata and public filenames     |
+| `web/**/index.html`              | Vite HTML entry points with existing metadata and public filenames     |
 | `src/entries/`                   | React application roots and page-specific stylesheet imports           |
 | `src/pages/`                     | React calculator layouts and home navigation                           |
 | `src/components/`                | Shared typed header/currency/actions and startup error boundary        |
@@ -179,3 +179,9 @@ npm run check
 ```
 
 `bkp/` is a compatibility source folder, not disposable build output. Its files are bundled into the React application when needed, but the folder and raw source files are not published to GitHub Pages. Active production metadata lives in `public/`; the matching files in `bkp/` are legacy snapshots.
+
+## Clean URLs and landing-page copy
+
+The homepage uses smart-planning language and an AI FAQ that explicitly describes the calculation-based model. No AI service, AI-generated advice, or market-price prediction is introduced.
+
+Canonical routes are `/`, `/growth/`, `/survival/`, `/custom-plan/`, `/freedom/` and `/bucket-plan/`, all relative to the configured base path. Each calculator has a real directory index in the build, so direct visits and reloads work on GitHub Pages without server rewrite rules. Old `.html` calculator bookmarks remain available and normalize to the clean route after JavaScript loads; old `/#growth` and `/#survival` links normalize too. Saved plans and report formats are unchanged. Canonical metadata and the sitemap use the new URLs.

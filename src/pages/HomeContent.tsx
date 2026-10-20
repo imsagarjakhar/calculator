@@ -1,21 +1,38 @@
+import { plannerHref } from "../runtime/routes";
 export function HomeContent() {
   return (
     <section id="homeScreen" className="welcome" aria-labelledby="welcomeTitle">
-      <div className="eyebrow">
-        LEARN WITH INTIMETEC / YOUR MONEY, IN PERSPECTIVE
-      </div>
+      <div className="eyebrow">INTIMETEC / SMART FINANCIAL PLANNING</div>
       <div className="welcome-intro">
-        <span className="welcome-kicker">Intimetec Money Planner</span>
+        <span className="welcome-kicker">
+          Your personal money planning workspace
+        </span>
         <h1 id="welcomeTitle" tabIndex={-1}>
-          Build your wealth.
-          <br />
-          Make it last.
+          Smarter money moves.
+          <br />A clearer future.
         </h1>
         <p>
-          Use Intimetec’s free SIP, loan, retirement and financial freedom
-          calculators to explore investment growth, monthly EMIs, savings
-          longevity and when work could become a choice.
+          Turn “what if?” into a plan you can see. Explore your SIP,
+          investments, loans and retirement together—with instant projections
+          that respond to your assumptions.
         </p>
+        <div className="welcome-benefits" aria-label="Planner features">
+          <span>Instant insights</span>
+          <span>Interactive scenarios</span>
+          <span>Private by design</span>
+        </div>
+        <div className="welcome-actions">
+          <button type="button" className="primary" data-screen="growth">
+            Explore my future <span aria-hidden="true">↗</span>
+          </button>
+          <a href={plannerHref("custom-plan")}>
+            Build my monthly plan <span aria-hidden="true">→</span>
+          </a>
+        </div>
+        <small className="welcome-assumption">
+          Your inputs set the direction. Financial formulas calculate the
+          possibilities.
+        </small>
       </div>
       <div className="planner-choices has-custom has-freedom">
         <button
@@ -54,7 +71,7 @@ export function HomeContent() {
             Explore corpus survival <span aria-hidden="true">↗</span>
           </span>
         </button>
-        <a className="choice custom-choice" href="custom-plan.html">
+        <a className="choice custom-choice" href={plannerHref("custom-plan")}>
           <span className="choice-icon" aria-hidden="true">
             ✎
           </span>
@@ -68,7 +85,7 @@ export function HomeContent() {
             Build a monthly plan <span aria-hidden="true">↗</span>
           </span>
         </a>
-        <a className="choice freedom-choice" href="freedom.html">
+        <a className="choice freedom-choice" href={plannerHref("freedom")}>
           <span className="choice-icon" aria-hidden="true">
             ◎
           </span>
@@ -82,7 +99,7 @@ export function HomeContent() {
             Find my freedom age <span aria-hidden="true">↗</span>
           </span>
         </a>
-        <a className="choice bucket-choice" href="bucket-plan.html">
+        <a className="choice bucket-choice" href={plannerHref("bucket-plan")}>
           <span className="choice-icon" aria-hidden="true">
             <svg
               viewBox="0 0 48 48"
@@ -115,7 +132,7 @@ export function HomeContent() {
       </div>
       <section className="planner-guide" aria-labelledby="plannerGuideTitle">
         <h2 id="plannerGuideTitle">
-          Plan investments, loans and retirement with Intimetec
+          Financial clarity, one scenario at a time
         </h2>
         <p>
           Choose a calculator to explore your next money decision. Each tool
@@ -136,16 +153,18 @@ export function HomeContent() {
         </p>
         <h3>Financial freedom age calculator</h3>
         <p>
-          <a href="freedom.html">Explore your financial freedom age</a> using
-          your current corpus, monthly SIP, yearly step-up and desired monthly
-          income. Change expected return and inflation to explore the modelled
-          freedom age, including future expenses.
+          <a href={plannerHref("freedom")}>
+            Explore your financial freedom age
+          </a>{" "}
+          using your current corpus, monthly SIP, yearly step-up and desired
+          monthly income. Change expected return and inflation to explore the
+          modelled freedom age, including future expenses.
         </p>
         <h3>Loan EMI and monthly planning calculator</h3>
         <p>
-          <a href="custom-plan.html">Open Intimetec Custom Plan</a> to enter an
-          original loan amount, interest rate, total tenure and loan dates.
-          Calculate paid months, remaining EMIs and estimated outstanding
+          <a href={plannerHref("custom-plan")}>Open Intimetec Custom Plan</a> to
+          enter an original loan amount, interest rate, total tenure and loan
+          dates. Calculate paid months, remaining EMIs and estimated outstanding
           principal, then plan extra repayments alongside monthly investments.
         </p>
         <p className="helper">
@@ -153,6 +172,36 @@ export function HomeContent() {
           Actual returns, lender balances and payment schedules may differ.
           Calculations run in your browser; no account is needed.
         </p>
+      </section>
+      <section className="welcome-faq" aria-labelledby="planningQuestions">
+        <div className="eyebrow">UNDERSTAND YOUR INSIGHTS</div>
+        <h2 id="planningQuestions">Smart planning, explained.</h2>
+        <details>
+          <summary>Is this an AI financial planner?</summary>
+          <p>
+            INTIMETEC uses financial formulas and the assumptions you enter.
+            These tools do not use generative AI or predict market prices. Your
+            results are calculated scenarios, with methods and detailed
+            schedules you can review.
+          </p>
+        </details>
+        <details>
+          <summary>How can I explore a different financial future?</summary>
+          <p>
+            Change your monthly investment, expected return, inflation or future
+            expenses. Compare the resulting projections to see how each
+            assumption affects your plan.
+          </p>
+        </details>
+        <details>
+          <summary>Can I keep my plan and return later?</summary>
+          <p>
+            Your inputs are saved in this browser when storage is available.
+            Download an original HTML report or JSON plan to keep a portable
+            copy, then import it into the matching calculator to continue
+            editing.
+          </p>
+        </details>
       </section>
       <p className="welcome-foot">
         Private by design. Calculations run in your browser. No sign-up.

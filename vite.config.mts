@@ -81,6 +81,24 @@ const controllers: Record<string, { file: string; deps: string[] }> = {
 function compatibilityModules(): Plugin {
   return {
     name: "tested-planner-modules",
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const url = new URL(request.url || "/", "http://localhost");
+        const base = buildBase();
+        const local = url.pathname.startsWith(base)
+          ? url.pathname.slice(base.length)
+          : url.pathname;
+        const oldPage = local.match(
+          /^(custom-plan|freedom|bucket-plan)\.html$/,
+        );
+        if (oldPage) {
+          response.writeHead(302, {
+            Location: base + oldPage[1] + "/" + url.search,
+          });
+          response.end();
+        } else next();
+      });
+    },
     resolveId(id) {
       if (id.startsWith("planner:")) return "\0" + id;
     },
@@ -152,9 +170,19 @@ export default defineConfig({
     target: "es2022",
     rollupOptions: {
       input: Object.fromEntries(
-        ["index", "custom-plan", "freedom", "bucket-plan"].map((page) => [
+        [
+          "index",
+          "growth",
+          "survival",
+          "custom-plan",
+          "freedom",
+          "bucket-plan",
+        ].map((page) => [
           page,
-          resolve("web", page + ".html"),
+          resolve(
+            "web",
+            page === "index" ? "index.html" : page + "/index.html",
+          ),
         ]),
       ),
     },

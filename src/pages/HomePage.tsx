@@ -1,17 +1,22 @@
+import {
+  plannerHref,
+  homeScreenFromLocation,
+  normalizePlannerUrl,
+} from "../runtime/routes";
 import { useEffect, useState, type MouseEvent } from "react";
 import { HomeContent } from "./HomeContent";
 import { GrowthPage } from "./GrowthPage";
 import { SurvivalPage } from "./SurvivalPage";
 
 type Screen = "home" | "growth" | "survival";
-function readScreen(): Screen {
-  const hash = location.hash.slice(1);
-  return hash === "growth" || hash === "survival" ? hash : "home";
-}
+const readScreen = homeScreenFromLocation;
 export function HomePage() {
   const [screen, setScreen] = useState<Screen>(readScreen);
   useEffect(() => {
-    const pop = () => setScreen(readScreen());
+    const pop = () => {
+      normalizePlannerUrl();
+      setScreen(readScreen());
+    };
     window.addEventListener("popstate", pop);
     window.addEventListener("hashchange", pop);
     return () => {
@@ -55,11 +60,7 @@ export function HomePage() {
     );
     const next = button?.dataset.screen;
     if (next !== "home" && next !== "growth" && next !== "survival") return;
-    history.pushState(
-      null,
-      "",
-      next === "home" ? location.pathname + location.search : "#" + next,
-    );
+    history.pushState(null, "", plannerHref(next));
     setScreen(next);
   }
   return (

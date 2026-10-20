@@ -1,3 +1,4 @@
+import { plannerHref } from "../runtime/routes";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { useTables } from "../runtime/useTables";
 
@@ -25,7 +26,7 @@ class ErrorBoundary extends Component<
             Reload planner
           </button>
           <p>
-            <a href="index.html">All planners</a>
+            <a href={plannerHref("home")}>All planners</a>
           </p>
         </main>
       );
