@@ -73,27 +73,44 @@ After reviewing the changed files and passing the checks:
 ```powershell
 git add .
 git commit -m "Migrate calculator pages to React and Vite"
-git push -u origin react
+git push -u new-account react
 ```
 
-Open the repository's **Actions** tab and check **Test and deploy planners**. Pushes to `react` and pull requests into `main` run tests/builds. They do **not** deploy over the live website. This workflow does not create a public preview URL for the branch; use the local preview while reviewing.
+The new account repository is `https://github.com/imsagarjakhar/calculator.git`, configured locally as `new-account`. The `origin` remote retains the previous repository for reference. Push this migration with `git push -u new-account react`.
+
+Open the repository's **Actions** tab and check **Test and deploy planners**. Pushes to `react` and pull requests into `main` run tests/builds. By default, they do **not** deploy over the live website. Setting the repository Actions variable `PAGES_DEPLOY_BRANCH=react` intentionally enables deployment from `react` to the existing live domain, as described below. This workflow does not create a public preview URL for the branch; use the local preview while reviewing.
 
 ## 5. Change GitHub Pages when ready to release
 
-1. Open `sagarjat/Calculator` on GitHub.
+1. Open `imsagarjakhar/calculator` on GitHub.
 2. Open **Settings → Pages**.
 3. Under **Build and deployment → Source**, select **GitHub Actions**, replacing the branch/root publishing mode. Do this when you are ready for the migration release; keep the existing publishing setup during branch review.
 4. Keep the existing **Custom domain** as `intimetec.org` and keep **Enforce HTTPS** enabled. No GoDaddy DNS changes are required when the domain and GitHub Pages repository remain the same.
 5. Create a pull request from `react` into `main`, wait for the checks, review and merge it.
-6. In **Actions → Test and deploy planners**, wait for both **Tests and production build** and **Deploy main to GitHub Pages** to succeed. The deployment uploads only `dist/`, which contains the four built HTML entry points, bundled assets, `CNAME`, `robots.txt`, `sitemap.xml` and favicon.
-7. If GitHub reports an environment protection error, open **Settings → Environments → github-pages** and ensure `main` is allowed to deploy. Keep any existing approval requirements you want for production.
+6. In **Actions → Test and deploy planners**, wait for both **Tests and production build** and **Deploy selected branch to GitHub Pages** to succeed. The deployment uploads only `dist/`, which contains the four built HTML entry points, bundled assets, `CNAME`, `robots.txt`, `sitemap.xml` and favicon.
+7. If GitHub reports an environment protection error, open **Settings → Environments → github-pages** and ensure the selected deployment branch is allowed to deploy. Keep any existing approval requirements you want for production.
 8. Visit the live domain and all calculator links. Test a saved report import, change an input, reload, download a report and check a reset with a disposable plan. Confirm that the domain still uses HTTPS.
 
-Only `main` deploys. A failed test/build blocks deployment. Manual workflow runs also deploy only when the selected branch is `main`. There is no PAT, database password or other application secret to configure.
+Only the branch selected by `PAGES_DEPLOY_BRANCH` deploys; when unset, this defaults to `main`. A failed test/build blocks deployment. Pull requests never deploy, and manual runs must also match the configured branch. There is no PAT, database password or other application secret to configure.
 
 The app uses Vite's `/` base because production uses a custom domain. Deploying it instead at `username.github.io/Calculator/` would require adjusting the base, resource-integrity path handling and public URLs; it is not the deployment configured here.
 
 References: [Vite GitHub Pages deployment](https://vite.dev/guide/static-deploy.html), [GitHub custom Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+## Test `react` on the live domain without merging
+
+This replaces the site currently served at **https://intimetec.org/** with the React version after checks pass. It does not create a separate preview URL, and it does not merge or change `main`.
+
+1. In **Settings → Pages → Source**, select **GitHub Actions**. Do not simply change the old branch dropdown to `react`: this application needs Vite to build `dist/` first.
+2. Keep **Custom domain: intimetec.org** and **Enforce HTTPS** unchanged.
+3. Open **Settings → Secrets and variables → Actions → Variables → New repository variable**. Set the name to `PAGES_DEPLOY_BRANCH` and the value to `react`. This is a repository variable, not an environment variable or secret.
+4. If **Settings → Environments → github-pages → Deployment branches and tags** restricts branches, allow `react` while preserving any intended approval requirements. Keep `main` allowed too if you plan to merge later.
+5. Commit and push the updated workflow and documentation to `react`. A push runs this branch's workflow without requiring it to be merged into the default branch. Watch **Actions → Test and deploy planners**. Tests/build/browser checks must pass before **Deploy selected branch to GitHub Pages** runs. If the workflow version containing this selector is already pushed, a new push can trigger it again; do not depend on the manual Run workflow button appearing before the workflow exists on the default branch.
+6. Test the live site, ideally from the phone/network that can access it. The laptop's Infoblox certificate issue is separate from deployment.
+
+While `PAGES_DEPLOY_BRANCH=react`, subsequent pushes to `react` can update the live website after checks; pushes to `main` do not deploy through this workflow. Change the variable back to `main` before merging the migration when you want normal production releases from `main`.
+
+The variable is evaluated on a workflow run. Changing it alone does not immediately republish another version. To undo this live test **while `main` still contains the original static site**, restore **Settings → Pages → Deploy from a branch → main → / (root)** and set `PAGES_DEPLOY_BRANCH` back to `main` (or delete the variable). Once `main` itself contains the React migration, keep GitHub Actions and use the normal revert/redeploy procedure below instead.
 
 ## 6. Roll back a release if needed
 
@@ -113,7 +130,7 @@ For an ordinary application change, revert the release commit/merge with a new G
 | `vite.config.mts`                | Multi-page build and compatibility-module bundling                     |
 | `scripts/secure-build.cjs`       | CSP and script/style/preload integrity for built pages                 |
 | `e2e/`                           | Real production-browser regression tests                               |
-| `.github/workflows/pages.yml`    | Branch/PR checks and main-only deployment                              |
+| `.github/workflows/pages.yml`    | Branch/PR checks and selected-branch deployment                              |
 
 This migration makes every calculator available through React, but does not pretend every original JavaScript function has been rewritten into TypeScript or React state. The financial engines and existing event-driven form/result controllers are deliberately reused as bundled, isolated modules. React owns the page layout; controllers own mutable inputs/result containers. Memoized page boundaries prevent React navigation from reconciling those mutable subtrees. The adapters install no engine APIs on `window`, inject no scripts and use no `eval`.
 
