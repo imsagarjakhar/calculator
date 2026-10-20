@@ -17,6 +17,12 @@ for (const page of [
 ]) {
   const file = path.join(output, page);
   let source = fs.readFileSync(file, "utf8");
+  if (
+    !/<meta\s+name="google-adsense-account"\s+content="ca-pub-7696234797118425"\s*\/?>/.test(
+      source,
+    )
+  )
+    throw new Error("Missing AdSense account verification: " + page);
   source = source.replace(
     /<meta\s+(?:http-equiv="Content-Security-Policy"|name="referrer")[^>]*>\s*/gi,
     "",
@@ -66,13 +72,18 @@ for (const name of ["custom-plan", "freedom", "bucket-plan"]) {
     path.join(output, name + ".html"),
   );
 }
-for (const file of ["CNAME", "robots.txt", "sitemap.xml"]) {
+for (const file of ["CNAME", "robots.txt", "sitemap.xml", "ads.txt"]) {
   if (
     fs.readFileSync(path.join(output, file), "utf8").trim() !==
     fs.readFileSync(path.join("public", file), "utf8").trim()
   )
     throw new Error("Public metadata differs from " + file);
 }
+if (
+  fs.readFileSync(path.join(output, "ads.txt"), "utf8").trim() !==
+  "google.com, pub-7696234797118425, DIRECT, f08c47fec0942fa0"
+)
+  throw new Error("Unexpected AdSense publisher record");
 console.log(
   "Production security applied: CSP, resource integrity, no external API connections, and preserved domain/SEO files.",
 );

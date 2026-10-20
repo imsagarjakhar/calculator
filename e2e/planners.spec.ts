@@ -571,12 +571,18 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     expect(response.ok()).toBe(true);
     const html = await response.text();
     expect(html).toContain("Content-Security-Policy");
+    expect(html).toContain(
+      'name="google-adsense-account" content="ca-pub-7696234797118425"',
+    );
     expect(html).toContain("connect-src 'none'");
     expect(html).not.toContain("'unsafe-eval'");
     expect(html).toMatch(/type="module"[^>]*integrity="sha384-/);
   }
   expect((await (await request.get(appPath("/CNAME"))).text()).trim()).toBe(
     "intimetec.org",
+  );
+  expect((await (await request.get(appPath("/ads.txt"))).text()).trim()).toBe(
+    "google.com, pub-7696234797118425, DIRECT, f08c47fec0942fa0",
   );
   await page.goto(appPath("/growth/"));
   const outgoing: string[] = [];

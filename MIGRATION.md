@@ -186,6 +186,26 @@ The homepage uses smart-planning language and an AI FAQ that explicitly describe
 
 Canonical routes are `/`, `/growth/`, `/survival/`, `/custom-plan/`, `/freedom/` and `/bucket-plan/`, all relative to the configured base path. Each calculator has a real directory index in the build, so direct visits and reloads work on GitHub Pages without server rewrite rules. Old `.html` calculator bookmarks remain available and normalize to the clean route after JavaScript loads; old `/#growth` and `/#survival` links normalize too. Saved plans and report formats are unchanged. Canonical metadata and the sitemap use the new URLs.
 
+## AdSense connection and review
+
+Publisher account: `ca-pub-7696234797118425`. Vite adds the public `google-adsense-account` verification meta tag to every entry, including the pre-rendered homepage. `public/ads.txt` is copied unchanged to `/ads.txt` with the matching `pub-7696234797118425` direct-seller record. Production checks verify both identifiers. These identifiers are public, not credentials.
+
+After pushing and waiting for a successful Pages deployment:
+
+1. Open `https://intimetec.org/ads.txt` and confirm the publisher line appears.
+2. In **AdSense → Sites → intimetec.org**, choose **Meta tag** as the connection method, confirm installation, click **Verify**, then **Request review**. The **Ads.txt snippet** method is also supported by this release. Do not select **AdSense code snippet**, because this release uses the supported non-script verification method.
+3. Complete privacy disclosures and consent configuration, review ad placements, and integrate ad serving separately once ready. Verification alone does not display ads or guarantee approval.
+
+The supplied ad-serving snippet is:
+
+```html
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7696234797118425" crossorigin="anonymous"></script>
+```
+
+It is retained here for the ad-serving stage; it is not executed by this connection-only release. Google's current AdSense CSP guidance supports a nonce-based strict policy. GitHub Pages serves static files and cannot generate a fresh per-response nonce. Do not insert a reusable build-time nonce, disable CSP silently, or assume an ad-domain allowlist is supported indefinitely. The existing calculator policy and offline reports remain unchanged during verification.
+
+References: [Google's connection methods](https://support.google.com/adsense/answer/12169212), [ads.txt guide](https://support.google.com/adsense/answer/12171612), and [AdSense CSP requirements](https://support.google.com/adsense/answer/16283098).
+
 ## Styled calendars
 
 Date and month fields in the React Custom and Bucket planners use the shared `DateInput` / `CalendarProvider` components. Their styled calendar supports selection, keyboard navigation, date bounds, Escape, Cancel, Close and backdrop dismissal, returning focus to its trigger. The original editable date/month input remains available, and selections dispatch the normal input/change events to the calculation controllers. The `bkp/` calendar and native-date tests describe the retained legacy pages; the active React picker is covered by desktop/mobile Playwright tests.

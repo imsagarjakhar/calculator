@@ -56,6 +56,14 @@ function searchMetadata(): Plugin {
         html,
         tags: [
           {
+            tag: "meta",
+            attrs: {
+              name: "google-adsense-account",
+              content: "ca-pub-7696234797118425",
+            },
+            injectTo: "head",
+          },
+          {
             tag: "footer",
             attrs: { class: "site-footer" },
             children: footer,
