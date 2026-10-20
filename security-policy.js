@@ -2,7 +2,7 @@
 // Run after editing any production script or inline script: node security-policy.js
 // CI/review mode: node security-policy.js --check
 const fs=require('node:fs'),crypto=require('node:crypto');
-const pages=['index.html','custom-plan.html'];
+const pages=['index.html','custom-plan.html','freedom.html'];
 function digest(text,algorithm='sha384'){return algorithm+'-'+crypto.createHash(algorithm).update(text).digest('base64');}
 function securePage(source){
  let html=source.replace(/\r\n?/g,'\n');

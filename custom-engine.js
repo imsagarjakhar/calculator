@@ -59,25 +59,33 @@
   });
   if(flowCount>2000)throw new Error('Keep at most 2,000 cash flows in a plan.');
   if(new Set(overrides.map(o=>o.month)).size!==overrides.length)throw new Error('Each month can have only one override record.');
-  return {schema:SCHEMA,version:VERSION,name:string(raw.name,80,'plan name'),currency:raw.currency,startMonth:raw.startMonth,months:number(raw.months,1,720,'Plan duration in months',true),monthlySip:number(raw.monthlySip,0,1e9,'Default monthly SIP'),annualStepup:number(raw.annualStepup,0,30,'Annual SIP step-up'),inflation:number(raw.inflation,0,30,'Inflation'),sipAssetId:raw.sipAssetId,assets,loans,overrides:overrides.sort((a,b)=>a.month.localeCompare(b.month))};
+  const transactions=list(raw.transactions===undefined?[]:raw.transactions,2000,'Investment transactions').map(t=>{
+   if(!t||typeof t!=='object')throw new Error('Invalid investment transaction.');loanDate(t.date);monthNumber(t.date.slice(0,7));
+   if(!assetIds.has(t.assetId))throw new Error('A transaction refers to a missing investment account.');
+   return {id:id(t.id),date:t.date,assetId:t.assetId,amount:number(t.amount,0.01,1e12,'Transaction amount'),note:note(t.note)};
+  });
+  if(new Set(transactions.map(t=>t.id)).size!==transactions.length)throw new Error('Transaction identifiers must be unique.');
+  return {schema:SCHEMA,version:VERSION,name:string(raw.name,80,'plan name'),currency:raw.currency,startMonth:raw.startMonth,months:number(raw.months,1,720,'Plan duration in months',true),targetToday:number(raw.targetToday===undefined?10000000:raw.targetToday,0,1e15,'Target in today’s value'),monthlySip:number(raw.monthlySip,0,1e9,'Default monthly SIP'),annualStepup:number(raw.annualStepup,0,30,'Annual SIP step-up'),inflation:number(raw.inflation,0,30,'Inflation'),sipAssetId:raw.sipAssetId,assets,loans,transactions:transactions.sort((a,b)=>a.date.localeCompare(b.date)),overrides:overrides.sort((a,b)=>a.month.localeCompare(b.month))};
  }
- function createPlan(now=new Date()){return {schema:SCHEMA,version:VERSION,name:'My custom plan',currency:'INR',startMonth:now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'),months:120,monthlySip:20000,annualStepup:0,inflation:6,sipAssetId:'core',assets:[{id:'core',name:'Monthly SIP fund',type:'Mutual fund',value:0,annualReturn:8,canWithdraw:true}],loans:[],overrides:[]};}
+ function createPlan(now=new Date()){return {schema:SCHEMA,version:VERSION,name:'My custom plan',currency:'INR',startMonth:now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'),months:120,targetToday:10000000,monthlySip:20000,annualStepup:0,inflation:6,sipAssetId:'core',assets:[{id:'core',name:'Monthly SIP fund',type:'Mutual fund',value:0,annualReturn:8,canWithdraw:true}],loans:[],transactions:[],overrides:[]};}
  function parse(text){if(typeof text!=='string'||text.length>2*1024*1024)throw new Error('Choose a plan JSON file smaller than 2 MB.');let raw;try{raw=JSON.parse(text.replace(/^\ufeff/,''));}catch{throw new Error('The selected file is not valid JSON.');}return validate(raw);}
  const exportPlan=plan=>JSON.stringify(validate(plan),null,2);
  function project(raw){
   const plan=validate(raw),start=monthNumber(plan.startMonth),changes=new Map(plan.overrides.map(o=>[o.month,o]));
+  const transactionsByMonth=new Map();for(const t of plan.transactions){const month=t.date.slice(0,7);if(!transactionsByMonth.has(month))transactionsByMonth.set(month,[]);transactionsByMonth.get(month).push(t);}
   const assets=plan.assets.map(a=>({...a,growth:0,contributions:0,withdrawn:0,monthlyRate:Math.expm1(Math.log1p(a.annualReturn/100)/12)}));
   const loans=plan.loans.map(l=>({...l,emi:l.balance?Growth.calculateEmi(l.balance,l.annualRate,l.remainingMonths):0,interest:0,paid:0,prepaid:0,missed:0,scheduled:true,payoffMonth:l.balance===0?0:null}));
   const assetMap=new Map(assets.map(a=>[a.id,a])),loanMap=new Map(loans.map(l=>[l.id,l]));
   function snapshot(){const balance=assets.reduce((s,a)=>s+a.value,0),debt=loans.reduce((s,l)=>s+l.balance,0),available=assets.filter(a=>a.canWithdraw).reduce((s,a)=>s+a.value,0);return {balance,debt,available,netWorth:balance-debt};}
   function withdraw(amount){let needed=amount;const ordered=[...assets].sort((a,b)=>Number(b.id===plan.sipAssetId)-Number(a.id===plan.sipAssetId));for(const a of ordered){if(!a.canWithdraw)continue;const used=Math.min(a.value,needed);a.value-=used;a.withdrawn+=used;needed-=used;if(needed<=0)break;}return amount-needed;}
-  const initial=snapshot(),rows=[],years=[],path=[{index:0,...initial}],totals={contributions:0,growth:0,loanInterest:0,emiPaid:0,prepaid:0,expensePaid:0,expenseDue:0,incomePayments:0,portfolioPayments:0,shortfall:0,unusedPrepayment:0};
+  const initial=snapshot(),rows=[],years=[],path=[{index:0,...initial}],totals={contributions:0,recorded:0,growth:0,loanInterest:0,emiPaid:0,prepaid:0,expensePaid:0,expenseDue:0,incomePayments:0,portfolioPayments:0,shortfall:0,unusedPrepayment:0};
   for(let i=0;i<plan.months;i++){
-   const month=monthKey(start+i),override=changes.get(month),sip=override?.sip??plan.monthlySip*(1+plan.annualStepup/100)**Math.floor(i/12),flows=override?.flows||[];
-   const row={month,index:i+1,sip,extra:0,contributions:sip,growth:0,loanInterest:0,emiPaid:0,prepaid:0,expensePaid:0,expenseDue:0,incomePayments:0,portfolioPayments:0,shortfall:0,unusedPrepayment:0,custom:!!override};
+   const month=monthKey(start+i),override=changes.get(month),recordedTransactions=transactionsByMonth.get(month)||[],usesRecorded=recordedTransactions.length>0,plannedSip=override?.sip??plan.monthlySip*(1+plan.annualStepup/100)**Math.floor(i/12),sip=usesRecorded?0:plannedSip,flows=override?.flows||[];
+   const row={month,index:i+1,sip,plannedSip,usesRecorded,recorded:0,extra:0,contributions:sip,growth:0,loanInterest:0,emiPaid:0,prepaid:0,expensePaid:0,expenseDue:0,incomePayments:0,portfolioPayments:0,shortfall:0,unusedPrepayment:0,custom:!!override};
    for(const a of assets){const growth=a.value*a.monthlyRate;a.value+=growth;a.growth+=growth;row.growth+=growth;}
    const sipAsset=assetMap.get(plan.sipAssetId);sipAsset.value+=sip;sipAsset.contributions+=sip;
-   for(const f of flows.filter(f=>f.type==='investment')){const a=assetMap.get(f.assetId);a.value+=f.amount;a.contributions+=f.amount;row.extra+=f.amount;row.contributions+=f.amount;}
+   for(const f of flows.filter(f=>f.type==='investment'&&!usesRecorded)){const a=assetMap.get(f.assetId);a.value+=f.amount;a.contributions+=f.amount;row.extra+=f.amount;row.contributions+=f.amount;}
+   for(const t of recordedTransactions){const a=assetMap.get(t.assetId);a.value+=t.amount;a.contributions+=t.amount;row.recorded+=t.amount;row.contributions+=t.amount;}
    for(const l of loans){if(l.balance<=0)continue;const interest=l.balance*l.annualRate/1200;l.balance+=interest;l.interest+=interest;row.loanInterest+=interest;
     const due=l.balance<=l.emi*(1+1e-10)+1e-8?l.balance:l.emi,paid=l.source==='income'?due:withdraw(due);l.balance=Math.max(0,l.balance-paid);l.paid+=paid;l.missed+=due-paid;row.emiPaid+=paid;row.shortfall+=due-paid;
     row[l.source==='income'?'incomePayments':'portfolioPayments']+=paid;
@@ -90,9 +98,41 @@
    }
    for(const f of flows.filter(f=>f.type==='expense')){const due=f.amount*(f.inflate?(1+plan.inflation/100)**((i+1)/12):1),paid=withdraw(due);row.expenseDue+=due;row.expensePaid+=paid;row.shortfall+=due-paid;}
    Object.assign(row,snapshot());rows.push(row);for(const key of Object.keys(totals))totals[key]+=row[key];path.push({index:i+1,...snapshot()});
-   const year=Math.floor(i/12);if(!years[year])years[year]={year:year+1,contributions:0,extra:0,growth:0,emiPaid:0,prepaid:0,expensePaid:0,shortfall:0};for(const key of ['contributions','extra','growth','emiPaid','prepaid','expensePaid','shortfall'])years[year][key]+=row[key];Object.assign(years[year],snapshot());
+   const year=Math.floor(i/12);if(!years[year])years[year]={year:year+1,contributions:0,recorded:0,extra:0,growth:0,emiPaid:0,prepaid:0,expensePaid:0,shortfall:0};for(const key of ['contributions','recorded','extra','growth','emiPaid','prepaid','expensePaid','shortfall'])years[year][key]+=row[key];Object.assign(years[year],snapshot());
   }
-  return {initial,...snapshot(),...totals,rows,years,path,assets,loans,outsideMonths:plan.overrides.filter(o=>monthNumber(o.month)<start||monthNumber(o.month)>=start+plan.months).length};
+  return {outsideTransactions:plan.transactions.filter(t=>monthNumber(t.date.slice(0,7))<start||monthNumber(t.date.slice(0,7))>=start+plan.months).length,initial,...snapshot(),...totals,rows,years,path,assets,loans,outsideMonths:plan.overrides.filter(o=>monthNumber(o.month)<start||monthNumber(o.month)>=start+plan.months).length};
  }
- const api={validate,createPlan,parse,exportPlan,project,monthNumber,monthKey,calculateLoanDetails};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomPlan=api;
+ // Date-based portfolio return, using the actual-day / 365 convention.
+ function xirr(entries){
+  const grouped=new Map();
+  for(const entry of entries){const date=new Date(entry.date).getTime();if(!Number.isFinite(date)||!Number.isFinite(entry.amount))throw new Error('XIRR needs valid dates and finite amounts.');grouped.set(date,(grouped.get(date)||0)+entry.amount);}
+  const flows=[...grouped].filter(([,amount])=>amount!==0).sort((a,b)=>a[0]-b[0]);
+  if(flows.length<2||!flows.some(([,a])=>a<0)||!flows.some(([,a])=>a>0))return {rate:null,status:'unavailable'};
+  const scale=Math.max(...flows.map(([,a])=>Math.abs(a))),times=flows.map(([d])=>(d-flows[0][0])/86400000/365),amounts=flows.map(([,a])=>a/scale),last=times.at(-1);
+  const npv=logRate=>amounts.reduce((sum,amount,i)=>sum+amount*Math.exp(-logRate*times[i]-(logRate<0?-logRate*last:0)),0);
+  const roots=[],minimum=Math.log(1e-8),maximum=Math.log(1e6+1),steps=2048;
+  function addRoot(logRate){const rawRate=Math.expm1(logRate),rate=Math.abs(rawRate)<1e-10?0:rawRate;if(!roots.some(root=>Math.abs(root-rate)<1e-7*Math.max(1,Math.abs(rate))))roots.push(rate);}
+  let left=minimum,leftValue=npv(left);
+  for(let step=1;step<=steps;step++){
+   const right=minimum+(maximum-minimum)*step/steps,rightValue=npv(right);
+   if(leftValue===0)addRoot(left);
+   if(leftValue*rightValue<0){let lo=left,hi=right,lowValue=leftValue;for(let i=0;i<90;i++){const mid=(lo+hi)/2,value=npv(mid);if(value===0){lo=hi=mid;break;}if(Math.sign(value)===Math.sign(lowValue)){lo=mid;lowValue=value;}else hi=mid;}addRoot((lo+hi)/2);}
+   left=right;leftValue=rightValue;
+  }
+  if(leftValue===0)addRoot(left);
+  return roots.length===1?{rate:roots[0],status:'available'}:{rate:null,status:roots.length>1?'multiple':'unavailable'};
+ }
+ function portfolioSummary(raw,projection){
+  const plan=validate(raw),o=projection||project(plan),start=monthNumber(plan.startMonth),dateAt=offset=>new Date(Date.UTC(Math.floor((start+offset)/12),(start+offset)%12,0)).toISOString().slice(0,10),discount=month=>(1+plan.inflation/100)**(month/12);
+  const categories=new Map();for(const asset of plan.assets)categories.set(asset.type,(categories.get(asset.type)||0)+asset.value);
+  const sip=o.rows.reduce((sum,row)=>sum+row.sip,0),extras=o.rows.reduce((sum,row)=>sum+row.extra,0),invested=o.initial.balance+o.contributions;
+  const recordedCategories=new Map();for(const t of plan.transactions){const month=monthNumber(t.date.slice(0,7));if(month<start||month>=start+plan.months)continue;const category=plan.assets.find(a=>a.id===t.assetId).type;recordedCategories.set(category,(recordedCategories.get(category)||0)+t.amount);}
+  let realInvested=o.initial.balance,withdrawals=0,realWithdrawals=0;
+  const flows=[{date:dateAt(0),amount:-o.initial.balance}];
+  for(const row of o.rows){const paid=row.expensePaid+row.portfolioPayments;withdrawals+=paid;realWithdrawals+=paid/discount(row.index);realInvested+=row.contributions/discount(row.index);flows.push({date:dateAt(row.index),amount:paid-row.contributions});}
+  flows.push({date:dateAt(plan.months),amount:o.balance});
+  const realNetWorth=o.netWorth/discount(plan.months),gain=o.balance+withdrawals-invested,realGain=o.balance/discount(plan.months)+realWithdrawals-realInvested;
+  return {targetToday:plan.targetToday,targetFuture:plan.targetToday*discount(plan.months),targetGap:Math.max(0,plan.targetToday*discount(plan.months)-o.netWorth),realTargetGap:Math.max(0,plan.targetToday-realNetWorth),invested,sip,extras,recorded:o.recorded,recordedCategories:[...recordedCategories].map(([category,amount])=>({category,amount})),existing:o.initial.balance,categories:[...categories].map(([category,amount])=>({category,amount})),xirr:xirr(flows),realNetWorth,gain,absoluteReturn:invested>0?gain/invested:null,realGain,realInvested,realAbsoluteReturn:realInvested>0?realGain/realInvested:null,withdrawals,startingLoans:o.initial.debt,remainingLoans:o.debt,loanPayments:o.emiPaid+o.prepaid,flows};
+ }
+ const api={validate,createPlan,parse,exportPlan,project,monthNumber,monthKey,calculateLoanDetails,xirr,portfolioSummary};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomPlan=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

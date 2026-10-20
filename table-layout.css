@@ -1,0 +1,36 @@
+/* Shared table layout: allow containers to shrink, never split money amounts. */
+main,.card,.panel,.freedom-layout>*,.two-columns>*,.investment-schedule,details,form{min-width:0}
+.table-wrap{width:100%;max-width:100%;min-width:0;overflow:auto;overscroll-behavior-x:contain;border-radius:8px;scrollbar-color:#527589 var(--bg);scrollbar-width:auto}
+.panel.schedule{padding:0}
+.table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.table-wrap table{width:100%;min-width:0}
+.table-wrap th,.table-wrap td{padding:11px 10px}
+.table-wrap thead th{white-space:normal;line-height:1.45;vertical-align:bottom;min-width:0}
+.table-wrap tbody td,.table-wrap tfoot td{white-space:nowrap}
+.table-wrap th:first-child,.table-wrap td:first-child{padding-left:12px}
+.table-wrap tbody th:first-child{white-space:normal;min-width:76px;max-width:150px;overflow-wrap:break-word}
+.table-wrap.is-scrollable thead th:first-child{position:sticky;left:0;z-index:4;background:#123348;box-shadow:1px 0 var(--line)}
+.table-wrap.is-scrollable tbody th:first-child{position:sticky;left:0;z-index:2;background:var(--card);box-shadow:1px 0 var(--line)}
+.table-scroll-hint{font-size:11px;color:var(--muted);margin:8px 0;line-height:1.6}
+.table-scroll-hint[hidden]{display:none}
+.table-wrap td input{width:120px;min-height:42px}
+@media(max-width:900px){
+ .table-wrap table{font-size:12px}
+ .table-wrap th,.table-wrap td{padding:10px 8px}
+ .table-wrap thead th{font-size:11px}
+ .table-wrap tbody th:first-child{min-width:70px;max-width:110px}
+ .section-top,.result-top,.schedule-toolbar,.pagination,.filters,.filter-bar{flex-wrap:wrap}
+ .filters{min-width:0;max-width:100%}
+ .filters label{min-width:0;flex:1 1 120px}
+ .page-buttons{flex-wrap:wrap}
+}
+@media print{
+ .table-scroll-hint{display:none}
+ .table-wrap{max-height:none!important;overflow:visible;border-radius:0}
+ .table-wrap table{font-size:9px}
+ .table-wrap th,.table-wrap td{white-space:normal!important;overflow-wrap:anywhere;padding:7px 4px}
+ .table-wrap thead th,.table-wrap.is-scrollable tbody th:first-child{position:static!important;box-shadow:none}
+ .table-wrap tbody th:first-child{min-width:0}
+ thead{display:table-header-group}
+ tr{break-inside:avoid}
+}

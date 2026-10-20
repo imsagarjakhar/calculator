@@ -1,0 +1,67 @@
+/* Shared header for every calculator. Load after each page's own styles. */
+.planner-header.planner-header{
+ display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:clamp(24px,4vw,60px);
+ align-items:center;padding:12px 0 30px;margin:0 0 28px;border-bottom:1px solid var(--line,#24485c);
+}
+.planner-header .planner-header-copy{min-width:0;max-width:780px}
+.planner-header .eyebrow{margin:0 0 12px;font-size:10px;font-weight:800;letter-spacing:2px;line-height:1.7;color:var(--accent,#2bdbb0)}
+.planner-header h1{margin:0 0 15px;font-size:clamp(30px,3.2vw,46px);font-weight:800;line-height:1.13;letter-spacing:-1.4px;overflow-wrap:break-word}
+.planner-header h1 em{font-style:normal;color:var(--accent,#2bdbb0)}
+.planner-header .planner-header-description{max-width:590px;margin:0;color:var(--muted,#b0c3cf);font-size:14px;font-weight:400;line-height:1.8}
+.planner-header .planner-header-badge{display:inline-flex;align-items:center;gap:7px;margin-top:18px;font-size:10px;color:var(--muted,#b0c3cf);line-height:1.6}
+.planner-header-badge:before{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--accent,#2bdbb0);flex-shrink:0}
+.planner-header .planner-toolbar{display:grid;gap:12px;min-width:0;width:100%;padding:18px;border:1px solid var(--line,#24485c);border-radius:15px;background:linear-gradient(140deg,#102d3e,#0b2331);text-align:left;box-shadow:0 8px 28px #00000012}
+.planner-header .planner-toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.planner-header .planner-currency{display:block;width:152px;min-width:0;margin:0;font-size:11px;font-weight:700;line-height:1.5;color:var(--muted,#b0c3cf)}
+.planner-header .planner-currency select{width:100%;min-width:0;min-height:42px;margin:6px 0 0;padding:9px 12px;border-radius:8px;font-size:14px;font-weight:700;color:var(--ink,#f1f7fa);background:var(--bg,#071a26);border:1px solid #315366}
+.planner-header .planner-toolbar-label{font-size:9px;letter-spacing:1.6px;font-weight:700;color:var(--muted,#b0c3cf);opacity:.75}
+.planner-header .planner-currency-note{font-size:10px;line-height:1.7;color:var(--muted,#b0c3cf);margin:0}
+.planner-header .planner-toolbar-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:7px;align-items:stretch}
+.planner-header .planner-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;margin:0;padding:10px 11px;border:1px solid var(--line,#24485c);border-radius:8px;background:#15374a;color:var(--ink,#f1f7fa);font-size:11px;font-weight:700;line-height:1.5;text-align:center;white-space:normal;cursor:pointer;box-sizing:border-box}
+.planner-header .planner-toolbar button:hover{border-color:var(--accent,#2bdbb0);background:#1b4356}
+.planner-header .planner-toolbar button.primary{background:var(--accent,#2bdbb0);border-color:var(--accent,#2bdbb0);color:var(--bg,#071a26)}
+.planner-header .planner-toolbar button.primary:hover{filter:brightness(1.08)}
+.planner-header .planner-toolbar button.planner-reset{background:transparent;color:var(--muted,#b0c3cf);min-width:58px}
+.planner-header .planner-toolbar button:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.planner-header .planner-toolbar-utilities{display:flex;flex-wrap:wrap;gap:8px;padding-top:11px;border-top:1px solid var(--line,#24485c)}
+.planner-header .planner-toolbar-utilities button{min-height:34px;padding:6px 10px;font-size:10px;background:transparent;color:var(--muted,#b0c3cf)}
+.planner-header .planner-reset-note{margin:0;font-size:10px;color:var(--muted,#b0c3cf);line-height:1.6}
+.planner-header .planner-currency-info{margin:0;padding:0;color:var(--muted,#b0c3cf)}
+.planner-header .planner-currency-info summary{display:list-item;cursor:pointer;font-size:10px;font-weight:400;line-height:1.7;width:fit-content;list-style-position:inside}
+.planner-header .planner-currency-info p{margin:9px 0 0;font-size:11px;line-height:1.8;color:var(--muted,#b0c3cf)}
+.planner-header .planner-header-status{margin:0;padding-top:10px;border-top:1px solid var(--line,#24485c);font-size:10px;font-weight:400;line-height:1.7;color:var(--accent,#2bdbb0);overflow-wrap:anywhere}
+.planner-header .planner-header-status:empty{display:none}
+.planner-header button:focus-visible,.planner-header summary:focus-visible,.planner-header select:focus-visible{outline:2px solid var(--accent,#2bdbb0);outline-offset:3px}
+@media(max-width:1000px){
+ .planner-header.planner-header{grid-template-columns:1fr;gap:24px;padding-bottom:24px}
+ .planner-header .planner-header-copy{max-width:760px}
+ .planner-header .planner-toolbar{max-width:none;grid-template-columns:minmax(0,1fr) minmax(280px,1.2fr);column-gap:24px;align-items:start}
+ .planner-header .planner-toolbar-top{grid-column:1;grid-row:1}
+ .planner-header .planner-currency-note{grid-column:1;grid-row:2}
+ .planner-header .planner-toolbar-actions{grid-column:2;grid-row:1;align-self:end}
+ .planner-header .planner-toolbar-utilities{grid-column:2;grid-row:2;border-top:0;padding-top:0}
+ .planner-header .planner-reset-note{grid-column:2;grid-row:2}
+ .planner-header .planner-currency-info,.planner-header .planner-header-status{grid-column:1/-1}
+ .planner-header h1{font-size:clamp(31px,4.6vw,44px)}
+}
+@media(max-width:600px){
+ .planner-header.planner-header{gap:20px;margin-bottom:22px;padding-top:6px}
+ .planner-header h1{font-size:32px;letter-spacing:-1px;line-height:1.18}
+ .planner-header .eyebrow{font-size:9px;letter-spacing:1.7px;margin-bottom:10px}
+ .planner-header .planner-header-description{font-size:13px;line-height:1.8}
+ .planner-header .planner-header-badge{margin-top:13px}
+ .planner-header .planner-toolbar{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:13px}
+ .planner-header .planner-toolbar-top,.planner-header .planner-toolbar-actions,.planner-header .planner-toolbar-utilities{width:100%}
+ .planner-header .planner-toolbar-actions{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:6px}
+ .planner-header .planner-toolbar button{min-height:44px;padding:9px 8px;font-size:11px;flex:initial}
+ .planner-header .planner-toolbar-utilities{padding-top:11px;border-top:1px solid var(--line,#24485c)}
+ .planner-header .planner-toolbar-utilities button{min-height:36px;font-size:10px;padding:6px 10px}
+ .planner-header .planner-header-status{width:100%}
+}
+@media(max-width:350px){.planner-header .planner-toolbar{padding:12px}.planner-header .planner-toolbar button{font-size:10px;padding:8px 6px}.planner-header .planner-toolbar button.planner-reset{min-width:48px}.planner-header .planner-toolbar-label{font-size:8px;letter-spacing:1px}}
+@media print{
+ .planner-header.planner-header{display:block;padding:0 0 15px;margin-bottom:20px;border-color:#bbc;color:#183241}
+ .planner-header .planner-toolbar,.planner-header .planner-header-badge{display:none}
+ .planner-header h1,.planner-header h1 em,.planner-header .eyebrow,.planner-header .planner-header-description{color:#183241}
+ .planner-header h1{font-size:28px}
+}

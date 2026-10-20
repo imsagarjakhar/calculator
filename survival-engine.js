@@ -5,6 +5,25 @@
     const offset=start.getUTCMonth()+months,year=start.getUTCFullYear()+Math.floor(offset/12),month=offset%12;
     return new Date(Date.UTC(year,month,Math.min(start.getUTCDate(),new Date(Date.UTC(year,month+1,0)).getUTCDate())));
   }
+  // Present value of the exact daily spending/start-of-day event schedule.
+  function requiredCorpus(a,start=new Date(),events=[]){
+    const origin=new Date(Date.UTC(start.getFullYear(),start.getMonth(),start.getDate())),dueByDay=new Map();
+    for(const e of LifeEvents.scheduled(events,(a.endAge-a.age)*12,a.inflation)){
+      const date=planMonth(origin,e.index-1).getTime();dueByDay.set(date,(dueByDay.get(date)||0)+e.cost);
+    }
+    let required=0,discount=1;
+    for(let year=0;year<a.endAge-a.age;year++){
+      const from=planMonth(origin,year*12),to=planMonth(origin,(year+1)*12),days=(to-from)/86400000,q=Math.exp(Math.log1p(a.returns/100)/days),budget=a.swp*Math.pow(1+a.inflation/100,year);
+      let month=year*12,monthEnd=planMonth(origin,month+1).getTime(),monthDays=(monthEnd-from.getTime())/86400000;
+      for(let day=0;day<days;day++){
+        const date=from.getTime()+day*86400000;
+        if(date>=monthEnd){month++;const monthStart=monthEnd;monthEnd=planMonth(origin,month+1).getTime();monthDays=(monthEnd-monthStart)/86400000;}
+        required+=(dueByDay.get(date)||0)*discount;
+        discount/=q;required+=budget/monthDays*discount;
+      }
+    }
+    return required;
+  }
   function projectSurvival(a, start = new Date(), events = []) {
     const origin=new Date(Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()));
     const planned=LifeEvents.scheduled(events,(a.endAge-a.age)*12,a.inflation),dueByDay=new Map();
@@ -34,7 +53,7 @@
     return {expenseDue,expensePaid,expenseShortfall:Math.max(0,expenseDue-expensePaid),eventFailure,balance,days,totalWithdrawn,totalGrowth,depleted,rows,path,age:path[path.length-1].age,start:origin};
   }
 
-const api={projectSurvival};
+const api={projectSurvival,requiredCorpus};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 else root.CorpusSurvival=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
