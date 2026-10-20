@@ -44,4 +44,8 @@ p.overrides=[{month:'2026-12',sip:null,note:'',flows:[{type:'investment',assetId
 p=basic();p.assets[0].type='<script>category</script>';const cards=R.summaryCards(p),html=R.build(p);
 assert.deepEqual(cards.map(c=>c.key),['net-worth','invested','xirr','real-net-worth','returns','loans','available']);assert.equal((html.match(/data-metric=/g)||[]).length,7);assert.ok(html.includes('&lt;script&gt;category&lt;/script&gt;'));assert.ok(!html.includes('<script>category'));
 p.assets[0].canWithdraw=false;p.loans=[{id:'loan',name:'Loan',balance:1000,annualRate:0,remainingMonths:1,source:'investments'}];assert.ok(R.build(p).includes('Unfunded cash flows:'));
+// Account details count only positive applied SIPs, with step-ups and recorded replacements.
+p=basic();p.months=24;p.monthlySip=1000;p.annualStepup=10;
+p.overrides=[{month:'2026-01',sip:0,note:'Skipped',flows:[]}];p.transactions=[{id:'record',date:'2026-02-05',assetId:'core',amount:1500,note:''}];
+const sipDetails=R.assetSipDetails(p,E.project(p),'core',String);assert.equal(sipDetails.frequency,'Monthly');assert.equal(sipDetails.count,22);near(sipDetails.total,1000*10+1100*12);near(sipDetails.other,1500);assert.equal(sipDetails.amount,'1000 – 1100');
 console.log('Custom performance passed: published XIRR example, leap years, negative/zero/multiple/no returns, category reconciliation, loan separation, cash-flow inflation, withdrawals and shared seven-card reports.');

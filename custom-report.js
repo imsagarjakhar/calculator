@@ -20,6 +20,11 @@
    {key:'available',label:'Available for withdrawal',value:m(o.available),note:'Excludes assets you keep untouched'}
   ];
  }
+ function assetSipDetails(plan,projection,assetId,formatMoney){
+  const amounts=assetId===plan.sipAssetId?projection.rows.filter(row=>row.sip>0).map(row=>row.sip):[],total=amounts.reduce((sum,amount)=>sum+amount,0),asset=projection.assets.find(a=>a.id===assetId);
+  const minimum=amounts.length?Math.min(...amounts):0,maximum=amounts.length?Math.max(...amounts):0;
+  return {frequency:assetId===plan.sipAssetId?'Monthly':'No recurring SIP',amount:amounts.length?(minimum===maximum?formatMoney(minimum):formatMoney(minimum)+' – '+formatMoney(maximum)):'No SIP payments applied',count:amounts.length,total,other:Math.max(0,asset.contributions-total)};
+ }
  function read(text){
   if(typeof text!=='string'||text.length>MAX_FILE_BYTES)throw new Error('Choose a JSON plan or HTML report smaller than 10 MB.');
   const clean=text.replace(/^\ufeff/,'').trim();
@@ -40,7 +45,7 @@
   let chart='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Projected net wealth from '+escape(plan.startMonth)+' through '+escape(end)+'"><title>Projected net wealth</title>';
   for(let i=0;i<=4;i++){const value=min+range*i/4;chart+='<line x1="'+l+'" y1="'+y(value)+'" x2="'+(w-r)+'" y2="'+y(value)+'" stroke="#dbe5e9"/><text x="'+(l-10)+'" y="'+(y(value)+4)+'" text-anchor="end" fill="#526977" font-size="12">'+escape(new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(value))+'</text>';}
   chart+='<path d="'+o.path.map((p,i)=>(i?'L':'M')+x(p.index).toFixed(2)+' '+y(p.netWorth).toFixed(2)).join(' ')+'" fill="none" stroke="#087e71" stroke-width="3"/><text x="'+l+'" y="'+(h-12)+'" fill="#526977" font-size="12">Start · '+escape(month(plan.startMonth))+'</text><text x="'+(w-r)+'" y="'+(h-12)+'" text-anchor="end" fill="#526977" font-size="12">End · '+escape(month(end))+'</text></svg>';
-  const assets=table(['Asset','Type','Starting value','Annual return','Available for withdrawals','Projected value'],plan.assets.map(a=>[a.name,a.type,money(a.value),a.annualReturn+'%',a.canWithdraw?'Yes':'No',money(o.assets.find(p=>p.id===a.id).value)]));
+  const assets=table(['Asset','Type','Starting value','Annual return','Available for withdrawals','SIP frequency','SIP amount per occurrence','SIP occurrences','Total SIP','Extra / recorded contributions','Projected value'],plan.assets.map(a=>{const sip=assetSipDetails(plan,o,a.id,money);return [a.name,a.type,money(a.value),a.annualReturn+'%',a.canWithdraw?'Yes':'No',sip.frequency,sip.amount,sip.count,money(sip.total),money(sip.other),money(o.assets.find(p=>p.id===a.id).value)];}));
   const loans=plan.loans.length?table(['Loan','Details at start','Outstanding','Interest','Monthly EMI','Remaining EMIs','Payment source','Projected debt'],plan.loans.map(a=>{const projected=o.loans.find(p=>p.id===a.id);return [a.name,a.balanceMode==='original'?'Original '+money(a.originalAmount)+'; '+a.totalMonths+' months; start '+a.startDate+'; balance as of '+a.currentDate+'; '+a.paidMonths+' paid':'Lender balance entered directly',money(a.balance),a.annualRate+'%',money(projected.emi),a.remainingMonths,a.source==='income'?'Salary / income':'Investments',money(projected.balance)];})):'<p>No loans in this plan.</p>';
   const yearly=table(['Plan year','New investments','Loan payments','Expenses paid','Assets','Remaining loans','Net wealth'],o.years.map(row=>['Year '+row.year,money(row.contributions),money(row.emiPaid+row.prepaid),money(row.expensePaid),money(row.balance),money(row.debt),money(row.netWorth)]));
   const monthly=table(['Month','Investment source','SIP','Extra invested','Recorded investments','Loan payments','Expenses paid','Unfunded','Assets','Loans','Net wealth'],o.rows.map(row=>[month(row.month),row.usesRecorded?'Recorded':'Forecast',money(row.sip),money(row.extra),money(row.recorded),money(row.emiPaid+row.prepaid),money(row.expensePaid),money(row.shortfall),money(row.balance),money(row.debt),money(row.netWorth)]));
@@ -62,5 +67,5 @@
  }
  const styles=typeof module!=='undefined'&&module.exports?require('./calculator-report').styles:root.CalculatorReport.styles;
  const summaryStyles='.metric-breakdown{display:block;margin:14px 0 8px}.metric-breakdown>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-top:1px solid #dbe5e9}.metric-breakdown dt{font-size:11px;font-weight:400;min-width:0;overflow-wrap:anywhere}.metric-breakdown dd{font-size:12px;margin:0;text-align:right;min-width:0;overflow-wrap:anywhere}.summary-warning{padding:12px;border:1px solid #e7a5a5;color:#a62828;background:#fff0f0;border-radius:10px}';
- const api={build,read,targetComparison,summaryCards,MAX_FILE_BYTES};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomReport=api;
+ const api={build,read,targetComparison,summaryCards,assetSipDetails,MAX_FILE_BYTES};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.CustomReport=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

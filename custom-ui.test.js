@@ -179,6 +179,7 @@ async function checkFiles(){
  // Reopening the page restores the cleared defaults, rather than the old portfolio.
  vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
  assert.equal(get('defaultSip').value,'20000');assert.equal(read().monthlySip,20000);assert.equal(read().transactions.length,0);assert.equal(read().loans.length,0);assert.equal(read().overrides.length,0);assert.equal(read().assets.length,1);assert.equal(read().assets[0].value,0);assert.ok(get('loanList').innerHTML.includes('No loans'));assert.ok(get('transactionRows').innerHTML.includes('No transactions'));
+ assert.ok(get('assetList').innerHTML.includes('Monthly · ₹20,000 per occurrence'));assert.ok(get('assetList').innerHTML.includes('SIP occurrences: 120 · Total SIP: ₹24,00,000'));
  console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/JSON download, staged import/restore, and read-only Growth copying.');
 }
 checkFiles().catch(e=>{console.error(e);process.exitCode=1;});
