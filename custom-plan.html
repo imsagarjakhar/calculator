@@ -33,11 +33,21 @@
   ]
 }
 </script>
-<link rel="stylesheet" href="table-layout.css"></head>
+<link rel="stylesheet" href="table-layout.css"><link rel="stylesheet" href="planner-header.css"></head>
 <body><main><noscript><p>Please enable JavaScript to use the Custom Plan calculator.</p></noscript>
 <nav class="custom-planner-nav" aria-label="Financial planners"><a class="back-to-planners" href="index.html">← All planners</a><span>LEARN WITH INTIMETEC</span></nav>
-<header><div><p class="eyebrow">03 / PLAN MONTH BY MONTH</p><h1>Intimetec loan &amp; monthly investment planner</h1><p class="muted">Change a SIP. Invest a bonus. Pay a loan sooner. Keep a plan you can revisit.</p></div><div class="header-tools"><div class="plan-currency"><label for="currency">Plan currency<select id="currency" form="settingsForm" aria-describedby="currencyNote"><option value="INR">INR — ₹</option><option value="SAR">SAR — ر.س</option><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option></select></label><p id="currencyNote" class="helper">Applies instantly. Amounts keep their values; no exchange-rate conversion.</p></div><div class="actions"><button id="copyGrowth" type="button">Copy Growth setup</button><button id="importButton" type="button">Import plan / report</button><input id="importFile" type="file" accept=".json,.html,application/json,text/html" hidden><button id="exportPlan" type="button">Save JSON</button><button id="exportReport" class="primary" type="button">Download report</button><button id="resetPlan" type="button" title="Reset this page to a 20,000 monthly SIP and clear loans, extras and transactions">Reset</button></div></div></header>
-<p class="helper">Download a readable report to view or print later. Both the original HTML report and JSON file can restore your editable plan. Starting-plan changes update automatically. Save asset, loan and cash-flow forms before exporting.</p>
+<header class="planner-header ">
+<div class="planner-header-copy"><p class="eyebrow">INTIMETEC / CUSTOM PLAN</p><h1>Your money, month by month</h1><p class="planner-header-description">Plan your investments and loans. Record each contribution and see where it takes you.</p><span class="planner-header-badge">Private calculations · No account needed</span></div>
+<div class="planner-toolbar" role="group" aria-label="Custom Plan plan controls">
+<div class="planner-toolbar-top"><label class="planner-currency" for="currency">Plan currency<select id="currency" form="settingsForm" aria-describedby="currencyNote"><option value="INR">INR — ₹</option><option value="SAR">SAR — ر.س</option><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option></select></label><span class="planner-toolbar-label">YOUR PLAN</span></div>
+<p class="planner-currency-note">Amounts keep their values. No currency conversion.</p>
+<div class="planner-toolbar-actions"><button id="importButton" type="button" class="" title="Import an original HTML report or saved JSON plan">Import report</button><input id="importFile" type="file" accept=".html,.htm,.json,text/html,application/json" aria-label="Choose saved Custom Plan report" hidden><button id="exportReport" type="button" class="primary" >Download report</button><button id="resetPlan" type="button" class="planner-reset" title="Restore the default 20,000 monthly SIP and clear Custom Plan loans, extras and transactions">Reset</button></div>
+<div class="planner-toolbar-utilities"><button id="copyGrowth" type="button">Copy Growth setup</button><button id="exportPlan" type="button">Save JSON</button></div>
+
+<details class="planner-currency-info"><summary>About currency</summary><p id="currencyNote">Currency changes apply instantly to the whole plan. Enter all values in the selected currency; no exchange-rate conversion is applied. Unfinished asset, loan and transaction forms remain available.</p></details>
+
+</div></header>
+
 <p id="status" class="status" role="status"></p><p id="error" class="error" role="alert" hidden></p>
 <section id="importPreview" class="card import-preview" hidden><h2>Review this plan</h2><p id="importDescription"></p><p class="muted">Using this plan replaces the Custom Plan currently open here. Your Growth and Survival inputs stay separate. Save your current plan file first if you want to keep it.</p><div class="actions"><button id="confirmImport" class="primary" type="button">Use this plan</button><button id="cancelImport" type="button">Cancel</button></div></section>
 <section class="card" aria-labelledby="defaultsTitle"><div class="section-heading"><div><p class="eyebrow">01 / SET THE BASELINE</p><h2 id="defaultsTitle">Your starting plan</h2></div><span id="saveState" class="badge">Private · browser saved</span></div>

@@ -7,7 +7,17 @@
   const get = id => document.getElementById(id);
   const screen = get('survivalScreen');
   screen.innerHTML = `
-    <header class="survival-header"><div><div class="eyebrow">MAKE IT LAST / CORPUS SURVIVAL</div><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="subtitle">Your savings, your monthly needs, and the years ahead.</p></div><div class="header-actions survival-currency"><label for="s-currency">Plan currency<select id="s-currency"><option value="INR">INR — ₹</option><option value="SAR">SAR — ر.س</option><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option></select></label><span class="currency-note">Amounts are entered directly in this currency. No conversion.</span><div class="header-report-actions"><button id="survivalImport" type="button" title="Restore a saved HTML report; replaces the current Survival plan">Import report</button><input id="survivalImportFile" type="file" accept=".html,.htm,.json,text/html,application/json" aria-label="Choose saved Survival report" hidden><button id="survivalReport" class="primary" type="button">Download report</button></div><p id="survivalImportStatus" class="helper" role="status" aria-live="polite"></p><p id="survivalReportStatus" class="helper" role="status"></p></div></header>
+    <header class="planner-header survival-header">
+<div class="planner-header-copy"><p class="eyebrow">INTIMETEC / CORPUS SURVIVAL</p><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="planner-header-description">Your savings, monthly spending and the years ahead. See what your corpus could support.</p><span class="planner-header-badge">Private calculations · No account needed</span></div>
+<div class="planner-toolbar" role="group" aria-label="Corpus Survival plan controls">
+<div class="planner-toolbar-top"><label class="planner-currency" for="s-currency">Plan currency<select id="s-currency"><option value="INR">INR — ₹</option><option value="SAR">SAR — ر.س</option><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option></select></label><span class="planner-toolbar-label">YOUR PLAN</span></div>
+<p class="planner-currency-note">Amounts keep their values. No currency conversion.</p>
+<div class="planner-toolbar-actions"><button id="survivalImport" type="button" class="" title="Import an original HTML report or saved JSON plan">Import report</button><input id="survivalImportFile" type="file" accept=".html,.htm,.json,text/html,application/json" aria-label="Choose saved Corpus Survival report" hidden><button id="survivalReport" type="button" class="primary" >Download report</button><button id="survivalResetTop" type="button" class="planner-reset" >Reset</button></div>
+
+<p id="survivalResetNote" class="planner-reset-note">Reset starts from today and keeps saved future expenses.</p>
+<details class="planner-currency-info"><summary>About currency</summary><p>Amounts are entered directly in the selected currency. Each currency has its own life-expense list. No exchange-rate conversion is applied.</p></details>
+<p id="survivalImportStatus" class="planner-header-status helper" role="status" aria-live="polite"></p><p id="survivalReportStatus" class="planner-header-status helper" role="status" aria-live="polite"></p>
+</div></header>
     <div class="layout"><section class="panel"><div class="eyebrow">01 / YOUR STARTING POINT</div><h2 style="margin-top:8px">Set your survival plan</h2><p class="helper">Your SWP is the monthly spending you want your corpus to fund.</p><p id="survivalStartStatus" class="helper"></p><form id="survivalForm" novalidate><div class="controls">
     ${Object.keys(ranges).map(key=>`<label for="s-${key}">${labels[key]} ${key==='corpus'||key==='swp'?'(<span class="s-currency-code">INR</span>)':key==='age'||key==='endAge'?'(years)':'(%)'}<input id="s-${key}" type="number" min="${ranges[key][0]}" max="${ranges[key][1]}" step="${key==='age'||key==='endAge'?'1':'any'}" value="${defaults[key]}" inputmode="decimal"></label>`).join('')}
     </div><div id="survivalError" class="error survival-error" role="alert"></div><div class="survival-actions"><button class="primary" type="submit">Calculate survival</button><button id="survivalReset" class="ghost" type="button">Reset example</button></div></form><p class="helper">Inflation increases the SWP budget once per year. Use a return assumption after any expected taxes and costs.</p></section>
@@ -80,6 +90,7 @@
   get('survivalForm').addEventListener('submit',event=>{event.preventDefault();update();});
   get('survivalForm').addEventListener('input',update);get('s-currency').addEventListener('change',update);
   get('survivalReset').onclick=()=>{projectionStart=new Date();restore(defaults);update();};
+  get('survivalResetTop').onclick=get('survivalReset').onclick;
   CalculatorReport.bindImport({button:get('survivalImport'),input:get('survivalImportFile'),status:get('survivalImportStatus'),kind:'survival',restore(saved){
     const a=validateSaved(saved.inputs),events=LifeEvents.validate(saved.events),start=readStart(saved.projectionStart);
     projectSurvival(a,start,events);requiredCorpus(a,start,events);
