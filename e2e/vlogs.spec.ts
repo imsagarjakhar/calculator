@@ -72,53 +72,158 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await expect(
     page.getByRole("button", { name: "Login", exact: false }),
   ).toBeVisible();
-  await expect(page.locator(".vlog-card")).toHaveCount(0);
+  await expect(page.locator(".vlog-message")).toHaveCount(0);
   await page
     .locator(".vlog-choice")
     .screenshot({ path: info.outputPath("vlog-entry.png") });
   await page.getByRole("link", { name: /View all vlogs/ }).click();
   await expect(page).toHaveURL(/#vlogs$/);
   await expect(page.locator("#homeScreen")).toBeHidden();
-  await expect(page.locator(".vlog-card")).toHaveCount(6);
+  await expect(page.locator(".vlog-message")).toHaveCount(7);
   await expect(page.locator("#vlogs")).not.toContainText("imsagarjakhar");
   await page
     .locator("#vlogs")
     .screenshot({ path: info.outputPath("vlog-feed.png") });
-  await page.getByRole("button", { name: /Show more vlogs/ }).click();
-  await expect(page.locator(".vlog-card")).toHaveCount(7);
   await page.getByLabel("Find a vlog").fill("story 3");
-  await expect(page.locator(".vlog-card")).toHaveCount(1);
-  await page.getByRole("button", { name: "Read vlog" }).click();
-  await expect(page.getByRole("dialog")).toContainText(
+  await expect(page.locator(".vlog-message")).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Read Money story 3", exact: true })
+    .click();
+  await expect(page.locator(".vlog-reading-pane")).toBeVisible();
+  await expect(page.locator(".vlog-reader-body")).toContainText(
     "<script>globalThis.vlogXss = 1</script>",
   );
-  await expect(page.getByRole("dialog")).not.toContainText("imsagarjakhar");
+  await expect(page.locator(".vlog-reading-pane")).not.toContainText(
+    "imsagarjakhar",
+  );
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(
     await page.evaluate(() => (globalThis as any).vlogXss),
   ).toBeUndefined();
   await expect(
     page.getByRole("link", { name: "Watch the video" }),
   ).toHaveAttribute("rel", "noopener noreferrer");
-  await page.getByRole("button", { name: "Close vlog window" }).click();
+  await page
+    .locator("#vlogs")
+    .screenshot({ path: info.outputPath("vlog-reader.png") });
+  if (info.project.name === "mobile")
+    await page
+      .getByRole("button", { name: "← All vlogs", exact: true })
+      .click();
   await page.getByLabel("Find a vlog").fill("");
+  if (info.project.name === "desktop")
+    await page
+      .locator(".vlog-mailbox")
+      .screenshot({ path: info.outputPath("vlog-mailbox.png") });
   posts = [sample(8), ...posts];
   await page.getByRole("button", { name: "Refresh vlogs" }).click();
-  await expect(page.locator(".vlog-card").first()).toContainText(
+  await expect(page.locator(".vlog-message").first()).toContainText(
     "Money story 8",
   );
+  await expect(page.locator("#vlogReaderTitle")).toHaveText("Money story 3");
   await expect(
     page.getByRole("button", { name: "Edit", exact: true }),
   ).toHaveCount(0);
   expect(errors).toEqual([]);
   await page.getByRole("link", { name: "← All planners", exact: true }).click();
   await expect(page.locator("#homeScreen")).toBeVisible();
-  await expect(page.locator(".vlog-card")).toHaveCount(0);
+  await expect(page.locator(".vlog-message")).toHaveCount(0);
   await page.goBack();
   await expect(page.locator("#vlogs")).toBeVisible();
   await page.reload();
   await expect(page.locator("#vlogs")).toBeVisible();
   await page.goForward();
   await expect(page.locator("#homeScreen")).toBeVisible();
+});
+
+test("mailbox ignores stale article responses and lets readers retry a failed load", async ({
+  page,
+  context,
+}, info) => {
+  const posts = [sample(1), sample(2)].map((post) => ({
+    ...post,
+    body: `Article body ${post.title}`,
+  }));
+  let release!: () => void;
+  const blocked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let began!: () => void;
+  const started = new Promise<void>((resolve) => {
+    began = resolve;
+  });
+  let first = true;
+  let fail = false;
+  await context.route(raw + "**", async (route) => {
+    const post = posts.find((p) => route.request().url().includes(p.id));
+    if (post?.id === posts[1].id && first) {
+      first = false;
+      began();
+      await blocked;
+    }
+    return route.fulfill({
+      status: fail && post?.id === posts[1].id ? 503 : 200,
+      json: post,
+    });
+  });
+  await context.route(github + "**", (route) => {
+    const isIndex = route.request().url().includes("index.json");
+    const value = isIndex
+      ? { version: 1, posts: posts.map(metadata) }
+      : posts.find((p) => route.request().url().includes(p.id));
+    return route.fulfill({
+      status: !isIndex && fail ? 503 : 200,
+      json: {
+        type: "file",
+        encoding: "base64",
+        content: Buffer.from(JSON.stringify(value)).toString("base64"),
+      },
+    });
+  });
+  try {
+    await page.goto(app + "#vlogs");
+    await started;
+    await page
+      .getByRole("button", { name: "Read Money story 1", exact: true })
+      .click();
+    await expect(page.locator(".vlog-reader-body")).toHaveText(
+      "Article body Money story 1",
+    );
+    const slowResponse = page.waitForResponse(
+      (response) =>
+        response.url().startsWith(raw) && response.url().includes(posts[1].id),
+    );
+    release();
+    await (await slowResponse).finished();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => requestAnimationFrame(() => resolve(null))),
+    );
+    await expect(page.locator("#vlogReaderTitle")).toHaveText("Money story 1");
+    await expect(page.locator(".vlog-reader-body")).toHaveText(
+      "Article body Money story 1",
+    );
+    if (info.project.name === "mobile")
+      await page
+        .getByRole("button", { name: "← All vlogs", exact: true })
+        .click();
+    fail = true;
+    await page
+      .getByRole("button", { name: "Read Money story 2", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Try loading again", exact: true }),
+    ).toBeVisible();
+    fail = false;
+    await page
+      .getByRole("button", { name: "Try loading again", exact: true })
+      .click();
+    await expect(page.locator(".vlog-reader-body")).toHaveText(
+      "Article body Money story 2",
+    );
+  } finally {
+    release();
+  }
 });
 
 test("publisher logs in, publishes, edits and removes posts without redeploying or storing credentials", async ({
@@ -241,12 +346,12 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   await page.screenshot({ path: info.outputPath("vlog-editor.png") });
   await page.getByRole("button", { name: "Publish vlog", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.locator(".vlog-card")).toContainText(
+  await expect(page.locator(".vlog-message")).toContainText(
     "My first finance vlog",
   );
   const visitor = await context.newPage();
   await visitor.goto(new URL(app + "#vlogs", page.url()).href);
-  await expect(visitor.locator(".vlog-card")).toContainText(
+  await expect(visitor.locator(".vlog-message")).toContainText(
     "My first finance vlog",
   );
   await expect(visitor.getByRole("button", { name: /Login/ })).toBeVisible();
@@ -254,6 +359,9 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
     visitor.getByRole("button", { name: "Edit", exact: true }),
   ).toHaveCount(0);
   await visitor.close();
+  await page
+    .getByRole("button", { name: "Read My first finance vlog", exact: true })
+    .click();
   await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page
     .getByLabel("Title", { exact: true })
@@ -261,12 +369,12 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   await page
     .getByRole("button", { name: "Publish changes", exact: true })
     .click();
-  await expect(page.locator(".vlog-card")).toContainText(
+  await expect(page.locator(".vlog-message")).toContainText(
     "My updated finance vlog",
   );
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Remove", exact: true }).click();
-  await expect(page.locator(".vlog-card")).toHaveCount(0);
+  await expect(page.locator(".vlog-message")).toHaveCount(0);
   await page.getByRole("button", { name: "Log out", exact: true }).click();
   await expect(page.getByRole("button", { name: /Login/ })).toBeVisible();
   expect(errors).toEqual([]);

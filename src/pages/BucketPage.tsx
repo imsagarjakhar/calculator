@@ -14,7 +14,7 @@ export const BucketPage = memo(function BucketPage() {
             ← All planners
           </a>
           <span className="lab-brand">
-            INTIMETEC <span>/ RETIREMENT LAB</span>
+            Money Planner <span>/ RETIREMENT LAB</span>
           </span>
           <span className="preview-tag">Standalone preview</span>
         </nav>
@@ -843,8 +843,8 @@ export const BucketPage = memo(function BucketPage() {
           </p>
         </details>
         <footer>
-          Intimetec retirement lab · Independent prototype · No changes to your
-          other plans
+          Money Planner retirement lab · Independent prototype · No changes to
+          your other plans
         </footer>
       </main>
     </div>

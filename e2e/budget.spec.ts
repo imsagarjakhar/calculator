@@ -70,7 +70,7 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: /Export plan/ }).click();
   expect((await download).suggestedFilename()).toBe(
-    "intimetec-monthly-budget.json",
+    "money-planner-monthly-budget.json",
   );
   expect(
     await page.evaluate(

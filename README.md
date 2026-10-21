@@ -1,4 +1,4 @@
-# INTIMETEC Money Planner — React migration
+# Money Planner — React migration
 
 The calculators have React layouts, shared TypeScript components and a Vite multi-page build, without a database. Existing financial engines and form/result controllers are reused through compatibility modules, preserving calculations, browser storage and report formats. The new standalone Monthly Salary & Budget Planner is available at `/salary-budget/`, with its own TypeScript calculation model. See [MIGRATION.md](MIGRATION.md) for the architecture, local testing, GitHub Pages setup, branch review and rollback steps.
 

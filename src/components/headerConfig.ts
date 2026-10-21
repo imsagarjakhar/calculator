@@ -1,6 +1,6 @@
 export const headerConfig = {
   growth: {
-    eyebrow: "INTIMETEC / GROWTH PLANNER",
+    eyebrow: "Money Planner / GROWTH PLANNER",
     title: "From your salary to your goal",
     description:
       "Existing assets, monthly investments and life expenses—all in one plan.",
@@ -46,7 +46,7 @@ export const headerConfig = {
     resetNote: null,
   },
   custom: {
-    eyebrow: "INTIMETEC / CUSTOM PLAN",
+    eyebrow: "Money Planner / CUSTOM PLAN",
     title: "Your money, month by month",
     description:
       "Plan your investments and loans. Record each contribution and see where it takes you.",
@@ -95,7 +95,7 @@ export const headerConfig = {
     resetNote: null,
   },
   freedom: {
-    eyebrow: "INTIMETEC / FINANCIAL FREEDOM",
+    eyebrow: "Money Planner / FINANCIAL FREEDOM",
     title: "When could you be financially free?",
     description:
       "Set your monthly investments and the income you want. Explore when your savings could support it.",
@@ -143,7 +143,7 @@ export const headerConfig = {
     },
   },
   bucket: {
-    eyebrow: "INTIMETEC / RETIREMENT BUCKETS",
+    eyebrow: "Money Planner / RETIREMENT BUCKETS",
     title: "One retirement.Three purposeful buckets.",
     description:
       "Spend from the first, keep a reserve in the second, and let the third fund the years ahead.",
@@ -188,7 +188,7 @@ export const headerConfig = {
     resetNote: null,
   },
   survival: {
-    eyebrow: "INTIMETEC / CORPUS SURVIVAL",
+    eyebrow: "Money Planner / CORPUS SURVIVAL",
     title: "How long will your money last?",
     description:
       "Your savings, monthly spending and the years ahead. See what your corpus could support.",

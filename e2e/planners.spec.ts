@@ -137,7 +137,7 @@ test("search engines can read content, links and consistent metadata without Jav
       "Smarter money moves",
     );
     await expect(staticPage.locator(".welcome-kicker")).toHaveText(
-      "INTIMETEC Money Planner",
+      "Money Planner",
     );
     await expect(staticPage.locator(".growth-choice")).toHaveAttribute(
       "href",
@@ -163,7 +163,7 @@ test("search engines can read content, links and consistent metadata without Jav
         canonical,
       );
       const title = await staticPage.title();
-      expect(title).toContain("INTIMETEC");
+      expect(title).toContain("Money Planner");
       const graph = JSON.parse(
         (await staticPage
           .locator('script[type="application/ld+json"]')
@@ -171,7 +171,7 @@ test("search engines can read content, links and consistent metadata without Jav
       )["@graph"];
       expect(
         graph.find((item: any) => item["@type"] === "WebSite").alternateName,
-      ).toContain("INTIMETEC");
+      ).toContain("intimetec.org");
       expect(graph.find((item: any) => item["@type"] === "WebPage").url).toBe(
         canonical,
       );

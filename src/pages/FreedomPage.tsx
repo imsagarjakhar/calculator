@@ -12,7 +12,7 @@ export const FreedomPage = memo(function FreedomPage() {
           <a className="back-to-planners" href={plannerHref("home")}>
             ← All planners
           </a>
-          <span>LEARN WITH INTIMETEC</span>
+          <span>Money Planner</span>
         </nav>
         <PlannerHeader kind="freedom" />
         <p className="freedom-intro">

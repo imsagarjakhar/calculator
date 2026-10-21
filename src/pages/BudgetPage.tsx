@@ -96,7 +96,7 @@ export function BudgetPage() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = "intimetec-monthly-budget.json";
+    a.download = "money-planner-monthly-budget.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -142,7 +142,7 @@ export function BudgetPage() {
       <nav className="budget-nav" aria-label="Planner navigation">
         <a href={plannerHref("home")}>← All planners</a>
         <a className="budget-brand" href={plannerHref("home")}>
-          INTIMETEC <span>/ MONEY, WITH PURPOSE</span>
+          Money Planner <span>/ MONEY, WITH PURPOSE</span>
         </a>
         <span className="budget-preview">Standalone preview</span>
       </nav>
@@ -911,7 +911,7 @@ export function BudgetPage() {
         <a href="#budget-snapshot">View breakdown ↑</a>
       </div>
       <footer className="budget-foot">
-        <span>INTIMETEC / MAKE ROOM FOR YOUR FUTURE</span>
+        <span>Money Planner / MAKE ROOM FOR YOUR FUTURE</span>
         <p>
           A planning illustration using your inputs. No account or bank
           connection. Your plan is stored in this browser when available;

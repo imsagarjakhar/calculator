@@ -93,7 +93,7 @@ function api(
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2026-03-10",
         ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
-        ...(session ? { "User-Agent": "INTIMETEC-Vlog-Publisher" } : {}),
+        ...(session ? { "User-Agent": "Money-Planner-Vlog-Publisher" } : {}),
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),

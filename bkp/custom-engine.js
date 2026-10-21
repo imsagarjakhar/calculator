@@ -1,7 +1,7 @@
 (function(root){
  'use strict';
  const Growth=typeof module!=='undefined'&&module.exports?require('./growth-engine'):root.GrowthEngine;
- const SCHEMA='intimetec-custom-plan',VERSION=1;
+ const SCHEMA='money-planner-custom-plan',VERSION=1;
  const currencies=['INR','SAR','USD','AED','EUR','GBP'];
  const monthNumber=value=>{if(typeof value!=='string'||!/^\d{4}-(0[1-9]|1[0-2])$/.test(value))throw new Error('Use a valid month in YYYY-MM format.');const [year,month]=value.split('-').map(Number);if(year<2000||year>2250)throw new Error('Plan months must be between 2000 and 2250.');return year*12+month-1;};
  const monthKey=number=>Math.floor(number/12)+'-'+String(number%12+1).padStart(2,'0');
@@ -25,7 +25,7 @@
   return Growth.calculateLoanFromOriginal(originalAmount,annualRate,totalMonths,Math.min(totalMonths,Math.max(0,elapsed)));
  }
  function validate(raw){
-  if(!raw||typeof raw!=='object'||raw.schema!==SCHEMA||raw.version!==VERSION)throw new Error('This file is not a supported Custom Plan (version 1).');
+  if(!raw||typeof raw!=='object'||![SCHEMA,'intimetec-custom-plan'].includes(raw.schema)||raw.version!==VERSION)throw new Error('This file is not a supported Custom Plan (version 1).');
   const start=monthNumber(raw.startMonth);if(start>2150*12+11)throw new Error('The start month must be no later than 2150.');
   if(!currencies.includes(raw.currency))throw new Error('Choose a supported currency.');
   const assets=list(raw.assets,50,'Assets').map(a=>{if(!a||typeof a!=='object')throw new Error('Invalid asset entry.');if(typeof a.canWithdraw!=='boolean')throw new Error('Choose whether each asset can fund withdrawals.');return {id:id(a.id),name:string(a.name,80,'asset name'),type:string(a.type,40,'asset class'),value:number(a.value,0,1e12,'Asset value'),annualReturn:number(a.annualReturn,-50,60,'Asset annual return'),canWithdraw:a.canWithdraw};});

@@ -53,3 +53,5 @@ p=basic();p.assets=[null];assert.throws(()=>E.validate(p),/Invalid asset/);
 p=basic();const before=JSON.stringify(p);E.project(p);assert.equal(JSON.stringify(p),before,'Projection must not mutate exported inputs');
 p.name='<script>alert(1)</script>';assert.equal(E.parse(E.exportPlan(p)).name,p.name,'Imported text is data; the UI must escape it');
 console.log('Custom Plan passed: monthly overrides, per-asset extras, prepayments/payoff, retained assets, inflation, date preservation, JSON round-trip, 40 mixed cash-flow reconciliations, and invalid-file rejection.');
+
+{ const legacy=E.createPlan();legacy.schema='intimetec-custom-plan';assert.equal(E.parse(JSON.stringify(legacy)).schema,'money-planner-custom-plan'); }

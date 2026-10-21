@@ -30,17 +30,19 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         hidden={vlogsOpen}
       >
         <div className="welcome-topbar">
-          <div className="eyebrow">INTIMETEC / SMART FINANCIAL PLANNING</div>
+          <div className="eyebrow">
+            Money Planner / SMART FINANCIAL PLANNING
+          </div>
           <VlogAccountButton />
         </div>
         <div className="welcome-intro">
-          <span className="welcome-kicker">INTIMETEC Money Planner</span>
+          <span className="welcome-kicker">Money Planner</span>
           <h1 id="welcomeTitle" tabIndex={-1}>
             Smarter money moves.
             <br />A clearer future.
           </h1>
           <p>
-            Turn “what if?” into a plan you can see with INTIMETEC's free
+            Turn “what if?” into a plan you can see with Money Planner's free
             financial calculators. Explore your SIP, investments, loans and
             retirement together—with instant projections that respond to your
             assumptions.
@@ -244,7 +246,9 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           </p>
           <h3>Loan EMI and monthly planning calculator</h3>
           <p>
-            <a href={plannerHref("custom-plan")}>Open Intimetec Custom Plan</a>{" "}
+            <a href={plannerHref("custom-plan")}>
+              Open Money Planner Custom Plan
+            </a>{" "}
             to enter an original loan amount, interest rate, total tenure and
             loan dates. Calculate paid months, remaining EMIs and estimated
             outstanding principal, then plan extra repayments alongside monthly
@@ -262,10 +266,10 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           <details>
             <summary>Is this an AI financial planner?</summary>
             <p>
-              INTIMETEC uses financial formulas and the assumptions you enter.
-              These tools do not use generative AI or predict market prices.
-              Your results are calculated scenarios, with methods and detailed
-              schedules you can review.
+              Money Planner uses financial formulas and the assumptions you
+              enter. These tools do not use generative AI or predict market
+              prices. Your results are calculated scenarios, with methods and
+              detailed schedules you can review.
             </p>
           </details>
           <details>

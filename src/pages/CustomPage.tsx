@@ -13,7 +13,7 @@ export const CustomPage = memo(function CustomPage() {
           <a className="back-to-planners" href={plannerHref("home")}>
             ← All planners
           </a>
-          <span>LEARN WITH INTIMETEC</span>
+          <span>Money Planner</span>
         </nav>
         <PlannerHeader kind="custom" />
 

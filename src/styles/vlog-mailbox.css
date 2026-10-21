@@ -1,0 +1,535 @@
+.welcome.vlog-directory {
+  max-width: 1240px;
+}
+.vlog-directory .vlog-section {
+  margin: 30px 0 0;
+}
+.vlog-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+.vlog-section-heading .eyebrow {
+  color: #70d6bf;
+  font-size: 9px;
+  letter-spacing: 2.2px;
+  margin: 0 0 10px;
+}
+.vlog-section-heading h2 {
+  margin: 0;
+  font-size: clamp(27px, 3vw, 36px);
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+.vlog-section-heading h2:focus {
+  outline: none;
+}
+.vlog-section-heading p:not(.eyebrow) {
+  color: #9eb8c4;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 10px 0 0;
+}
+.vlog-section-heading .vlog-refresh {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  min-height: 42px;
+  font-size: 11px;
+  color: #b4cccf;
+  background: transparent;
+  border-color: #2b4b59;
+}
+.vlog-refresh > span {
+  font-size: 19px;
+  color: #83ddc5;
+}
+.vlog-mailbox {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  height: min(800px, calc(100dvh - 185px));
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid #2e4b59;
+  border-radius: 18px;
+  background: #0c2431;
+  box-shadow: 0 16px 45px #00000015;
+}
+.vlog-index {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid #2b4653;
+  background: #0b202c;
+}
+.vlog-index-heading {
+  padding: 23px 21px 19px;
+  border-bottom: 1px solid #2b4552;
+}
+.vlog-index-heading > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.vlog-index-heading h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+.vlog-index-heading > div > span {
+  color: #91b1bc;
+  background: #18333f;
+  border: 1px solid #2b4854;
+  border-radius: 20px;
+  font-size: 10px;
+  padding: 4px 9px;
+}
+.vlog-mailbox .vlog-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+.vlog-search > span[aria-hidden] {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  font-size: 22px;
+  color: #82a3b0;
+  pointer-events: none;
+}
+.vlog-mailbox .vlog-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  margin: 0;
+  padding: 11px 12px 11px 35px;
+  border: 1px solid #2d4b59;
+  border-radius: 8px;
+  background: #0e2936;
+  color: #ecf5f7;
+  font:
+    400 13px/1.5 Arial,
+    Helvetica,
+    sans-serif;
+}
+.vlog-search input::placeholder {
+  color: #8da9b5;
+}
+.vlog-message-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #345764 transparent;
+}
+.vlog-mailbox .vlog-message {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-bottom: 1px solid #223e4b;
+  border-radius: 0;
+  padding: 21px 20px 17px 18px;
+  background: transparent;
+  text-align: left;
+  color: #d4e3e9;
+  font-weight: 400;
+  cursor: pointer;
+}
+.vlog-mailbox .vlog-message:hover {
+  background: #14323f;
+}
+.vlog-mailbox .vlog-message.is-selected {
+  background: #173a43;
+  border-left-color: #7bddbf;
+}
+.vlog-message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.vlog-message-meta > span {
+  color: #8ec2ba;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+.vlog-message-meta time {
+  color: #8ba7b4;
+  font-size: 9px;
+}
+.vlog-message > strong {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.2px;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vlog-message-preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: #93aeba;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.vlog-message-open {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  color: #7db7ad;
+  font-size: 9px;
+}
+.vlog-message-open > span {
+  font-size: 13px;
+}
+.is-selected .vlog-message-open {
+  color: #a0e4d0;
+}
+.vlog-index-foot {
+  border-top: 1px solid #2c4552;
+  padding: 13px 21px;
+  color: #7897a5;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.vlog-list-empty {
+  color: #a5bec9;
+  font-size: 12px;
+  line-height: 1.8;
+  padding: 30px 24px;
+}
+.vlog-list-empty button {
+  display: block;
+  margin-top: 14px;
+  font-size: 11px;
+}
+.vlog-reading-pane {
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #102936;
+  padding: 0 42px 35px;
+  scroll-margin-top: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: #345764 transparent;
+}
+.vlog-reading-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  min-height: 66px;
+  border-bottom: 1px solid #2a4653;
+  margin-bottom: 33px;
+}
+.vlog-reading-label {
+  color: #7398a5;
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.vlog-mailbox .vlog-owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+}
+.vlog-owner-actions button {
+  padding: 7px 11px;
+  min-height: 34px;
+  font-size: 10px;
+  background: transparent;
+  border-color: #365260;
+}
+.vlog-owner-actions button:last-child {
+  color: #d9a6a0;
+}
+.vlog-reading-toolbar .vlog-back-to-list {
+  display: none;
+}
+.vlog-inline-article {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.vlog-article-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #8eacb8;
+  font-size: 10px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.vlog-kind {
+  color: #97dfc9;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  padding: 5px 8px;
+  border: 1px solid #366359;
+  background: #1b3c38;
+  border-radius: 5px;
+  font-weight: 700;
+}
+.vlog-inline-article h3 {
+  margin: 0;
+  color: #edf5f7;
+  font-size: clamp(26px, 2.8vw, 37px);
+  line-height: 1.25;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+.vlog-inline-article h3:focus {
+  outline: none;
+}
+.vlog-reader-summary {
+  color: #b5cbd3;
+  font-size: 16px;
+  line-height: 1.85;
+  margin: 22px 0 26px;
+  overflow-wrap: anywhere;
+}
+.vlog-reader-body {
+  color: #c4d4dd;
+  font-size: 15px;
+  line-height: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-top: 1px solid #294653;
+  padding-top: 25px;
+}
+.vlog-article-updated {
+  font-size: 10px;
+  color: #88a5b1;
+  margin: -10px 0 20px;
+}
+.vlog-video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #183b3a;
+  border: 1px solid #3e6c5d;
+  border-radius: 8px;
+  color: #a5e9d1;
+  text-decoration: none;
+  padding: 11px 15px;
+  font-size: 11px;
+  margin-bottom: 26px;
+}
+.vlog-video:hover {
+  background: #21493f;
+}
+.vlog-article-end {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid #294653;
+  margin-top: 40px;
+  padding-top: 24px;
+  color: #9bc9be;
+}
+.vlog-article-end > span {
+  font-size: 20px;
+}
+.vlog-article-end p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.9;
+}
+.vlog-article-end p > span {
+  color: #789aa8;
+  font-size: 10px;
+}
+.vlog-reader-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 350px;
+  text-align: center;
+  padding: 35px 0;
+  color: #9db6c2;
+}
+.vlog-reader-empty > span {
+  color: #77b7a8;
+  font-size: 35px;
+  margin-bottom: 24px;
+}
+.vlog-reader-empty h3 {
+  color: #d4e5ea;
+  font-size: 23px;
+  letter-spacing: -0.5px;
+}
+.vlog-reader-empty p {
+  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.vlog-reader-empty button {
+  margin-top: 15px;
+}
+.vlog-reading-loading {
+  margin: 30px 0;
+}
+.vlog-reading-loading > span {
+  display: block;
+  height: 10px;
+  border-radius: 4px;
+  background: #1b3a48;
+  margin: 14px 0;
+}
+.vlog-reading-loading > span:nth-child(2) {
+  width: 90%;
+}
+.vlog-reading-loading > span:nth-child(3) {
+  width: 65%;
+}
+.vlog-reading-loading p {
+  color: #94b5bf;
+  font-size: 11px;
+  margin-top: 25px;
+}
+.vlog-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.vlog-mailbox :is(button, input, a):focus-visible {
+  outline: 2px solid #93e6cc;
+  outline-offset: -3px;
+}
+@media (max-width: 1050px) {
+  .vlog-mailbox {
+    grid-template-columns: 290px minmax(0, 1fr);
+  }
+  .vlog-reading-pane {
+    padding: 0 28px 30px;
+  }
+  .vlog-inline-article h3 {
+    font-size: 28px;
+  }
+  .vlog-reader-summary {
+    font-size: 15px;
+  }
+}
+@media (max-width: 760px) {
+  .vlog-directory .vlog-section {
+    margin-top: 22px;
+  }
+  .vlog-section-heading {
+    align-items: start;
+    gap: 17px;
+    margin-bottom: 20px;
+  }
+  .vlog-section-heading h2 {
+    font-size: 27px;
+  }
+  .vlog-section-heading p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .vlog-section-heading .vlog-refresh {
+    font-size: 10px;
+    padding: 8px 12px;
+  }
+  .vlog-mailbox {
+    display: block;
+    height: min(780px, calc(100dvh - 150px));
+    min-height: 510px;
+    border-radius: 14px;
+  }
+  .vlog-index {
+    height: 100%;
+    border-right: 0;
+  }
+  .vlog-index-heading {
+    padding: 20px;
+  }
+  .vlog-message > strong {
+    font-size: 16px;
+  }
+  .vlog-message-preview {
+    font-size: 12px;
+  }
+  .vlog-mailbox .vlog-message {
+    padding: 20px 20px 17px 17px;
+  }
+  .vlog-message-meta time {
+    font-size: 10px;
+  }
+  .vlog-reading-pane {
+    display: none;
+    height: 100%;
+    padding: 0 23px 30px;
+  }
+  .vlog-mailbox.is-reading .vlog-index {
+    display: none;
+  }
+  .vlog-mailbox.is-reading .vlog-reading-pane {
+    display: block;
+  }
+  .vlog-reading-toolbar {
+    min-height: 62px;
+    margin-bottom: 26px;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+  .vlog-reading-toolbar .vlog-back-to-list {
+    display: block;
+    color: #a5dec9;
+    font-size: 11px;
+    background: transparent;
+    border: 0;
+    padding: 9px 0;
+    min-height: 38px;
+  }
+  .vlog-reading-label {
+    display: none;
+  }
+  .vlog-inline-article h3 {
+    font-size: 27px;
+    letter-spacing: -0.7px;
+  }
+  .vlog-reader-summary {
+    font-size: 14px;
+  }
+  .vlog-reader-body {
+    font-size: 15px;
+    line-height: 1.95;
+  }
+}

@@ -21,8 +21,9 @@ import {
   type VlogSummary,
 } from "../vlogs/client";
 import "../styles/vlogs.css";
+import { VlogMailbox } from "./VlogMailbox";
 
-type Hub = {
+export type Hub = {
   session: EditorSession | null;
   posts: VlogSummary[];
   loading: boolean;
@@ -33,7 +34,7 @@ type Hub = {
   logout: () => void;
   refresh: () => void;
   create: () => void;
-  read: (post: VlogSummary, edit?: boolean) => void;
+  edit: (post: VlogSummary) => void;
   remove: (post: VlogSummary) => void;
 };
 const VlogContext = createContext<Hub | null>(null);
@@ -45,12 +46,6 @@ const errorText = (error: unknown) =>
   error instanceof Error
     ? error.message
     : "Something went wrong. Please try again.";
-const dateLabel = (date: string) =>
-  new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(date));
 
 function Modal({
   title,
@@ -98,7 +93,7 @@ function Modal({
     >
       <div className="vlog-modal-heading">
         <div>
-          <p className="eyebrow">INTIMETEC / VLOGS</p>
+          <p className="eyebrow">Money Planner / VLOGS</p>
           <h2 id="vlogModalTitle">{title}</h2>
         </div>
         <button
@@ -131,7 +126,6 @@ export function VlogProvider({
   const [busy, setBusy] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [current, setCurrent] = useState<Vlog | null>(null);
   const [original, setOriginal] = useState<Vlog | undefined>();
   const [draft, setDraft] = useState<VlogDraft>({ ...blank });
   const [dirty, setDirty] = useState(false);
@@ -181,7 +175,6 @@ export function VlogProvider({
   useEffect(() => {
     if (!active) {
       setLoginOpen(false);
-      setCurrent(null);
       return;
     }
     void refresh();
@@ -209,27 +202,25 @@ export function VlogProvider({
     setOriginal(undefined);
     setFormError("");
   }
-  async function read(post: VlogSummary, edit = false) {
-    if (operation.current) return;
+  async function edit(post: VlogSummary) {
+    if (!session || operation.current) return;
     operation.current = true;
     setBusy(true);
     setError("");
     try {
       const result = await loadVlog(post, session || undefined);
       if (!mounted.current) return;
-      if (edit && session) {
-        draftId.current = result.id;
-        setDraft({
-          title: result.title,
-          summary: result.summary,
-          body: result.body,
-          videoUrl: result.videoUrl,
-        });
-        setOriginal(result);
-        setDirty(false);
-        setFormError("");
-        setEditorOpen(true);
-      } else setCurrent(result);
+      draftId.current = result.id;
+      setDraft({
+        title: result.title,
+        summary: result.summary,
+        body: result.body,
+        videoUrl: result.videoUrl,
+      });
+      setOriginal(result);
+      setDirty(false);
+      setFormError("");
+      setEditorOpen(true);
     } catch (problem) {
       if (mounted.current) setError(errorText(problem));
     } finally {
@@ -326,8 +317,8 @@ export function VlogProvider({
         setEditorOpen(true);
       }
     },
-    read: (post, edit) => {
-      void read(post, edit);
+    edit: (post) => {
+      void edit(post);
     },
     remove: (post) => {
       void remove(post);
@@ -440,28 +431,6 @@ export function VlogProvider({
           </form>
         </Modal>
       )}
-      {current && (
-        <Modal title={current.title} close={() => setCurrent(null)} wide>
-          <p className="vlog-byline">
-            {dateLabel(current.createdAt)}
-            {current.updatedAt !== current.createdAt
-              ? ` · Updated ${dateLabel(current.updatedAt)}`
-              : ""}
-          </p>
-          <p className="vlog-reader-summary">{current.summary}</p>
-          <div className="vlog-reader-body">{current.body}</div>
-          {current.videoUrl && (
-            <a
-              className="vlog-video"
-              href={current.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Watch the video <span aria-hidden="true">↗</span>
-            </a>
-          )}
-        </Modal>
-      )}
     </VlogContext.Provider>
   );
 }
@@ -495,8 +464,8 @@ function LoginModal({
   return (
     <Modal title="Publisher login" close={close} busy={busy}>
       <p className="vlog-helper">
-        For the INTIMETEC site publisher. Visitors can read every vlog without
-        logging in.
+        For the Money Planner site publisher. Visitors can read every vlog
+        without logging in.
       </p>
       {!publisherConfigured ? (
         <p className="vlog-error" role="status">
@@ -586,159 +555,5 @@ export function VlogAccountButton() {
 }
 
 export function VlogFeed() {
-  const hub = useHub();
-  const [query, setQuery] = useState("");
-  const [visible, setVisible] = useState(6);
-  const filtered = hub.posts.filter((post) =>
-    `${post.title} ${post.summary}`.toLowerCase().includes(query.toLowerCase()),
-  );
-  return (
-    <section className="vlog-section" aria-labelledby="vlogsTitle" id="vlogs">
-      <div className="vlog-section-heading">
-        <div>
-          <p className="eyebrow">IDEAS, UPDATES &amp; PERSPECTIVE</p>
-          <h2 id="vlogsTitle" tabIndex={-1}>
-            The INTIMETEC vlog
-          </h2>
-          <p>Money conversations, shared one post at a time.</p>
-        </div>
-        <button
-          type="button"
-          className="ghost"
-          disabled={hub.loading || hub.busy}
-          onClick={hub.refresh}
-        >
-          {hub.loading ? "Loading…" : "Refresh vlogs"}
-        </button>
-      </div>
-      {hub.notice && (
-        <p className="vlog-notice" role="status">
-          {hub.notice}
-        </p>
-      )}
-      {hub.error && (
-        <p className="vlog-error" role="alert">
-          {hub.error}
-        </p>
-      )}
-      {hub.posts.length > 0 && (
-        <label className="vlog-search">
-          Find a vlog
-          <input
-            type="search"
-            value={query}
-            placeholder="Search titles and introductions"
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setVisible(6);
-            }}
-          />
-        </label>
-      )}
-      {!hub.posts.length && !hub.loading && !hub.error && (
-        <div className="vlog-empty">
-          <span aria-hidden="true">✎</span>
-          <h3>A new conversation starts here.</h3>
-          <p>Our first vlog is on the way. Come back for updates and ideas.</p>
-          {hub.session && (
-            <button type="button" className="primary" onClick={hub.create}>
-              Write the first vlog
-            </button>
-          )}
-        </div>
-      )}
-      {hub.loading && !hub.posts.length && (
-        <p className="vlog-helper" role="status">
-          Loading the latest vlogs…
-        </p>
-      )}
-      {hub.posts.length > 0 && !filtered.length && (
-        <p className="vlog-helper">No vlogs match your search.</p>
-      )}
-      <div className="vlog-grid">
-        {filtered.slice(0, visible).map((post, index) => (
-          <article className="vlog-card" key={post.id}>
-            <div className="vlog-card-cover" aria-hidden="true">
-              <span className="vlog-cover-label">MONEY IN PERSPECTIVE</span>
-              <svg viewBox="0 0 240 160" fill="none">
-                <circle cx="120" cy="80" r="61" />
-                <circle cx="120" cy="80" r="43" />
-                <path d="M30 119L76 93L111 108L154 58L208 34" />
-                <path d="M187 34H208V55" />
-                <circle cx="76" cy="93" r="4" />
-                <circle cx="154" cy="58" r="4" />
-              </svg>
-              <span className="vlog-cover-caption">
-                {post.videoUrl
-                  ? "Watch. Read. Reflect."
-                  : "A fresh perspective."}
-              </span>
-            </div>
-            <div className="vlog-card-content">
-              <div className="vlog-card-top">
-                <span className="vlog-kind">
-                  {index === 0 && !query ? "LATEST · " : ""}
-                  {post.videoUrl ? "VIDEO & STORY" : "STORY"}
-                </span>
-                <time dateTime={post.createdAt}>
-                  {dateLabel(post.createdAt)}
-                </time>
-              </div>
-              <h3>
-                <button
-                  type="button"
-                  className="vlog-title-button"
-                  onClick={() => hub.read(post)}
-                  disabled={hub.busy}
-                >
-                  {post.title}
-                </button>
-              </h3>
-              <p>{post.summary}</p>
-              <div className="vlog-card-bottom">
-                <button
-                  type="button"
-                  className="vlog-read"
-                  disabled={hub.busy}
-                  onClick={() => hub.read(post)}
-                >
-                  Read vlog <span aria-hidden="true">↗</span>
-                </button>
-              </div>
-              {hub.session && (
-                <div className="vlog-owner-actions">
-                  <button
-                    type="button"
-                    disabled={hub.busy}
-                    onClick={() => hub.read(post, true)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    disabled={hub.busy}
-                    onClick={() => hub.remove(post)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
-      {filtered.length > visible && (
-        <button
-          type="button"
-          className="vlog-more"
-          onClick={() => setVisible((count) => count + 6)}
-        >
-          Show more vlogs ({filtered.length - visible})
-        </button>
-      )}
-      <p className="vlog-feed-foot">
-        Published posts are public. Refresh to check for the latest updates.
-      </p>
-    </section>
-  );
+  return <VlogMailbox hub={useHub()} />;
 }

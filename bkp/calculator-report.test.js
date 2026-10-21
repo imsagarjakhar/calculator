@@ -2,9 +2,11 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),R=require('./calculator-report'),G=require('./growth-engine'),F=require('./freedom-engine'),S=require('./survival-engine');
 const now=new Date('2026-10-19T12:34:56Z'),event={name:'</script><img src=x onerror=alert(1)>',amount:10000,year:2,month:3,inflate:true,enabled:true};
 const events=[event,{...event,name:'Paused',enabled:false},{...event,name:'Later',year:120}];
-const raw=html=>JSON.parse(html.match(/<script id="intimetec-calculation-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+const raw=html=>JSON.parse(html.match(/<script id="money-planner-calculation-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
 const canonical=value=>JSON.parse(JSON.stringify(value,(_key,n)=>typeof n==='number'&&!Number.isFinite(n)?String(n):n));
 function check(html,kind,inputs,results){
+ assert.ok(!/intimetec/i.test(html),'New reports must not contain old branding');
+ assert.deepEqual(R.read(html.replaceAll('money-planner-calculation','intimetec-calculation'),kind).inputs,inputs,'Legacy reports remain importable');
  const saved=raw(html);assert.equal(saved.calculator,kind);assert.equal(saved.savedAt,now.toISOString());assert.deepEqual(saved.inputs,inputs);assert.deepEqual(saved.results,canonical(results));assert.deepEqual(saved.events,events);
  assert.equal((html.match(/<script\b/g)||[]).length,1);assert.ok(html.includes("script-src 'none'"));assert.ok(!html.includes('<img src='));assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));assert.ok(!html.includes('<script src='));assert.ok(!html.includes('<link rel='));assert.ok(html.includes('@media print'));assert.ok(html.includes('Saved calculation data'));assert.ok(!html.includes('NaN'));
  for(const row of html.matchAll(/<tr>(.*?)<\/tr>/g))assert.ok((row[1].match(/<t[dh][\s>]/g)||[]).length>=2);

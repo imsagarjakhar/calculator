@@ -208,7 +208,7 @@ export function LoanPage() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = "intimetec-loan-payoff.json";
+    a.download = "money-planner-loan-payoff.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -238,7 +238,7 @@ export function LoanPage() {
       <nav className="budget-nav" aria-label="Planner navigation">
         <a href={plannerHref("home")}>← All planners</a>
         <a className="budget-brand" href={plannerHref("home")}>
-          INTIMETEC <span>/ THE DEBT & WEALTH LAB</span>
+          Money Planner <span>/ THE DEBT & WEALTH LAB</span>
         </a>
         <span className="budget-preview">Standalone preview</span>
       </nav>
@@ -1189,7 +1189,7 @@ export function LoanPage() {
         </div>
       </section>
       <footer className="budget-foot">
-        <span>INTIMETEC / LESS GUESSWORK, MORE DIRECTION</span>
+        <span>Money Planner / LESS GUESSWORK, MORE DIRECTION</span>
         <p>
           An educational scenario model using your inputs. These resources
           inform the methods; the authors do not endorse this tool. No

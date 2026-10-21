@@ -8,7 +8,7 @@
   const screen = get('survivalScreen');
   screen.innerHTML = `
     <header class="planner-header survival-header">
-<div class="planner-header-copy"><p class="eyebrow">INTIMETEC / CORPUS SURVIVAL</p><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="planner-header-description">Your savings, monthly spending and the years ahead. See what your corpus could support.</p><span class="planner-header-badge">Private calculations · No account needed</span></div>
+<div class="planner-header-copy"><p class="eyebrow">Money Planner / CORPUS SURVIVAL</p><h1 id="survivalTitle" tabindex="-1">How long will your money last?</h1><p class="planner-header-description">Your savings, monthly spending and the years ahead. See what your corpus could support.</p><span class="planner-header-badge">Private calculations · No account needed</span></div>
 <div class="planner-toolbar" role="group" aria-label="Corpus Survival plan controls">
 <div class="planner-toolbar-top"><label class="planner-currency" for="s-currency">Plan currency<select id="s-currency"><option value="INR">INR — ₹</option><option value="SAR">SAR — ر.س</option><option value="USD">USD — $</option><option value="AED">AED — د.إ</option><option value="EUR">EUR — €</option><option value="GBP">GBP — £</option></select></label><span class="planner-toolbar-label">YOUR PLAN</span></div>
 <p class="planner-currency-note">Amounts keep their values. No currency conversion.</p>

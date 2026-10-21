@@ -228,7 +228,7 @@ Date and month fields in the React Custom and Bucket planners use the shared `Da
 
 ## Search visibility and release checks
 
-The preferred brand is **INTIMETEC Money Planner**, with INTIMETEC and intimetec.org as site-name alternatives. It describes this financial planning site; do not copy another company's profile, reviews, address or social accounts into structured data.
+The site uses the neutral name **Money Planner**, with **intimetec.org** retained as its domain and domain-only site-name alternative. Do not add the former company-style name to visible labels, metadata, structured-data aliases or new reports. Existing local-storage keys and legacy import aliases remain internal compatibility identifiers. Do not copy another company's profile, reviews, address or social accounts into structured data.
 
 `src/content/search.mts` is the shared source of titles, descriptions, canonical URLs and JSON-LD. Vite applies it to every HTML entry in development and production. The browser updates Growth/Survival metadata when their history-based navigation changes the screen. The homepage uses real links to calculators, including when JavaScript is disabled.
 
@@ -239,13 +239,15 @@ After deploying to intimetec.org:
 1. Add the **Domain property** `intimetec.org` in [Google Search Console](https://search.google.com/search-console). Copy the exact Google-provided TXT verification record into GoDaddy DNS. Keep the existing GitHub Pages DNS records.
 2. After verification, submit `https://intimetec.org/sitemap.xml` under **Sitemaps**.
 3. Inspect `https://intimetec.org/` using **URL inspection**, run **Test live URL**, then **Request indexing**. Inspect `/growth/`, `/survival/`, `/custom-plan/` and `/freedom/` as well. Do this after the new deployment has succeeded.
-4. Review **Page indexing** for crawl/canonical problems and **Performance** for queries containing `intimetec`. Track impressions, clicks and average position over time rather than relying on one personalised search.
+4. Review **Page indexing** for crawl/canonical problems and **Performance** for queries containing `Money Planner`. Track impressions, clicks and average position over time rather than relying on one personalised search.
 
 Google decides what it indexes and how it ranks results. These changes improve crawlability and brand clarity; they cannot guarantee first place or a particular indexing date. Earn relevant mentions and links from real users or sites; avoid paid link schemes, keyword stuffing and fake review/rating markup.
 
 References: [Google's JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [site-name guidance](https://developers.google.com/search/docs/appearance/site-names), and [Search Console setup](https://developers.google.com/search/docs/monitor-debug/search-console-start).
 
 ## Runtime vlogs: one-time setup
+
+The vlog directory uses a mailbox layout: all posts appear in a searchable, scrollable list and the selected article opens in the adjacent reading pane. On mobile, selection opens the reader with an **All vlogs** button back to the list. Refresh preserves the selected post when it still exists; changed or removed posts reload or select the next available entry. Article requests ignore obsolete responses and provide retry on failure. Public author metadata is hidden. Publishing/login remain dialogs; public reading is inline. `VlogMailbox.tsx` and `vlog-mailbox.css` contain this view separately from the publisher controls.
 
 The homepage has a **Login** button, a publisher editor, and a public vlog feed. Posts are individual JSON files in [imsagarjakhar/vlog](https://github.com/imsagarjakhar/vlog), with a small index at `vlogs/index.json`. Publishing, editing and removal run at runtime: the Worker commits the post file and index together, without triggering this website's deployment. Visitors do not need an account. Video posts use an optional HTTPS link; this version does not upload or embed video files.
 
