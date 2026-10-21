@@ -81,6 +81,9 @@ function githubFixture({ conflict = false, loseReply = false } = {}) {
       headers: { "Content-Type": "application/json" },
     });
   const fetch = async (input, options) => {
+    // Workerd rejects this browser-only RequestInit property before sending HTTP.
+    if (Object.hasOwn(options, "credentials"))
+      throw new Error("The 'credentials' field on 'RequestInitializerDict' is not implemented.");
     const url = new URL(input);
     assert.equal(url.origin, "https://api.github.com");
     assert.equal(options.headers.Authorization, "Bearer " + githubToken);

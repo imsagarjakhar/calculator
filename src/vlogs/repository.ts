@@ -42,18 +42,22 @@ async function jsonRequest(
   url: string,
   options: RequestInit = {},
   missingIsEmpty = false,
+  serverSide = false,
 ) {
   let response: Response;
   try {
     response = await fetch(url, {
       ...options,
-      credentials: "omit",
+      // Workers have no browser cookie jar and reject the credentials option.
+      ...(serverSide ? {} : { credentials: "omit" as RequestCredentials }),
       redirect: "error",
       signal: AbortSignal.timeout(20000),
     });
   } catch {
     throw new Error(
-      "Could not connect to GitHub. Check your connection and try again.",
+      serverSide
+        ? "The publishing API could not reach GitHub. Please try again; your draft is still here."
+        : "Could not connect to GitHub. Check your connection and try again.",
     );
   }
   if (missingIsEmpty && response.status === 404) return null;
@@ -90,6 +94,7 @@ function api(
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     },
     missingIsEmpty,
+    Boolean(session),
   );
 }
 function plain(value: unknown, max: number, required = true): string {
