@@ -50,7 +50,8 @@ async function jsonRequest(
       ...options,
       // Workers have no browser cookie jar and reject the credentials option.
       ...(serverSide ? {} : { credentials: "omit" as RequestCredentials }),
-      redirect: "error",
+      // Workerd only supports follow/manual; never forward the token on redirects.
+      redirect: serverSide ? "manual" : "error",
       signal: AbortSignal.timeout(20000),
     });
   } catch {
@@ -60,6 +61,10 @@ async function jsonRequest(
         : "Could not connect to GitHub. Check your connection and try again.",
     );
   }
+  if (serverSide && response.status >= 300 && response.status < 400)
+    throw new Error(
+      "GitHub redirected the publishing request. Check the configured repository owner and name; your draft is still here.",
+    );
   if (missingIsEmpty && response.status === 404) return null;
   if (!response.ok) throw new Error(message(response.status));
   const text = await response.text();

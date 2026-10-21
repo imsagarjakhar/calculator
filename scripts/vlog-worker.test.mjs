@@ -84,6 +84,8 @@ function githubFixture({ conflict = false, loseReply = false } = {}) {
     // Workerd rejects this browser-only RequestInit property before sending HTTP.
     if (Object.hasOwn(options, "credentials"))
       throw new Error("The 'credentials' field on 'RequestInitializerDict' is not implemented.");
+    if (options.redirect !== "follow" && options.redirect !== "manual")
+      throw new TypeError('Invalid redirect value, must be one of "follow" or "manual"');
     const url = new URL(input);
     assert.equal(url.origin, "https://api.github.com");
     assert.equal(options.headers.Authorization, "Bearer " + githubToken);
@@ -281,6 +283,38 @@ test("authenticated publishing commits UTF-8 post and index together, then edits
     globalThis.fetch = originalFetch;
   }
 });
+test("publisher rejects GitHub redirects without forwarding credentials or writing", async () => {
+  const bindings = env();
+  const session = await login(bindings);
+  const originalFetch = globalThis.fetch;
+  try {
+    for (const status of [301, 302, 303, 307, 308]) {
+      const requests = [];
+      globalThis.fetch = async (input, options) => {
+        requests.push({ input, options });
+        assert.equal(options.redirect, "manual");
+        return new Response(null, {
+          status,
+          headers: { Location: "https://other.example/repository" },
+        });
+      };
+      const response = await call(
+        "/posts",
+        bindings,
+        { draft, newId: postId },
+        session.token,
+      );
+      assert.equal(response.status, 502);
+      assert.match((await response.json()).error, /redirected.*draft is still here/);
+      assert.equal(requests.length, 1);
+      assert.equal(new URL(requests[0].input).origin, "https://api.github.com");
+      assert.equal(requests[0].options.method, "GET");
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("a conflicting branch update leaves public files unchanged", async () => {
   const bindings = env();
   const session = await login(bindings);
