@@ -132,7 +132,10 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               Find my freedom age <span aria-hidden="true">↗</span>
             </span>
           </a>
-          <a className="choice bucket-choice" href={plannerHref("bucket-plan")}>
+          <a
+            className="choice retirement-choice"
+            href={plannerHref("bucket-plan")}
+          >
             <span className="choice-icon" aria-hidden="true">
               <svg
                 viewBox="0 0 48 48"
@@ -149,30 +152,42 @@ export function HomeContent({ active = true }: { active?: boolean }) {
                 <path d="M13 30q11 5 22 0"></path>
               </svg>
             </span>
-            <span className="eyebrow">
-              05 / GIVE YOUR RETIREMENT MONEY A PLAN
-            </span>
+            <span className="eyebrow">05 / PLAN YOUR RETIREMENT</span>
             <strong>Retirement Bucket Planner</strong>
             <span className="choice-copy">
-              Split your savings into living costs, emergencies and long-term
-              growth. Watch withdrawals, inflation and refills work month by
-              month.
+              Plan living costs, emergencies and long-term growth with three
+              retirement buckets.
             </span>
             <span className="choice-link">
               Plan my retirement buckets <span aria-hidden="true">↗</span>
             </span>
           </a>
-          <a className="choice bucket-choice vlog-choice" href="#vlogs">
+          <a
+            className="choice salary-choice"
+            href={plannerHref("salary-budget")}
+          >
+            <span className="choice-icon" aria-hidden="true">
+              ▤
+            </span>
+            <span className="eyebrow">06 / PLAN YOUR PAYDAY</span>
+            <strong>Monthly Salary &amp; Budget Planner</strong>
+            <span className="choice-copy">
+              Balance your salary, bills and savings. See what a year of
+              investing could become.
+            </span>
+            <span className="choice-link">
+              Plan my monthly budget <span aria-hidden="true">↗</span>
+            </span>
+          </a>
+          <a className="choice vlog-choice" href="#vlogs">
             <span className="choice-icon" aria-hidden="true">
               ▷
             </span>
-            <span className="eyebrow">
-              06 / IDEAS, UPDATES &amp; PERSPECTIVE
-            </span>
+            <span className="eyebrow">07 / IDEAS &amp; PERSPECTIVE</span>
             <strong>Vlogs</strong>
             <span className="choice-copy">
-              Explore money conversations, practical ideas and the latest
-              updates. Browse all our vlogs in one place.
+              Money conversations, practical ideas and the latest updates, all
+              in one place.
             </span>
             <span className="choice-link">
               View all vlogs <span aria-hidden="true">↗</span>

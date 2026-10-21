@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  "salary-budget": {
+    title: "Monthly Salary & Budget Planner | INTIMETEC",
+    description:
+      "Plan your take-home salary, expenses, upcoming bills, emergency savings and goals. Explore a one-year monthly investment projection using your return assumption.",
+    name: "Monthly Salary & Budget Planner",
+  },
   home: {
     title: "INTIMETEC Money Planner | Free SIP, Loan & Retirement Calculators",
     description:

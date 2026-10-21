@@ -4,6 +4,12 @@ The `react` branch runs all five calculators through React, TypeScript and Vite,
 
 ## 1. Prepare your computer
 
+The **Monthly Salary & Budget Planner** is a standalone preview at `/salary-budget/`, linked from the homepage. Its React UI is `src/pages/BudgetPage.tsx`; calculations and saved-plan validation are in `src/budget/model.ts`. It uses the isolated browser key `intimetec-salary-budget-v1` and exports a JSON snapshot. It has no bank connection or server storage. Currency changes relabel amounts without converting them.
+
+The monthly budget counts essential and optional expenses, bill reserves, emergency contributions, goal contributions, investments and the cash buffer once each. A bill reserve is the unfunded amount divided by months until due. The emergency target includes essential expenses and bill reserves. Recorded actual spending is a separate comparison and does not replace planned allocations.
+
+The one-year projection assumes twelve equal month-end contributions, starting at zero, and converts the effective annual return to `(1 + return / 100)^(1/12) - 1`. Cash savings, taxes, fees and inflation are excluded from that investment corpus. Allocations are held constant; users should review them after a goal or bill is funded. The preview is `noindex` and excluded from the sitemap. `npm run test:budget` checks the model; `e2e/budget.spec.ts` covers desktop/mobile editing, persistence, projections, bill reserves and export.
+
 Install Node.js **22.12 or newer** (Node 22 or 24 LTS) from [nodejs.org](https://nodejs.org/en/download), then close and reopen the VS Code terminal. The old Node 18 installation cannot run this build toolchain.
 
 From the project directory:

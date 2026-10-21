@@ -51,7 +51,7 @@ try {
     );
   }
   console.log(
-    "Six pages pre-rendered: homepage, calculator introductions and links available without JavaScript.",
+    "Homepage and calculator introductions pre-rendered with links available without JavaScript.",
   );
 } finally {
   await server.close();

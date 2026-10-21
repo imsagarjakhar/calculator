@@ -1320,6 +1320,35 @@ header {
 }
 
 /* Landing page benefits and transparent projections. */
+.retirement-choice,
+.salary-choice,
+.vlog-choice {
+  border: 1px solid var(--line);
+  line-height: 1.3;
+}
+.retirement-choice {
+  background: linear-gradient(125deg, #163e3e, #1d3048);
+}
+.retirement-choice .choice-icon {
+  color: #70e2c9;
+  background: #1c514a;
+}
+.retirement-choice > .eyebrow,
+.retirement-choice > .choice-link {
+  color: #70e2c9;
+}
+.planner-choices .salary-choice {
+  background: linear-gradient(125deg, #293e39, #193848);
+  border-color: #49665c;
+}
+.salary-choice .choice-icon {
+  color: #e1ce9b;
+  background: #3c4e3e;
+}
+.salary-choice > .eyebrow,
+.salary-choice > .choice-link {
+  color: #d8d7ab;
+}
 .planner-choices .choice {
   color: var(--ink);
   text-decoration: none;
