@@ -15,7 +15,6 @@ import {
   logIn,
   publishVlog,
   publisherConfigured,
-  repository,
   type EditorSession,
   type Vlog,
   type VlogDraft,
@@ -161,7 +160,7 @@ export function VlogProvider({
       mounted.current = false;
     };
   }, []);
-  async function refresh(fresh = false) {
+  async function refresh(fresh = true) {
     if (refreshing.current) return;
     refreshing.current = true;
     const startedAt = revision.current;
@@ -474,7 +473,7 @@ function LoginModal({
   close: () => void;
   success: (session: EditorSession) => void;
 }) {
-  const [username, setUsername] = useState(repository.owner);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

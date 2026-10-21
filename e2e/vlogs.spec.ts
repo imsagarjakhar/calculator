@@ -51,7 +51,8 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
     expect(route.request().headers().authorization).toBeUndefined();
     if (url.pathname.endsWith("index.json"))
       return route.fulfill({
-        json: { version: 1, posts: posts.map(metadata) },
+        // Simulate GitHub's raw CDN still serving the older, single-post feed.
+        json: { version: 1, posts: posts.slice(0, 1).map(metadata) },
       });
     const post = posts.find((item) => url.pathname.endsWith(item.id + ".json"));
     return route.fulfill({ json: post });
@@ -209,6 +210,12 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   });
   await page.goto(app);
   await page.getByRole("button", { name: "Login", exact: false }).click();
+  await expect(
+    page.getByLabel("Publisher username", { exact: true }),
+  ).toHaveValue("");
+  await page
+    .getByLabel("Publisher username", { exact: true })
+    .fill("imsagarjakhar");
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Log in", exact: true }).click();
   await expect(
