@@ -6,7 +6,7 @@ The `react` branch runs all five calculators through React, TypeScript and Vite,
 
 ### Loan payoff preview
 
-`/loan-payoff/` is a standalone, `noindex` preview with a standard homepage card. `src/loans/model.ts` implements the comparison and `src/pages/LoanPage.tsx` provides the UI. The isolated local storage key is `intimetec-loan-payoff-v1`; JSON exports can be imported again. Reading an existing salary budget excludes its EMI category from living costs and clears sample loans, so users enter real lender balances without double-counting debt payments.
+`/loan-payoff/` is a standalone public calculator with a standard homepage card. `src/loans/model.ts` implements the comparison and `src/pages/LoanPage.tsx` provides the UI. The isolated local storage key is `intimetec-loan-payoff-v1`; JSON exports can be imported again. Reading an existing salary budget excludes its EMI category from living costs and clears sample loans, so users enter real lender balances without double-counting debt payments.
 
 Every strategy uses the initial required EMIs plus the chosen extra monthly amount. Fixed monthly interest accrues first, required payments follow, then extra principal and any proportional prepayment fees; unused cash and tax credits are invested at month end. Paid-off EMIs remain in the commitment. Prepayments reduce tenure, not scheduled EMI size. Lock-ins block extra payments for their entered duration. Interest tax relief uses an effective user-entered percentage and is modeled as a monthly cash refund. Investment fees reduce the effective annual return multiplicatively; investment tax is applied to positive total gains at the chosen horizon. No jurisdiction-specific tax rules or guaranteed returns are built in.
 
@@ -18,7 +18,7 @@ The **Monthly Salary & Budget Planner** is a standalone preview at `/salary-budg
 
 The monthly budget counts essential and optional expenses, bill reserves, emergency contributions, goal contributions, investments and the cash buffer once each. A bill reserve is the unfunded amount divided by months until due. The emergency target includes essential expenses and bill reserves. Recorded actual spending is a separate comparison and does not replace planned allocations.
 
-The one-year projection assumes twelve equal month-end contributions, starting at zero, and converts the effective annual return to `(1 + return / 100)^(1/12) - 1`. Cash savings, taxes, fees and inflation are excluded from that investment corpus. Allocations are held constant; users should review them after a goal or bill is funded. The preview is `noindex` and excluded from the sitemap. `npm run test:budget` checks the model; `e2e/budget.spec.ts` covers desktop/mobile editing, persistence, projections, bill reserves and export.
+The one-year projection assumes twelve equal month-end contributions, starting at zero, and converts the effective annual return to `(1 + return / 100)^(1/12) - 1`. Cash savings, taxes, fees and inflation are excluded from that investment corpus. Allocations are held constant; users should review them after a goal or bill is funded. The salary budget page is indexable and included in the sitemap. `npm run test:budget` checks the model; `e2e/budget.spec.ts` covers desktop/mobile editing, persistence, projections, bill reserves and export.
 
 Install Node.js **22.12 or newer** (Node 22 or 24 LTS) from [nodejs.org](https://nodejs.org/en/download), then close and reopen the VS Code terminal. The old Node 18 installation cannot run this build toolchain.
 
@@ -232,7 +232,7 @@ The site uses the neutral name **Money Planner**, with **intimetec.org** retaine
 
 `src/content/search.mts` is the shared source of titles, descriptions, canonical URLs and JSON-LD. Vite applies it to every HTML entry in development and production. The browser updates Growth/Survival metadata when their history-based navigation changes the screen. The homepage uses real links to calculators, including when JavaScript is disabled.
 
-`npm run build` pre-renders the public homepage from its actual React component and creates short, relevant calculator introductions. A shared visible footer provides calculator links and method/privacy information on every page. This needs no database, browser download or server at deployment. Financial inputs and saved browser plans are never used for pre-rendering. CSP and resource integrity are applied after pre-rendering. The experimental bucket page stays `noindex` and out of the sitemap.
+`npm run build` pre-renders the public homepage from its actual React component and creates short, relevant calculator introductions. A shared visible footer provides calculator links and method/privacy information on every page. This needs no database, browser download or server at deployment. Financial inputs and saved browser plans are never used for pre-rendering. CSP and resource integrity are applied after pre-rendering. All seven public calculator pages are indexable and listed in the sitemap.
 
 After deploying to intimetec.org:
 
@@ -324,3 +324,12 @@ Visitors load the feed from GitHub at runtime. It refreshes while the homepage i
 After setup, publish one non-sensitive test vlog, verify it in a separate logged-out browser, edit it, and remove it. No live post or repository write has been performed by the local tests. See [SECURITY.md](SECURITY.md) for the trust boundary.
 
 References: [GitHub repository contents](https://docs.github.com/en/rest/repos/contents), [Git database API](https://docs.github.com/en/rest/git), [Cloudflare rate-limit bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/), and [Cloudflare deployment action](https://github.com/cloudflare/wrangler-action).
+
+
+### Financial planning search coverage
+
+The homepage includes an original, visible financial planning guide, linked calculators, a budgeting example and links to primary financial education sources. The same guide is pre-rendered without JavaScript. `src/content/search.mts` supplies titles, descriptions, canonical URLs and structured data; the Vite metadata plugin also inserts missing social and description tags on newer pages. `public/sitemap.xml` lists the homepage and all seven public calculators. Keep it aligned with the public routes when adding a page.
+
+After deploying, verify domain ownership in Google Search Console, submit `https://intimetec.org/sitemap.xml`, and request indexing for the homepage and new calculator URLs. Review impressions, queries and indexing reports after Google recrawls. These code changes do not submit URLs or verify ownership, and do not guarantee rankings or inclusion in AI Overviews. Do not fabricate author qualifications, reviews or review dates.
+
+Implementation references: [Google SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide), [AI features](https://developers.google.com/search/docs/appearance/ai-features), and [sitemap submission](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).

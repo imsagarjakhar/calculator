@@ -27,17 +27,30 @@ function searchMetadata(): Plugin {
         /<title>[\s\S]*?<\/title>/,
         `<title>${escape(info.title)}</title>`,
       );
-      html = html.replace(
-        /<meta\b[^>]*\b(?:name|property)="(description|og:title|og:description|og:url|twitter:title|twitter:description)"[^>]*>/g,
-        (tag, name: string) => {
-          const value = name.endsWith("title")
-            ? info.title
-            : name === "og:url"
-              ? canonicalUrl(page)
-              : info.description;
-          return tag.replace(/content="[^"]*"/, `content="${escape(value)}"`);
-        },
-      );
+      // Upsert metadata so new entry points receive the same complete SEO tags.
+      const metadata: [string, string, string][] = [
+        ["name", "description", info.description],
+        ["name", "robots", "index, follow, max-image-preview:large"],
+        ["property", "og:type", "website"],
+        ["property", "og:locale", "en_US"],
+        ["property", "og:site_name", "Money Planner"],
+        ["property", "og:title", info.title],
+        ["property", "og:description", info.description],
+        ["property", "og:url", canonicalUrl(page)],
+        ["name", "twitter:card", "summary"],
+        ["name", "twitter:title", info.title],
+        ["name", "twitter:description", info.description],
+      ];
+      for (const [attribute, name, value] of metadata) {
+        const tag = `<meta ${attribute}="${name}" content="${escape(value)}" />`;
+        const pattern = new RegExp(
+          `<meta\\b[^>]*\\b${attribute}="${name}"[^>]*>`,
+          "g",
+        );
+        html = pattern.test(html)
+          ? html.replace(pattern, tag)
+          : html.replace("</head>", tag + "\n</head>");
+      }
       html = html.replace(
         /<link rel="canonical"[^>]*>/,
         `<link rel="canonical" href="${canonicalUrl(page)}" />`,

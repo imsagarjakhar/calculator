@@ -13,9 +13,9 @@ export const searchPages = {
     name: "Monthly Salary & Budget Planner",
   },
   home: {
-    title: "Money Planner | Free SIP, Loan & Retirement Calculators",
+    title: "Financial Planning Guide & Free Calculators | Money Planner",
     description:
-      "Plan with Money Planner at intimetec.org. Free SIP growth, loan EMI, retirement and financial freedom calculators with private, browser-based projections.",
+      "Learn how to do financial planning: budget your salary, build emergency savings, compare loan payoff with investing and plan retirement with free calculators.",
     name: "Money Planner",
   },
   growth: {
@@ -77,10 +77,24 @@ export function searchGraph(page: SearchPage) {
         inLanguage: "en",
         ...(page !== "home"
           ? { breadcrumb: { "@id": url + "#breadcrumb" } }
-          : {}),
+          : { mainEntity: { "@id": url + "#calculators" } }),
       },
       ...(page === "home"
-        ? []
+        ? [
+            {
+              "@type": "ItemList",
+              "@id": url + "#calculators",
+              name: "Free financial planning calculators",
+              itemListElement: (Object.keys(searchPages) as SearchPage[])
+                .filter((key) => key !== "home")
+                .map((key, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  name: searchPages[key].name,
+                  url: canonicalUrl(key),
+                })),
+            },
+          ]
         : [
             {
               "@type": "BreadcrumbList",

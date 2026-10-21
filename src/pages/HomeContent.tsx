@@ -1,3 +1,4 @@
+import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { plannerHref } from "../runtime/routes";
 import { useEffect, useState } from "react";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
@@ -38,14 +39,13 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         <div className="welcome-intro">
           <span className="welcome-kicker">Money Planner</span>
           <h1 id="welcomeTitle" tabIndex={-1}>
-            Smarter money moves.
+            Financial planning.
             <br />A clearer future.
           </h1>
           <p>
-            Turn “what if?” into a plan you can see with Money Planner's free
-            financial calculators. Explore your SIP, investments, loans and
-            retirement together—with instant projections that respond to your
-            assumptions.
+            Make a monthly budget, compare paying off loans with investing, and
+            plan for retirement. Use free financial planning calculators to see
+            how your choices and assumptions could shape your future.
           </p>
           <div className="welcome-benefits" aria-label="Planner features">
             <span>Instant insights</span>
@@ -210,56 +210,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </span>
           </a>
         </div>
-        <section className="planner-guide" aria-labelledby="plannerGuideTitle">
-          <h2 id="plannerGuideTitle">
-            Financial clarity, one scenario at a time
-          </h2>
-          <p>
-            Choose a calculator to explore your next money decision. Each tool
-            lets you adjust assumptions and see how they affect your projected
-            finances.
-          </p>
-          <h3>SIP and investment growth calculator</h3>
-          <p>
-            <a href={plannerHref("growth")}>Use the SIP growth calculator</a> to
-            estimate future investment value from a monthly SIP, annual
-            increases and one-time deposits. Include existing assets, loans and
-            planned life expenses to explore projected net wealth.
-          </p>
-          <h3>Retirement withdrawals and savings calculator</h3>
-          <p>
-            <a href={plannerHref("survival")}>
-              Use the retirement withdrawal calculator
-            </a>{" "}
-            to estimate how long your current savings may support regular
-            withdrawals. Adjust inflation, expected returns and future expenses
-            to compare scenarios.
-          </p>
-          <h3>Financial freedom age calculator</h3>
-          <p>
-            <a href={plannerHref("freedom")}>
-              Explore your financial freedom age
-            </a>{" "}
-            using your current corpus, monthly SIP, yearly step-up and desired
-            monthly income. Change expected return and inflation to explore the
-            modelled freedom age, including future expenses.
-          </p>
-          <h3>Loan EMI and monthly planning calculator</h3>
-          <p>
-            <a href={plannerHref("custom-plan")}>
-              Open Money Planner Custom Plan
-            </a>{" "}
-            to enter an original loan amount, interest rate, total tenure and
-            loan dates. Calculate paid months, remaining EMIs and estimated
-            outstanding principal, then plan extra repayments alongside monthly
-            investments.
-          </p>
-          <p className="helper">
-            These tools provide educational illustrations using your
-            assumptions. Actual returns, lender balances and payment schedules
-            may differ. Calculations run in your browser; no account is needed.
-          </p>
-        </section>
+        <FinancialPlanningGuide />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
           <div className="eyebrow">UNDERSTAND YOUR INSIGHTS</div>
           <h2 id="planningQuestions">Smart planning, explained.</h2>

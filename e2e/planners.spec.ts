@@ -79,9 +79,7 @@ test("clean routes support navigation, reloads, browser history and old bookmark
   page,
 }, info) => {
   await page.goto(appPath("/"));
-  await expect(page.locator("h1:visible")).toContainText(
-    "Smarter money moves.",
-  );
+  await expect(page.locator("h1:visible")).toContainText("Financial planning.");
   await page
     .getByText("Is this an AI financial planner?", { exact: true })
     .click();
@@ -134,8 +132,10 @@ test("search engines can read content, links and consistent metadata without Jav
   try {
     await staticPage.goto(appPath("/"));
     await expect(staticPage.locator("#welcomeTitle")).toContainText(
-      "Smarter money moves",
+      "Financial planning",
     );
+    await expect(staticPage.locator("#financialPlanningTitle")).toHaveText("How to do financial planning, step by step");
+    await expect(staticPage.locator(".planning-steps > li")).toHaveCount(6);
     await expect(staticPage.locator(".welcome-kicker")).toHaveText(
       "Money Planner",
     );
@@ -155,6 +155,9 @@ test("search engines can read content, links and consistent metadata without Jav
       "survival/",
       "custom-plan/",
       "freedom/",
+      "bucket-plan/",
+      "salary-budget/",
+      "loan-payoff/",
     ]) {
       await staticPage.goto(appPath(route));
       const canonical = "https://intimetec.org/" + route;
@@ -164,6 +167,19 @@ test("search engines can read content, links and consistent metadata without Jav
       );
       const title = await staticPage.title();
       expect(title).toContain("Money Planner");
+      const description = staticPage.locator('meta[name="description"]');
+      await expect(description).toHaveCount(1);
+      const descriptionText = await description.getAttribute("content");
+      expect(descriptionText!.length).toBeGreaterThan(60);
+      for (const [attribute, name, value] of [
+        ["property", "og:title", title], ["property", "og:description", descriptionText!],
+        ["property", "og:url", canonical], ["name", "twitter:title", title],
+        ["name", "twitter:description", descriptionText!],
+      ]) {
+        const tag = staticPage.locator(`meta[${attribute}="${name}"]`);
+        await expect(tag).toHaveCount(1);
+        await expect(tag).toHaveAttribute("content", value);
+      }
       const graph = JSON.parse(
         (await staticPage
           .locator('script[type="application/ld+json"]')
@@ -178,7 +194,7 @@ test("search engines can read content, links and consistent metadata without Jav
       await expect(
         staticPage.locator('meta[name="robots"]'),
       ).not.toHaveAttribute("content", /noindex/);
-      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(4);
+      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(8);
     }
     const sitemap = await (await request.get(appPath("sitemap.xml"))).text();
     for (const route of [
@@ -187,6 +203,9 @@ test("search engines can read content, links and consistent metadata without Jav
       "survival/",
       "custom-plan/",
       "freedom/",
+      "bucket-plan/",
+      "salary-budget/",
+      "loan-payoff/",
     ])
       expect(sitemap).toContain(`<loc>https://intimetec.org/${route}</loc>`);
   } finally {

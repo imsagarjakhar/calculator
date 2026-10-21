@@ -55,7 +55,11 @@ export function HomePage() {
       title.tabIndex = -1;
       title.focus({ preventScroll: true });
     }
-    window.scrollTo(0, 0);
+    if (screen === "home" && window.location.hash === "#financial-planning") {
+      document
+        .getElementById("financial-planning")
+        ?.scrollIntoView({ behavior: "instant" });
+    } else window.scrollTo(0, 0);
   }, [screen]);
   function navigate(event: MouseEvent<HTMLElement>) {
     const button = (event.target as HTMLElement).closest<HTMLElement>(
