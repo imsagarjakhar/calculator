@@ -47,7 +47,7 @@ test("all pages use neutral branding while the domain remains unchanged", async 
   }
   await page.goto(base + "#vlogs");
   await expect(page.locator("#vlogsTitle")).toHaveText(
-    "The Money Planner vlog",
+    "The Money Planner Vlog",
   );
   await expect(page.locator("#vlogs")).not.toContainText(/intimetec/i);
 });

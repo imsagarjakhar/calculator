@@ -81,7 +81,7 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
         <div>
           <p className="eyebrow">THE READING ROOM</p>
           <h2 id="vlogsTitle" tabIndex={-1}>
-            The Money Planner vlog
+            The Money Planner Vlog
           </h2>
           <p>Ideas for your money. A little space to think.</p>
         </div>
