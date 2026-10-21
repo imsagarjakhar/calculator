@@ -1,5 +1,5 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
-import { plannerHref } from "../runtime/routes";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -8,13 +8,8 @@ export const CustomPage = memo(function CustomPage() {
   const ref = usePlanner(mount);
   return (
     <div ref={ref}>
-      <main>
-        <nav className="custom-planner-nav" aria-label="Financial planners">
-          <a className="back-to-planners" href={plannerHref("home")}>
-            ← All planners
-          </a>
-          <span>Money Planner</span>
-        </nav>
+      <main className="planner-page">
+        <PlannerNavigation />
         <PlannerHeader kind="custom" />
 
         <p id="status" className="status" role="status"></p>

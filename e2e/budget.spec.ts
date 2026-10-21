@@ -68,7 +68,7 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     .click();
   await expect(bill).toHaveCount(0);
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: /Export plan/ }).click();
+  await page.getByRole("button", { name: "Save JSON" }).click();
   expect((await download).suggestedFilename()).toBe(
     "money-planner-monthly-budget.json",
   );

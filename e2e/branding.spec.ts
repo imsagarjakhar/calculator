@@ -51,3 +51,85 @@ test("all pages use neutral branding while the domain remains unchanged", async 
   );
   await expect(page.locator("#vlogs")).not.toContainText(/intimetec/i);
 });
+
+test("all calculator headers share branding, typography, colours and page spacing", async ({
+  page,
+}, info) => {
+  let reference: unknown;
+  const routes = [
+    ["growth", "GROWTH PLANNER"],
+    ["survival", "CORPUS SURVIVAL"],
+    ["custom-plan", "CUSTOM PLAN"],
+    ["freedom", "FINANCIAL FREEDOM"],
+    ["bucket-plan", "RETIREMENT BUCKETS"],
+    ["salary-budget", "SALARY & BUDGET"],
+    ["loan-payoff", "LOAN PAYOFF"],
+  ];
+  for (const [route, label] of routes) {
+    await page.goto(`${base}${route}/`);
+    const header = page.locator(".planner-header:visible");
+    await expect(header).toHaveCount(1);
+    await expect(header.locator(".eyebrow")).toHaveText(
+      `Money Planner / ${label}`,
+    );
+    await expect(
+      header.getByRole("button", { name: "Import report", exact: true }),
+    ).toBeVisible();
+    await expect(
+      header.getByRole("button", { name: "Download report", exact: true }),
+    ).toBeVisible();
+    await expect(
+      header.getByRole("button", { name: "Reset", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator(".planner-navigation:visible .planner-site-name"),
+    ).toHaveText("Money Planner");
+    await expect(page.locator(".planner-navigation:visible .planner-site-name")).toBeVisible();
+    const appearance = await header.evaluate((el) => {
+      const css = (selector: string, properties: string[]) => {
+        const style = getComputedStyle(el.querySelector(selector)!);
+        return Object.fromEntries(
+          properties.map((p) => [p, style.getPropertyValue(p)]),
+        );
+      };
+      const main = getComputedStyle(el.closest("main")!);
+      return {
+        label: css(".eyebrow", [
+          "color",
+          "font-size",
+          "font-family",
+          "font-weight",
+          "letter-spacing",
+          "text-transform",
+        ]),
+        title: css("h1", [
+          "color",
+          "font-size",
+          "font-family",
+          "font-weight",
+          "line-height",
+        ]),
+        toolbar: css(".planner-toolbar", [
+          "background-image",
+          "padding",
+          "border-radius",
+        ]),
+        button: css(".primary", [
+          "background-color",
+          "color",
+          "min-height",
+          "font-size",
+        ]),
+        page: [main.maxWidth, main.paddingLeft, main.paddingRight],
+      };
+    });
+    if (reference) expect(appearance).toEqual(reference);
+    else reference = appearance;
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await header.screenshot({ path: info.outputPath(`${route}-header.png`) });
+  }
+});

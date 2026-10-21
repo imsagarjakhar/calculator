@@ -1,4 +1,4 @@
-import { plannerHref } from "../runtime/routes";
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -7,13 +7,8 @@ export const FreedomPage = memo(function FreedomPage() {
   const ref = usePlanner(mount);
   return (
     <div ref={ref}>
-      <main>
-        <nav className="custom-planner-nav" aria-label="Financial planners">
-          <a className="back-to-planners" href={plannerHref("home")}>
-            ← All planners
-          </a>
-          <span>Money Planner</span>
-        </nav>
+      <main className="planner-page">
+        <PlannerNavigation />
         <PlannerHeader kind="freedom" />
         <p className="freedom-intro">
           Financial freedom here means your investment returns could support the

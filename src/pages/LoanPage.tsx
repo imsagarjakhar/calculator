@@ -1,3 +1,6 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
+import { PlannerHeader } from "../components/PlannerHeader";
+import { downloadReport, readPortablePlan } from "../runtime/portableReport";
 import { useEffect, useId, useMemo, useState } from "react";
 import {
   cashFlow,
@@ -14,7 +17,6 @@ import {
   type Simulation,
 } from "../loans/model";
 import { calculateBudget, validBudget } from "../budget/model";
-import { plannerHref } from "../runtime/routes";
 const storageKey = "intimetec-loan-payoff-v1";
 function example() {
   const p = structuredClone(initialLoanPlan);
@@ -215,17 +217,120 @@ export function LoanPage() {
   async function importFile(file: File | undefined) {
     if (!file) return;
     try {
-      if (file.size > 1000000)
-        throw Error("Choose a plan file smaller than 1 MB.");
-      const data = JSON.parse(await file.text()),
-        errors = validateLoanPlan(data.plan);
+      const value = await readPortablePlan(file, "loan");
+      const errors = validateLoanPlan(value);
       if (errors.length) throw Error(errors[0]);
-      setPlan(data.plan);
+      setPlan(value as LoanPlan);
       setNotice("Your loan plan was restored.");
       setView("setup");
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "Could not read this plan.");
     }
+  }
+  function resetPlan() {
+    if (
+      window.confirm("Replace your current loan plan with the example plan?")
+    ) {
+      setPlan(example());
+      setNotice("");
+      setView("setup");
+      setSelected("avalanche");
+    }
+  }
+  function report() {
+    if (!valid) return;
+    downloadReport(
+      "Loan payoff & investment comparison",
+      "money-planner-loan-payoff.html",
+      "loan",
+      plan,
+      [
+        {
+          title: "Your monthly budget & assumptions",
+          headers: ["Setting", "Value"],
+          rows: [
+            ["Currency", plan.currency],
+            ["Income", money(plan.salary)],
+            ["Living costs", money(plan.expenses)],
+            ["Emergency saving", money(plan.reserve)],
+            ["Cash buffer", money(plan.buffer)],
+            ["Extra monthly budget", money(plan.extra)],
+            ["Starting month", plan.start],
+            ["Comparison horizon", `${plan.horizon} months`],
+            ["Expected return", `${plan.returns}%`],
+            ["Investment fee", `${plan.investmentFee}%`],
+            ["Tax on gains", `${plan.gainsTax}%`],
+            ["Split to loan prepayments", `${plan.split}%`],
+          ],
+        },
+        {
+          title: "Your loans",
+          headers: [
+            "Loan",
+            "Balance",
+            "Rate",
+            "EMI",
+            "Months",
+            "Prepayment fee",
+            "Lock months",
+            "Interest tax relief",
+          ],
+          rows: plan.loans.map((l) => [
+            l.name,
+            money(l.balance),
+            `${l.rate}%`,
+            money(payment(l)),
+            l.months,
+            `${l.fee}%`,
+            l.lock,
+            `${l.taxRelief}%`,
+          ]),
+        },
+        {
+          title: "Same budget, same timeline",
+          headers: [
+            "Path",
+            "Interest",
+            "Fees",
+            "Portfolio",
+            "Debt",
+            "Net position",
+            "Debt free",
+          ],
+          rows: comparison.results.map((r) => [
+            label(r.strategy),
+            money(r.interest),
+            money(r.fees),
+            money(r.portfolio),
+            money(r.debt),
+            money(r.net),
+            when(r.debtFree),
+          ]),
+        },
+        ...comparison.results.map((r) => ({
+          title: `${label(r.strategy)} — monthly schedule`,
+          headers: [
+            "Month",
+            "Required payments",
+            "Extra repayments",
+            "Invested",
+            "Debt",
+            "Portfolio",
+            "Net position",
+          ],
+          rows: r.rows.map((m) => [
+            m.month,
+            money(m.required),
+            money(m.extra),
+            money(m.invested),
+            money(m.debt),
+            money(m.portfolio),
+            money(m.net),
+          ]),
+        })),
+      ],
+      "Fixed assumptions, not guaranteed investment returns. Each path uses the same monthly commitment and horizon. Emergency savings and cash buffers stay protected. Import restores inputs and recalculates with the current model.",
+    );
   }
   const totalDebt = plan.loans.reduce((s, l) => s + Math.max(0, l.balance), 0);
   const nonAmortizing = valid
@@ -234,36 +339,22 @@ export function LoanPage() {
       )
     : [];
   return (
-    <main className="budget-app loan-app">
-      <nav className="budget-nav" aria-label="Planner navigation">
-        <a href={plannerHref("home")}>← All planners</a>
-        <a className="budget-brand" href={plannerHref("home")}>
-          Money Planner <span>/ THE DEBT & WEALTH LAB</span>
-        </a>
-        <span className="budget-preview">Standalone preview</span>
-      </nav>
-      <header className="loan-hero">
-        <div>
-          <p className="budget-eyebrow">LESS DEBT. MORE DIRECTION.</p>
-          <h1>
-            Pay it down.
-            <br />
-            <em>Or build it up?</em>
-          </h1>
-          <p>
-            Give your extra money a clear job. Compare paying loans faster with
-            investing, using your actual budget and one fair timeline.
-          </p>
-        </div>
-        <div className="loan-hero-stat">
-          <span>YOUR STARTING DEBT</span>
-          <strong>{money(totalDebt)}</strong>
-          <p>
-            {plan.loans.length} loans · {plan.horizon} months compared
-          </p>
-          <small>Same monthly commitment. Different paths.</small>
-        </div>
-      </header>
+    <main className="planner-page budget-app loan-app">
+      <PlannerNavigation />
+      <PlannerHeader
+        kind="loan"
+        controls={{
+          currency: plan.currency,
+          onCurrency: (c) => update("currency", c),
+          onImport: (file) => {
+            void importFile(file);
+          },
+          onReport: report,
+          onReset: resetPlan,
+          onSaveJSON: exportPlan,
+          disabled: !valid,
+        }}
+      />
       <div className="budget-toolbar">
         <div
           className="budget-tabs"
@@ -289,21 +380,6 @@ export function LoanPage() {
         </div>
         <div className="budget-tools">
           <button onClick={importBudget}>Use my salary budget</button>
-          <button onClick={exportPlan} disabled={!valid}>
-            Export ↓
-          </button>
-          <label className="loan-file">
-            Import
-            <input
-              className="budget-sr-only"
-              type="file"
-              accept=".json,application/json"
-              onChange={(e) => {
-                void importFile(e.target.files?.[0]);
-                e.target.value = "";
-              }}
-            />
-          </label>
         </div>
       </div>
       <p className="budget-save" role="status">
@@ -379,20 +455,6 @@ export function LoanPage() {
                     onChange={(n) => update("extra", n)}
                     hint="This amount goes toward prepayments, investing, or both."
                   />
-                  <label className="budget-field">
-                    <span>Currency</span>
-                    <select
-                      value={plan.currency}
-                      onChange={(e) => update("currency", e.target.value)}
-                    >
-                      {["INR", "SAR", "USD", "AED", "EUR", "GBP"].map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
-                    </select>
-                    <small>
-                      Currency labels change; amounts are not converted.
-                    </small>
-                  </label>
                 </div>
               </section>
               <section

@@ -5,6 +5,7 @@
 .site-footer-inner {
   max-width: 1280px;
   margin: 0 auto;
+  text-align: center;
   border-top: 1px solid var(--line, #284b5d);
   padding-top: 28px;
 }
@@ -16,12 +17,14 @@
 }
 .site-footer p {
   max-width: 850px;
+  margin: 12px auto;
   font-size: 13px;
   line-height: 1.8;
 }
 .site-footer nav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 14px 24px;
   margin: 22px 0;
 }

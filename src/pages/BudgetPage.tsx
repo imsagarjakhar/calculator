@@ -1,3 +1,6 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
+import { PlannerHeader } from "../components/PlannerHeader";
+import { downloadReport, readPortablePlan } from "../runtime/portableReport";
 import { useEffect, useState, type CSSProperties } from "react";
 import {
   calculateBudget,
@@ -6,7 +9,6 @@ import {
   validBudget,
   type Budget,
 } from "../budget/model";
-import { plannerHref } from "../runtime/routes";
 
 const storageKey = "intimetec-salary-budget-v1";
 function load(): Budget {
@@ -59,6 +61,7 @@ function NumberField({
 export function BudgetPage() {
   const [plan, setPlan] = useState<Budget>(load);
   const [saved, setSaved] = useState("");
+  const [notice, setNotice] = useState("");
   const [tab, setTab] = useState<"plan" | "outlook" | "actual">("plan");
   const result = calculateBudget(plan);
   const money = (n: number) =>
@@ -100,6 +103,88 @@ export function BudgetPage() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function resetPlan() {
+    if (window.confirm("Replace your current budget with the example plan?")) {
+      setPlan(structuredClone(initialBudget));
+      setNotice("");
+      setTab("plan");
+    }
+  }
+  async function importFile(file: File | undefined) {
+    if (!file) return;
+    try {
+      const value = await readPortablePlan(file, "budget");
+      if (!validBudget(value))
+        throw Error("Choose a valid salary budget report or JSON plan.");
+      setPlan(value);
+      setTab("plan");
+      setNotice("Your salary budget was restored.");
+    } catch (e) {
+      setNotice(e instanceof Error ? e.message : "Could not read this plan.");
+    }
+  }
+  function report() {
+    downloadReport(
+      "Monthly salary & budget report",
+      "money-planner-monthly-budget.html",
+      "budget",
+      plan,
+      [
+        {
+          title: "Monthly overview",
+          headers: ["Setting", `Amount (${plan.currency})`],
+          rows: [
+            ["Take-home salary", money(plan.salary)],
+            ["Other income", money(plan.otherIncome)],
+            ["Allocated", money(result.allocated)],
+            ["Unassigned / shortfall", money(result.remainder)],
+            ["Monthly investment", money(plan.investment)],
+            ["Cash buffer", money(plan.buffer)],
+            ["Emergency saving per month", money(plan.emergencyMonthly)],
+            ["Goal reserve per month", money(result.goal)],
+            ["Expected annual return", `${plan.annualReturn}%`],
+          ],
+        },
+        {
+          title: "Expenses",
+          headers: ["Category", "Planned", "Actual"],
+          rows: plan.expenses.map((e) => [
+            e.name,
+            money(e.planned),
+            e.actual === null ? "Not recorded" : money(e.actual),
+          ]),
+        },
+        {
+          title: "Upcoming bills",
+          headers: ["Bill", "Amount", "Reserved", "Months until due"],
+          rows: plan.bills.map((b) => [
+            b.name,
+            money(b.amount),
+            money(b.reserved),
+            b.months,
+          ]),
+        },
+        {
+          title: "One-year investment outlook",
+          headers: [
+            "Month",
+            "Contribution",
+            "Total invested",
+            "Growth / loss",
+            "Corpus",
+          ],
+          rows: result.projection.map((r) => [
+            r.month,
+            money(r.contribution),
+            money(r.invested),
+            money(r.gain),
+            money(r.corpus),
+          ]),
+        },
+      ],
+      "12 month-end contributions; effective annual return; no tax, fees or inflation. Returns are assumptions, not guarantees. Amounts are in the selected currency without conversion.",
+    );
+  }
   function patchExpense(
     id: string,
     key: "planned" | "actual",
@@ -138,55 +223,21 @@ export function BudgetPage() {
     1,
   );
   return (
-    <main className="budget-app">
-      <nav className="budget-nav" aria-label="Planner navigation">
-        <a href={plannerHref("home")}>← All planners</a>
-        <a className="budget-brand" href={plannerHref("home")}>
-          Money Planner <span>/ MONEY, WITH PURPOSE</span>
-        </a>
-        <span className="budget-preview">Standalone preview</span>
-      </nav>
-      <header className="budget-hero">
-        <div>
-          <p className="budget-eyebrow">THE MONTHLY MONEY PLAN</p>
-          <h1>
-            A place for every rupee.
-            <br />
-            <em>A plan for what’s next.</em>
-          </h1>
-          <p className="budget-intro">
-            From payday to everyday. Give your salary a purpose, make room for
-            life, and see what a year of investing could become.
-          </p>
-          <div className="budget-pills">
-            <span>Private by design</span>
-            <span>Live calculations</span>
-            <span>Your numbers, your choices</span>
-          </div>
-        </div>
-        <div className="budget-payday">
-          <span className="budget-payday-icon" aria-hidden="true">
-            ↗
-          </span>
-          <p>YOUR MONTHLY TAKE-HOME</p>
-          <strong>{money(result.income)}</strong>
-          <span>
-            Small monthly choices.
-            <br />A clearer year ahead.
-          </span>
-          <div className="budget-payday-line">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-        </div>
-      </header>
+    <main className="planner-page budget-app">
+      <PlannerNavigation />
+      <PlannerHeader
+        kind="budget"
+        controls={{
+          currency: plan.currency,
+          onCurrency: (c) => update("currency", c),
+          onImport: (file) => {
+            void importFile(file);
+          },
+          onReport: report,
+          onReset: resetPlan,
+          onSaveJSON: exportPlan,
+        }}
+      />
       <div className="budget-toolbar">
         <div className="budget-tabs" role="group" aria-label="Budget views">
           {(
@@ -206,22 +257,12 @@ export function BudgetPage() {
             </button>
           ))}
         </div>
-        <div className="budget-tools">
-          <button onClick={exportPlan}>Export plan ↓</button>
-          <button
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Replace your current budget with the example plan?",
-                )
-              )
-                setPlan(structuredClone(initialBudget));
-            }}
-          >
-            Reset example
-          </button>
-        </div>
       </div>
+      {notice && (
+        <p className="budget-save" role="status">
+          {notice}
+        </p>
+      )}
       <p className="budget-save" role="status">
         {saved}
       </p>
@@ -259,20 +300,6 @@ export function BudgetPage() {
                     value={plan.otherIncome}
                     onChange={(n) => update("otherIncome", n)}
                   />
-                  <label className="budget-field">
-                    <span>Plan currency</span>
-                    <select
-                      value={plan.currency}
-                      onChange={(e) => update("currency", e.target.value)}
-                    >
-                      {["INR", "SAR", "USD", "AED", "EUR", "GBP"].map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
-                    </select>
-                    <small>
-                      Changes the currency label; amounts are not converted.
-                    </small>
-                  </label>
                   <NumberField
                     label="Monthly cash buffer"
                     value={plan.buffer}

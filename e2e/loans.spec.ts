@@ -71,7 +71,7 @@ test("loan planner compares fair paths, provides a guide and restores exported p
   await expect(page.locator(".loan-schedule > details")).toHaveCount(24);
   await page.getByRole("button", { name: /Your money & loans/ }).click();
   const downloadEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: /Export/ }).click();
+  await page.getByRole("button", { name: "Save JSON" }).click();
   const download = await downloadEvent;
   const file = (await download.path())!;
   const exported = JSON.parse(await readFile(file, "utf8"));
@@ -85,7 +85,7 @@ test("loan planner compares fair paths, provides a guide and restores exported p
   await page
     .getByRole("button", { name: "Review my inputs", exact: true })
     .click();
-  await page.locator(".loan-file input").setInputFiles(file);
+  await page.locator("#loan-file").setInputFiles(file);
   await expect(
     page.getByLabel("Extra monthly budget", { exact: true }),
   ).toHaveValue("10000");
@@ -147,7 +147,7 @@ test("loan planner works with storage unavailable and rejects malformed imports"
   await expect(page.getByRole("status")).toContainText(
     "Browser saving unavailable",
   );
-  await page.locator(".loan-file input").setInputFiles({
+  await page.locator("#loan-file").setInputFiles({
     name: "bad.json",
     mimeType: "application/json",
     buffer: Buffer.from('{"plan":{"salary":-1}}'),

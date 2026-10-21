@@ -1,5 +1,5 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
-import { plannerHref } from "../runtime/routes";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -8,16 +8,8 @@ export const BucketPage = memo(function BucketPage() {
   const ref = usePlanner(mount);
   return (
     <div ref={ref}>
-      <main>
-        <nav className="lab-nav" aria-label="Financial planners">
-          <a className="back-to-planners" href={plannerHref("home")}>
-            ← All planners
-          </a>
-          <span className="lab-brand">
-            Money Planner <span>/ RETIREMENT LAB</span>
-          </span>
-          <span className="preview-tag">Standalone preview</span>
-        </nav>
+      <main className="planner-page">
+        <PlannerNavigation />
         <PlannerHeader kind="bucket" />
         <div className="bucket-workspace">
           <section className="card setup-card" aria-labelledby="setupTitle">

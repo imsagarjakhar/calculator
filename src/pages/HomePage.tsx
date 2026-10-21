@@ -1,3 +1,4 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import {
   plannerHref,
   homeScreenFromLocation,
@@ -75,16 +76,11 @@ export function HomePage() {
     setScreen(next);
   }
   return (
-    <main onClick={navigate}>
-      <nav
-        id="plannerNav"
-        className="planner-nav"
-        aria-label="Financial planners"
-        hidden={screen === "home"}
-      >
-        <button type="button" data-screen="home" className="ghost">
-          ← All planners
-        </button>
+    <main
+      className={screen === "home" ? undefined : "planner-page"}
+      onClick={navigate}
+    >
+      <PlannerNavigation id="plannerNav" hidden={screen === "home"}>
         <div className="view-switch">
           <button
             type="button"
@@ -101,7 +97,7 @@ export function HomePage() {
             Survival
           </button>
         </div>
-      </nav>
+      </PlannerNavigation>
       <div hidden={screen !== "home"}>
         <HomeContent active={screen === "home"} />
       </div>
