@@ -444,7 +444,7 @@ export function VlogProvider({
       {current && (
         <Modal title={current.title} close={() => setCurrent(null)} wide>
           <p className="vlog-byline">
-            {dateLabel(current.createdAt)} · {current.author}
+            {dateLabel(current.createdAt)}
             {current.updatedAt !== current.createdAt
               ? ` · Updated ${dateLabel(current.updatedAt)}`
               : ""}
@@ -657,54 +657,74 @@ export function VlogFeed() {
         <p className="vlog-helper">No vlogs match your search.</p>
       )}
       <div className="vlog-grid">
-        {filtered.slice(0, visible).map((post) => (
+        {filtered.slice(0, visible).map((post, index) => (
           <article className="vlog-card" key={post.id}>
-            <div className="vlog-card-top">
-              <span className="vlog-kind">
-                {post.videoUrl ? "VIDEO & STORY" : "STORY"}
+            <div className="vlog-card-cover" aria-hidden="true">
+              <span className="vlog-cover-label">MONEY IN PERSPECTIVE</span>
+              <svg viewBox="0 0 240 160" fill="none">
+                <circle cx="120" cy="80" r="61" />
+                <circle cx="120" cy="80" r="43" />
+                <path d="M30 119L76 93L111 108L154 58L208 34" />
+                <path d="M187 34H208V55" />
+                <circle cx="76" cy="93" r="4" />
+                <circle cx="154" cy="58" r="4" />
+              </svg>
+              <span className="vlog-cover-caption">
+                {post.videoUrl
+                  ? "Watch. Read. Reflect."
+                  : "A fresh perspective."}
               </span>
-              <time dateTime={post.createdAt}>{dateLabel(post.createdAt)}</time>
             </div>
-            <h3>
-              <button
-                type="button"
-                className="vlog-title-button"
-                onClick={() => hub.read(post)}
-                disabled={hub.busy}
-              >
-                {post.title}
-              </button>
-            </h3>
-            <p>{post.summary}</p>
-            <div className="vlog-card-bottom">
-              <button
-                type="button"
-                className="vlog-read"
-                disabled={hub.busy}
-                onClick={() => hub.read(post)}
-              >
-                Read vlog <span aria-hidden="true">↗</span>
-              </button>
-              <span>by {post.author}</span>
-            </div>
-            {hub.session && (
-              <div className="vlog-owner-actions">
+            <div className="vlog-card-content">
+              <div className="vlog-card-top">
+                <span className="vlog-kind">
+                  {index === 0 && !query ? "LATEST · " : ""}
+                  {post.videoUrl ? "VIDEO & STORY" : "STORY"}
+                </span>
+                <time dateTime={post.createdAt}>
+                  {dateLabel(post.createdAt)}
+                </time>
+              </div>
+              <h3>
                 <button
                   type="button"
+                  className="vlog-title-button"
+                  onClick={() => hub.read(post)}
                   disabled={hub.busy}
-                  onClick={() => hub.read(post, true)}
                 >
-                  Edit
+                  {post.title}
                 </button>
+              </h3>
+              <p>{post.summary}</p>
+              <div className="vlog-card-bottom">
                 <button
                   type="button"
+                  className="vlog-read"
                   disabled={hub.busy}
-                  onClick={() => hub.remove(post)}
+                  onClick={() => hub.read(post)}
                 >
-                  Remove
+                  Read vlog <span aria-hidden="true">↗</span>
                 </button>
               </div>
-            )}
+              {hub.session && (
+                <div className="vlog-owner-actions">
+                  <button
+                    type="button"
+                    disabled={hub.busy}
+                    onClick={() => hub.read(post, true)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    disabled={hub.busy}
+                    onClick={() => hub.remove(post)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
           </article>
         ))}
       </div>

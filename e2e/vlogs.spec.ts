@@ -79,6 +79,7 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await expect(page).toHaveURL(/#vlogs$/);
   await expect(page.locator("#homeScreen")).toBeHidden();
   await expect(page.locator(".vlog-card")).toHaveCount(6);
+  await expect(page.locator("#vlogs")).not.toContainText("imsagarjakhar");
   await page
     .locator("#vlogs")
     .screenshot({ path: info.outputPath("vlog-feed.png") });
@@ -90,6 +91,7 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await expect(page.getByRole("dialog")).toContainText(
     "<script>globalThis.vlogXss = 1</script>",
   );
+  await expect(page.getByRole("dialog")).not.toContainText("imsagarjakhar");
   expect(
     await page.evaluate(() => (globalThis as any).vlogXss),
   ).toBeUndefined();
