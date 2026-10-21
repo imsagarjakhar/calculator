@@ -13,7 +13,9 @@ Open the Vite URL, usually `http://127.0.0.1:5173/`. For a production preview, r
 
 Before pushing, install the browser once with `npx playwright install chromium --no-shell`, then run `npm run check`. It runs calculation/controller tests, TypeScript, the production build and desktop/mobile browser tests. The workflow checks the `react` branch and pull requests; only `main` deploys by default. To test `react` on the live domain without merging, set the repository Actions variable `PAGES_DEPLOY_BRANCH` to `react`; see the migration guide. In GitHub Pages, select **GitHub Actions** when ready to release. Keep the current custom domain and GoDaddy DNS.
 
-Deploy **only `dist/`**. The build adds CSP and script/style integrity automatically. No database or application secrets are needed. Legacy HTML/CSS/JS and their regression tests are grouped in `bkp/`; edit the React pages in `src/pages/`. Original model documentation is in [bkp/MODEL-NOTES.md](bkp/MODEL-NOTES.md). Some legacy scripts and styles still power the React compatibility layer; `bkp/` remains required for builds.
+Deploy **only `dist/`**. The build adds CSP and script/style integrity automatically. The calculators need no database or application secrets. Legacy HTML/CSS/JS and their regression tests are grouped in `bkp/`; edit the React pages in `src/pages/`. Original model documentation is in [bkp/MODEL-NOTES.md](bkp/MODEL-NOTES.md). Some legacy scripts and styles still power the React compatibility layer; `bkp/` remains required for builds.
+
+The homepage also supports runtime vlogs stored as files in `imsagarjakhar/vlog`. A separate Cloudflare Worker authenticates the publisher and writes posts using server-side secrets. **Never embed a GitHub token in the website build.** Follow the [one-time runtime vlog setup](MIGRATION.md#runtime-vlogs-one-time-setup); posts require no website deployment after setup.
 
 ## Repository layout
 

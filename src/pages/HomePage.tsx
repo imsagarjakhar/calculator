@@ -103,7 +103,7 @@ export function HomePage() {
         </div>
       </nav>
       <div hidden={screen !== "home"}>
-        <HomeContent />
+        <HomeContent active={screen === "home"} />
       </div>
       <div hidden={screen !== "growth"}>
         <GrowthPage />

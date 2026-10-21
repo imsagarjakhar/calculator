@@ -1,6 +1,6 @@
 # React migration: local testing and GitHub Pages
 
-The `react` branch runs all five calculators through React, TypeScript and Vite. There is no database, login, server API or cloud storage. Existing browser storage keys, report formats, calculation engines and public URLs are preserved.
+The `react` branch runs all five calculators through React, TypeScript and Vite, without a calculator database. Existing browser storage keys, report formats, calculation engines and public URLs are preserved. The optional runtime vlog feature uses a separate public content repository and a Cloudflare publishing API; it never stores calculator plans.
 
 ## 1. Prepare your computer
 
@@ -228,3 +228,81 @@ After deploying to intimetec.org:
 Google decides what it indexes and how it ranks results. These changes improve crawlability and brand clarity; they cannot guarantee first place or a particular indexing date. Earn relevant mentions and links from real users or sites; avoid paid link schemes, keyword stuffing and fake review/rating markup.
 
 References: [Google's JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [site-name guidance](https://developers.google.com/search/docs/appearance/site-names), and [Search Console setup](https://developers.google.com/search/docs/monitor-debug/search-console-start).
+
+## Runtime vlogs: one-time setup
+
+The homepage has a **Login** button, a publisher editor, and a public vlog feed. Posts are individual JSON files in [imsagarjakhar/vlog](https://github.com/imsagarjakhar/vlog), with a small index at `vlogs/index.json`. Publishing, editing and removal run at runtime: the Worker commits the post file and index together, without triggering this website's deployment. Visitors do not need an account. Video posts use an optional HTTPS link; this version does not upload or embed video files.
+
+The code is prepared locally, but the API is not deployed and no credentials have been created. Do not paste credentials into chat, source files, `.env` variables prefixed `VITE_`, or repository files. GitHub Secrets are transferred only to the Worker by a separate workflow. The only publishing configuration built into the website is the API's public HTTPS origin.
+
+### 1. Initialize the content repository
+
+Open `https://github.com/imsagarjakhar/vlog`. If it is empty, add `README.md` and commit it to **main**. This establishes a branch for atomic Git updates. The first published vlog creates the `vlogs/` files automatically. Keep this repository public and separate from `calculator`; do not add a Pages build workflow to the content repository.
+
+### 2. Prepare Cloudflare
+
+Create or sign in to a Cloudflare account and finish setting up its Workers `workers.dev` subdomain. The app can stay on GitHub Pages and GoDaddy DNS does not need to change. The API will use `https://intimetec-vlogs.YOUR-SUBDOMAIN.workers.dev`.
+
+Create a Cloudflare API token using the **Edit Cloudflare Workers** template and restrict it to your account. Record the **Account ID** from the Cloudflare dashboard. Keep both for the GitHub secrets in the next step. Account limits and charges are governed by your Cloudflare plan; no billing changes are made by this repository.
+
+### 3. Create a restricted GitHub content token
+
+In the `imsagarjakhar` GitHub account, open **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Choose an expiration, select **Only select repositories → vlog**, and set **Repository permissions → Contents → Read and write**. Metadata read access is included automatically. Do not grant access to `calculator` or Workflows.
+
+This token allows the Worker to change public vlog content. It is not the publisher password and never enters the React build or browser.
+
+### 4. Store secrets in the application repository
+
+In **imsagarjakhar/calculator → Settings → Environments**, create **vlog-api** and allow deployment from your selected application branch (`react` for the current setup). Add these **environment secrets**:
+
+| Secret name | Value |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | The restricted Cloudflare Workers token |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID |
+| `GH_VLOG_TOKEN` | The fine-grained token restricted to `vlog` |
+| `VLOG_ADMIN_PASSWORD` | A new, random publisher password, 20–256 characters; use a password manager |
+| `VLOG_SESSION_SECRET` | A cryptographically random signing key of at least 64 characters |
+
+The publisher username is **imsagarjakhar**, configured in `worker/wrangler.jsonc`. There is no built-in/default password. Use a separate password from your GitHub and Cloudflare passwords.
+
+To generate a random 64-character hexadecimal session key locally in PowerShell:
+
+```powershell
+$vlogKeyBytes = New-Object byte[] 32
+$vlogKeyGenerator = [Security.Cryptography.RandomNumberGenerator]::Create()
+$vlogKeyGenerator.GetBytes($vlogKeyBytes)
+[BitConverter]::ToString($vlogKeyBytes).Replace('-', '').ToLowerInvariant()
+$vlogKeyGenerator.Dispose()
+```
+
+Copy that result into `VLOG_SESSION_SECRET`; do not commit it. Protect both hosting accounts with two-factor authentication and limit who can edit workflows or environment secrets.
+
+### 5. Enable and deploy the publishing API
+
+In **Settings → Secrets and variables → Actions → Variables**, add the repository variable **`VLOG_API_ENABLED` = `true`**. Keep **`PAGES_DEPLOY_BRANCH` = `react`** for the current release branch.
+
+Push the prepared code to `imsagarjakhar/calculator` on `react`. The separate **Deploy vlog publishing API** workflow runs only when enabled and on the selected deployment branch. It runs the API tests, deploys `worker/index.ts`, and binds the three private Worker secrets. The normal Pages job never receives these secrets. A push to the `vlog` repository does not run either application workflow.
+
+When the API job succeeds, copy its deployed `https://intimetec-vlogs.YOUR-SUBDOMAIN.workers.dev` origin. Do not include a path. A manually dispatched run is also supported once the workflow exists on the repository's default branch.
+
+### 6. Connect the homepage once
+
+Add the application repository **Actions variable** **`VLOG_API_ORIGIN`** with that public API origin. Re-run **Test and deploy planners** on `react` after setting it. This builds the origin into the client and its CSP. Nothing secret goes into this variable.
+
+The Worker allows requests from **`https://intimetec.org`** only. Open the actual custom domain for publisher login; project previews and localhost are intentionally not authorized by the production Worker. If you intentionally change the public site origin, update `SITE_ORIGIN` in `worker/wrangler.jsonc` and redeploy the API.
+
+### 7. Publish without deployment
+
+Open **intimetec.org → Login**. Use publisher username **imsagarjakhar** and the password you stored as `VLOG_ADMIN_PASSWORD`. Click **Add vlog**, enter a title, short introduction, body and optional HTTPS video link, then **Publish vlog**. Use **Edit** or **Remove** on your posts later.
+
+The browser holds only a signed 15-minute publishing session in memory, not the GitHub token. Reload or logout clears it. There is no database, signup, or default password. The editor keeps unpublished text in the current tab only; closing/reloading can lose it. All committed content and Git history are public, including older versions of edited/removed posts. Never include private financial plans or credentials in a vlog.
+
+Visitors load the feed from GitHub at runtime. It refreshes while the homepage is visible and has a **Refresh vlogs** button for a fresh API read. GitHub's CDN may briefly cache the raw feed; its API has request limits. Publishing is not a real-time streaming service. The current index supports up to 500 posts and 500 KB of metadata. Updating website code, rotating Worker credentials, or changing configuration still requires the corresponding deployment; ordinary vlog publishing does not.
+
+### Validation and remaining checks
+
+`npm run test:vlogs` tests the actual Worker handler and GitHub update logic using mocked GitHub responses: origin restrictions, missing credentials, rate limiting, bad passwords, signed/expired sessions, atomic commits, stale edits, lost-response retries and bounded content. Desktop/mobile browser tests cover public reads and the publisher workflow with a mocked publishing endpoint. They do not prove that live credentials, branch protections, Cloudflare bindings or a deployed service are correctly configured.
+
+After setup, publish one non-sensitive test vlog, verify it in a separate logged-out browser, edit it, and remove it. No live post or repository write has been performed by the local tests. See [SECURITY.md](SECURITY.md) for the trust boundary.
+
+References: [GitHub repository contents](https://docs.github.com/en/rest/repos/contents), [Git database API](https://docs.github.com/en/rest/git), [Cloudflare rate-limit bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/), and [Cloudflare deployment action](https://github.com/cloudflare/wrangler-action).

@@ -6,3 +6,6 @@ test-results/
 .env.*
 !.env.example
 *.tsbuildinfo
+.dev.vars
+.dev.vars.*
+.wrangler/

@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from "vite";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { buildBase } from "./scripts/build-base.cjs";
+import { vlogApiOrigin } from "./scripts/vlog-config.cjs";
 import {
   searchPages,
   canonicalUrl,
@@ -231,6 +232,9 @@ function compatibilityModules(): Plugin {
   };
 }
 export default defineConfig({
+  define: {
+    "import.meta.env.VITE_VLOG_API_ORIGIN": JSON.stringify(vlogApiOrigin()),
+  },
   root: "web",
   resolve: { alias: { "/src": resolve("src") } },
   base: buildBase(),

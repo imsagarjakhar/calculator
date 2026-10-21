@@ -14,7 +14,24 @@ const CustomReport = load("./bkp/custom-report.js");
 
 const test = base.extend<{ consoleCheck: void }>({
   consoleCheck: [
-    async ({ page }, use) => {
+    async ({ page, context }, use) => {
+      await context.route(
+        "https://raw.githubusercontent.com/imsagarjakhar/vlog/**",
+        (route) => route.fulfill({ json: { version: 1, posts: [] } }),
+      );
+      await context.route(
+        "https://api.github.com/repos/imsagarjakhar/vlog/contents/vlogs/index.json*",
+        (route) =>
+          route.fulfill({
+            json: {
+              type: "file",
+              encoding: "base64",
+              content: Buffer.from(
+                JSON.stringify({ version: 1, posts: [] }),
+              ).toString("base64"),
+            },
+          }),
+      );
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("console", (message) => {
@@ -574,7 +591,11 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     expect(html).toContain(
       'name="google-adsense-account" content="ca-pub-7696234797118425"',
     );
-    expect(html).toContain("connect-src 'none'");
+    expect(html).toContain(
+      path === "/index.html"
+        ? "connect-src 'self' https://api.github.com https://raw.githubusercontent.com"
+        : "connect-src 'none'",
+    );
     expect(html).not.toContain("'unsafe-eval'");
     expect(html).toMatch(/type="module"[^>]*integrity="sha384-/);
   }

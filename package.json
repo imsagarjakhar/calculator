@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build && node scripts/prerender.mjs && node scripts/secure-build.cjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
-    "test": "node scripts/test.cjs",
+    "test": "node scripts/test.cjs && npm run test:vlogs",
+    "test:vlogs": "node --test scripts/vlog-worker.test.mjs",
     "test:e2e": "playwright test",
     "check": "npm test && npm run build && npm run test:e2e"
   },
