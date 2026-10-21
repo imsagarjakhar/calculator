@@ -598,7 +598,9 @@ export function VlogFeed() {
       <div className="vlog-section-heading">
         <div>
           <p className="eyebrow">IDEAS, UPDATES &amp; PERSPECTIVE</p>
-          <h2 id="vlogsTitle">The INTIMETEC vlog</h2>
+          <h2 id="vlogsTitle" tabIndex={-1}>
+            The INTIMETEC vlog
+          </h2>
           <p>Money conversations, shared one post at a time.</p>
         </div>
         <button

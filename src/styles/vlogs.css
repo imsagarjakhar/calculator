@@ -28,6 +28,25 @@
   margin: 46px 0;
   scroll-margin-top: 24px;
 }
+.planner-choices .vlog-choice {
+  grid-column: 1 / -1;
+  background: linear-gradient(120deg, #173c40, #1c3047);
+}
+.vlog-choice .choice-icon {
+  color: #2bdbb0;
+}
+.vlog-back {
+  color: var(--text, #f1f7fa);
+  text-decoration: none;
+  padding: 12px 0;
+}
+.vlog-back:hover {
+  color: #2bdbb0;
+}
+.vlog-back:focus-visible {
+  outline: 2px solid #2bdbb0;
+  outline-offset: 4px;
+}
 .vlog-section-heading {
   display: flex;
   justify-content: space-between;

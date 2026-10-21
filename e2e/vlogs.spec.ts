@@ -71,6 +71,13 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await expect(
     page.getByRole("button", { name: "Login", exact: false }),
   ).toBeVisible();
+  await expect(page.locator(".vlog-card")).toHaveCount(0);
+  await page
+    .locator(".vlog-choice")
+    .screenshot({ path: info.outputPath("vlog-entry.png") });
+  await page.getByRole("link", { name: /View all vlogs/ }).click();
+  await expect(page).toHaveURL(/#vlogs$/);
+  await expect(page.locator("#homeScreen")).toBeHidden();
   await expect(page.locator(".vlog-card")).toHaveCount(6);
   await page
     .locator("#vlogs")
@@ -100,6 +107,15 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
     page.getByRole("button", { name: "Edit", exact: true }),
   ).toHaveCount(0);
   expect(errors).toEqual([]);
+  await page.getByRole("link", { name: "← All planners", exact: true }).click();
+  await expect(page.locator("#homeScreen")).toBeVisible();
+  await expect(page.locator(".vlog-card")).toHaveCount(0);
+  await page.goBack();
+  await expect(page.locator("#vlogs")).toBeVisible();
+  await page.reload();
+  await expect(page.locator("#vlogs")).toBeVisible();
+  await page.goForward();
+  await expect(page.locator("#homeScreen")).toBeVisible();
 });
 
 test("publisher logs in, publishes, edits and removes posts without redeploying or storing credentials", async ({
@@ -204,6 +220,7 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   );
   expect(storage).not.toContain(password);
   expect(storage).not.toContain(session);
+  await page.getByRole("link", { name: /View all vlogs/ }).click();
   await page.getByRole("button", { name: "+ Add vlog", exact: true }).click();
   await page.getByLabel("Title", { exact: true }).fill("My first finance vlog");
   await page
@@ -219,7 +236,7 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
     "My first finance vlog",
   );
   const visitor = await context.newPage();
-  await visitor.goto(new URL(app, page.url()).href);
+  await visitor.goto(new URL(app + "#vlogs", page.url()).href);
   await expect(visitor.locator(".vlog-card")).toContainText(
     "My first finance vlog",
   );

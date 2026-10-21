@@ -1,12 +1,33 @@
 import { plannerHref } from "../runtime/routes";
+import { useEffect, useState } from "react";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
 export function HomeContent({ active = true }: { active?: boolean }) {
+  const [vlogsOpen, setVlogsOpen] = useState(
+    () => typeof window !== "undefined" && window.location.hash === "#vlogs",
+  );
+  useEffect(() => {
+    const sync = () => setVlogsOpen(window.location.hash === "#vlogs");
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
+  }, []);
+  useEffect(() => {
+    if (!active) return;
+    document
+      .getElementById(vlogsOpen ? "vlogsTitle" : "welcomeTitle")
+      ?.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }, [vlogsOpen, active]);
   return (
     <VlogProvider active={active}>
       <section
         id="homeScreen"
         className="welcome"
         aria-labelledby="welcomeTitle"
+        hidden={vlogsOpen}
       >
         <div className="welcome-topbar">
           <div className="eyebrow">INTIMETEC / SMART FINANCIAL PLANNING</div>
@@ -141,8 +162,23 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               Plan my retirement buckets <span aria-hidden="true">↗</span>
             </span>
           </a>
+          <a className="choice bucket-choice vlog-choice" href="#vlogs">
+            <span className="choice-icon" aria-hidden="true">
+              ▷
+            </span>
+            <span className="eyebrow">
+              06 / IDEAS, UPDATES &amp; PERSPECTIVE
+            </span>
+            <strong>Vlogs</strong>
+            <span className="choice-copy">
+              Explore money conversations, practical ideas and the latest
+              updates. Browse all our vlogs in one place.
+            </span>
+            <span className="choice-link">
+              View all vlogs <span aria-hidden="true">↗</span>
+            </span>
+          </a>
         </div>
-        <VlogFeed />
         <section className="planner-guide" aria-labelledby="plannerGuideTitle">
           <h2 id="plannerGuideTitle">
             Financial clarity, one scenario at a time
@@ -225,6 +261,17 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           Private by design. Calculations run in your browser. No sign-up.
         </p>
       </section>
+      {vlogsOpen && (
+        <section className="welcome vlog-directory" aria-label="Vlogs">
+          <div className="welcome-topbar">
+            <a className="vlog-back" href="#">
+              ← All planners
+            </a>
+            <VlogAccountButton />
+          </div>
+          <VlogFeed />
+        </section>
+      )}
     </VlogProvider>
   );
 }
