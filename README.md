@@ -19,6 +19,8 @@ The homepage also supports runtime vlogs stored as files in `imsagarjakhar/vlog`
 
 ## Repository layout
 
+The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It compares highest-interest-first, smallest-balance-first, investing and a configurable split, with a shared monthly commitment and horizon. It supports multiple fixed-rate loans, prepayment fees/lock-ins, explicit tax assumptions, return sensitivity, salary-budget import and an exportable/restorable plan. Method references and assumptions are linked in the page. Run `npm run test:loans` for the model tests.
+
 - `src/` — React pages, shared components and runtime hooks.
 - `web/` — Vite HTML entry points.
 - `public/` — production domain, sitemap, robots and favicon.

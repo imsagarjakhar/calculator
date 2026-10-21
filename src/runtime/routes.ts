@@ -5,7 +5,8 @@ export type PlannerRoute =
   | "custom-plan"
   | "freedom"
   | "bucket-plan"
-  | "salary-budget";
+  | "salary-budget"
+  | "loan-payoff";
 export function plannerHref(route: PlannerRoute): string {
   return import.meta.env.BASE_URL + (route === "home" ? "" : route + "/");
 }

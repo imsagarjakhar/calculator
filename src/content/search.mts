@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  "loan-payoff": {
+    title: "Loan Payoff & Investment Planner | INTIMETEC",
+    description:
+      "Compare paying multiple loans faster with investing on the same monthly budget. Explore debt payoff order, fees, tax assumptions and a monthly payment guide.",
+    name: "Loan Payoff & Investment Planner",
+  },
   "salary-budget": {
     title: "Monthly Salary & Budget Planner | INTIMETEC",
     description:

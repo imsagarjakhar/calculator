@@ -1322,9 +1322,21 @@ header {
 /* Landing page benefits and transparent projections. */
 .retirement-choice,
 .salary-choice,
+.loan-choice,
 .vlog-choice {
   border: 1px solid var(--line);
   line-height: 1.3;
+}
+.loan-choice {
+  background: linear-gradient(135deg, #303a42, #142e3d);
+}
+.loan-choice .choice-icon {
+  color: #efc294;
+  background: #4a3e35;
+}
+.loan-choice > .eyebrow,
+.loan-choice > .choice-link {
+  color: #efc294;
 }
 .retirement-choice {
   background: linear-gradient(125deg, #163e3e, #1d3048);

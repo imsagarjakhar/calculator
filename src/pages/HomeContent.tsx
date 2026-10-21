@@ -179,11 +179,25 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               Plan my monthly budget <span aria-hidden="true">↗</span>
             </span>
           </a>
+          <a className="choice loan-choice" href={plannerHref("loan-payoff")}>
+            <span className="choice-icon" aria-hidden="true">
+              ⇄
+            </span>
+            <span className="eyebrow">07 / LESS DEBT, MORE DIRECTION</span>
+            <strong>Loan Payoff &amp; Investment Planner</strong>
+            <span className="choice-copy">
+              Pay loans faster or invest the extra? Compare your options and
+              build a monthly payoff guide that fits your budget.
+            </span>
+            <span className="choice-link">
+              Compare my loan options <span aria-hidden="true">↗</span>
+            </span>
+          </a>
           <a className="choice vlog-choice" href="#vlogs">
             <span className="choice-icon" aria-hidden="true">
               ▷
             </span>
-            <span className="eyebrow">07 / IDEAS &amp; PERSPECTIVE</span>
+            <span className="eyebrow">08 / IDEAS &amp; PERSPECTIVE</span>
             <strong>Vlogs</strong>
             <span className="choice-copy">
               Money conversations, practical ideas and the latest updates, all

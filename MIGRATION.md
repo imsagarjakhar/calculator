@@ -4,6 +4,16 @@ The `react` branch runs all five calculators through React, TypeScript and Vite,
 
 ## 1. Prepare your computer
 
+### Loan payoff preview
+
+`/loan-payoff/` is a standalone, `noindex` preview with a standard homepage card. `src/loans/model.ts` implements the comparison and `src/pages/LoanPage.tsx` provides the UI. The isolated local storage key is `intimetec-loan-payoff-v1`; JSON exports can be imported again. Reading an existing salary budget excludes its EMI category from living costs and clears sample loans, so users enter real lender balances without double-counting debt payments.
+
+Every strategy uses the initial required EMIs plus the chosen extra monthly amount. Fixed monthly interest accrues first, required payments follow, then extra principal and any proportional prepayment fees; unused cash and tax credits are invested at month end. Paid-off EMIs remain in the commitment. Prepayments reduce tenure, not scheduled EMI size. Lock-ins block extra payments for their entered duration. Interest tax relief uses an effective user-entered percentage and is modeled as a monthly cash refund. Investment fees reduce the effective annual return multiplicatively; investment tax is applied to positive total gains at the chosen horizon. No jurisdiction-specific tax rules or guaranteed returns are built in.
+
+Results compare after-tax investments plus protected emergency cash minus outstanding debt, at the same horizon. The highest-interest heuristic uses interest rate times `(1 - effective tax relief)`; it does not claim global optimality with fees or restrictions. The break-even scan covers annual returns from -50% to +50% at 5-point intervals, then bisects detected crossings. The UI identifies ties and multiple detected crossings and explains the scan's limits. Revolving minimums, floating rates, fixed prepayment charges, lender payment caps, tax caps/timing, inflation and changing salary/expenses are outside this first version.
+
+The model is covered by `npm run test:loans`, including independent amortization, fee budgets, lock-ins, break-even and 60 mixed cash-flow reconciliations. `e2e/loans.spec.ts` checks desktop/mobile comparisons, the monthly guide, affordability blocking, JSON restoration, salary import and unavailable storage. The page links original method explanations from Ramsey Solutions, Ramit Sethi, the CFPB and Investor.gov; these are references, not endorsements.
+
 The **Monthly Salary & Budget Planner** is a standalone preview at `/salary-budget/`, linked from the homepage. Its React UI is `src/pages/BudgetPage.tsx`; calculations and saved-plan validation are in `src/budget/model.ts`. It uses the isolated browser key `intimetec-salary-budget-v1` and exports a JSON snapshot. It has no bank connection or server storage. Currency changes relabel amounts without converting them.
 
 The monthly budget counts essential and optional expenses, bill reserves, emergency contributions, goal contributions, investments and the cash buffer once each. A bill reserve is the unfunded amount divided by months until due. The emergency target includes essential expenses and bill reserves. Recorded actual spending is a separate comparison and does not replace planned allocations.
