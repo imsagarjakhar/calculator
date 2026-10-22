@@ -1,3 +1,4 @@
+import { SiteSearch } from "../components/SiteSearch";
 import { PlannerDirectory } from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { PlannerNavigation } from "../components/PlannerNavigation";
@@ -93,6 +94,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             <a href={plannerHref("learn")}>Learn finance</a>
             <a href="#vlogs">Blog</a>
           </nav>
+          <SiteSearch />
           <label
             className="planner-currency home-currency"
             htmlFor="home-currency"
@@ -139,38 +141,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </svg>
           </button>
         </div>
-        <aside
-          className="home-data-notice"
-          aria-label="Calculator data and backups"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="26"
-            height="26"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" />
-            <path d="m8 12 3 3 5-6" />
-          </svg>
-          <div>
-            <strong>Your financial plan stays in your browser.</strong>
-            <p>
-              We don’t store your calculator entries on our servers. Your plan
-              may be saved in this browser only. <b>Download report</b> to keep
-              your own copy, then use <b>Import report</b> to continue
-              later—even on another device.
-            </p>
-            <small>
-              Clearing browser data can remove your saved plan. Keep the
-              original report file as your backup.
-            </small>
-          </div>
-        </aside>
         <div className="welcome-hero">
           <div className="welcome-intro">
             <h1 id="welcomeTitle" tabIndex={-1}>
@@ -258,13 +228,46 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           <details>
             <summary>Can I keep my plan and return later?</summary>
             <p>
-              Your inputs are saved in this browser when storage is available.
-              Download an original HTML report or JSON plan to keep a portable
-              copy, then import it into the matching calculator to continue
-              editing.
+              Some planners keep a browser copy when storage is available. The
+              salary planner starts at zero on each visit; use Import report to
+              restore it. Download an original HTML report or JSON plan to keep
+              a portable copy, then import it into the matching calculator to
+              continue editing.
             </p>
           </details>
         </section>
+        <aside
+          className="home-data-notice"
+          aria-label="Calculator data and backups"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" />
+            <path d="m8 12 3 3 5-6" />
+          </svg>
+          <div>
+            <strong>Your financial plan stays in your browser.</strong>
+            <p>
+              We don’t store your calculator entries on our servers. Your plan
+              may be saved in this browser only. <b>Download report</b> to keep
+              your own copy, then use <b>Import report</b> to continue
+              later—even on another device.
+            </p>
+            <small>
+              Clearing browser data can remove your saved plan. Keep the
+              original report file as your backup.
+            </small>
+          </div>
+        </aside>
         <p className="welcome-foot">
           Private by design. Calculations run in your browser. No sign-up.
         </p>

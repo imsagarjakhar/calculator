@@ -11,8 +11,12 @@ const dateLabel = (value: string) =>
   }).format(new Date(value));
 export function VlogMailbox({ hub }: { hub: Hub }) {
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState("");
-  const [readerOpen, setReaderOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(
+    () => new URLSearchParams(window.location.search).get("post") || "",
+  );
+  const [readerOpen, setReaderOpen] = useState(() =>
+    new URLSearchParams(window.location.search).has("post"),
+  );
   const [article, setArticle] = useState<Vlog | null>(null);
   const [loading, setLoading] = useState(false);
   const [readError, setReadError] = useState("");
@@ -27,8 +31,9 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
       .includes(query.trim().toLowerCase()),
   );
   useEffect(() => {
+    if (hub.loading) return;
     if (selected?.id !== selectedId) setSelectedId(selected?.id || "");
-  }, [selected?.id, selectedId]);
+  }, [selected?.id, selectedId, hub.loading]);
   useEffect(() => {
     let cancelled = false;
     setArticle(null);
@@ -66,6 +71,9 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
   }, [selected?.id, readerOpen, article]);
   function back() {
     setReaderOpen(false);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("post");
+    history.replaceState(null, "", url);
     requestAnimationFrame(() => {
       document
         .getElementById(`vlog-message-${selectedId}`)
@@ -166,6 +174,9 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
                 onClick={() => {
                   setSelectedId(post.id);
                   setReaderOpen(true);
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("post", post.id);
+                  history.replaceState(null, "", url);
                 }}
               >
                 <span className="vlog-message-meta">
@@ -213,7 +224,9 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
             <button className="vlog-back-to-list" onClick={back}>
               ← All blogs
             </button>
-            <span className="vlog-reading-label">Financial AI Planner / JOURNAL</span>
+            <span className="vlog-reading-label">
+              Financial AI Planner / JOURNAL
+            </span>
             {hub.session && selected && (
               <div className="vlog-owner-actions">
                 <button disabled={hub.busy} onClick={() => hub.edit(selected)}>

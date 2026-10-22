@@ -101,7 +101,11 @@ export function LearnPage() {
   const [cursor, setCursor] = useState<number | null>(null),
     [playing, setPlaying] = useState(false),
     [answer, setAnswer] = useState<number | null>(null);
-  const [query, setQuery] = useState(""),
+  const [query, setQuery] = useState(() =>
+      typeof window === "undefined"
+        ? ""
+        : new URLSearchParams(window.location.search).get("term") || "",
+    ),
     [category, setCategory] = useState<Category>("All terms");
   const chart = useRef<SVGSVGElement>(null),
     [chartWidth, setChartWidth] = useState(550);

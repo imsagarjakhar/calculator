@@ -15,15 +15,6 @@ import {
 } from "../budget/model";
 
 const storageKey = "intimetec-salary-budget-v1";
-function load(): Budget {
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-    if (validBudget(saved)) return upgradeBudget(saved);
-  } catch {
-    /* Storage can be unavailable. */
-  }
-  return emptyBudget();
-}
 function NumberField({
   label,
   value,
@@ -145,10 +136,11 @@ function NumberField({
 }
 export function BudgetPage() {
   const [plan, setPlan] = useState<Budget>(() => {
-    const saved = load();
+    const saved = emptyBudget();
     return { ...saved, currency: preferredCurrency() ?? saved.currency };
   });
   usePlanCurrency(plan, setPlan);
+  const freshPlan = useRef(plan);
   const [saved, setSaved] = useState("");
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState<"plan" | "outlook" | "actual">("plan");
@@ -199,9 +191,16 @@ export function BudgetPage() {
     setPlan((p) => ({ ...p, investment: value, investmentMode: "custom" }));
   }
   useEffect(() => {
+    // Keep the last edited snapshot for the loan planner; never restore it here.
+    if (plan === freshPlan.current) {
+      setSaved("Starts at zero each visit · Import report to resume");
+      return;
+    }
     try {
       localStorage.setItem(storageKey, JSON.stringify(plan));
-      setSaved("Saved in this browser");
+      setSaved(
+        "Download report to resume later · Budget shared with the loan planner in this browser",
+      );
     } catch {
       setSaved("Browser saving unavailable · export a copy to keep your plan");
     }

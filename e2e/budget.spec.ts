@@ -1,6 +1,26 @@
-import { test, expect } from "./test";
+import { test, expect, type Page } from "./test";
 import { initialBudget } from "../src/budget/model";
 const base = process.env.VITE_BASE_PATH || "/";
+async function importBudget(page: Page, plan: unknown) {
+  await page.locator('.planner-header input[type="file"]').setInputFiles({
+    name: "budget.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify({ plan })),
+  });
+}
+async function reopenWithReport(page: Page) {
+  const download = page.waitForEvent("download");
+  await page
+    .locator(".planner-header")
+    .getByRole("button", { name: "Download report", exact: true })
+    .click();
+  const path = await (await download).path();
+  await page.reload();
+  await expect(
+    page.getByLabel("Take-home salary (INR)", { exact: true }),
+  ).toHaveValue("");
+  await page.locator('.planner-header input[type="file"]').setInputFiles(path!);
+}
 
 test("fresh budget starts at zero and waits for income before warning", async ({
   page,
@@ -12,11 +32,7 @@ test("fresh budget starts at zero and waits for income before warning", async ({
   const p = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("intimetec-salary-budget-v1")!),
   );
-  expect(p.salary).toBe(0);
-  expect(p.expenses.every((e: { planned: number }) => e.planned === 0)).toBe(
-    true,
-  );
-  expect(p.bills.every((b: { amount: number }) => b.amount === 0)).toBe(true);
+  expect(p).toBeNull();
   await expect(
     page.getByText("START WITH YOUR INCOME", { exact: true }),
   ).toBeVisible();
@@ -31,7 +47,12 @@ test("fresh budget starts at zero and waits for income before warning", async ({
   await page.reload();
   await expect(
     page.getByLabel("Take-home salary (INR)", { exact: true }),
-  ).toHaveValue("2000");
+  ).toHaveValue("");
+  await expect(page.getByLabel("Rent / home", { exact: true })).toHaveValue("");
+  const snapshot = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("intimetec-salary-budget-v1")!),
+  );
+  expect(snapshot.salary).toBe(2000);
   page.once("dialog", (d) => d.accept());
   await page
     .locator(".planner-header")
@@ -57,12 +78,8 @@ test("older plans retain goal inputs and start the new forecast at 12 percent", 
     goalSaved: 5000,
     goalMonths: 40,
   };
-  await page.addInitScript(
-    (plan) =>
-      localStorage.setItem("intimetec-salary-budget-v1", JSON.stringify(plan)),
-    legacy,
-  );
   await page.goto(`${base}salary-budget/`);
+  await importBudget(page, legacy);
   await expect(
     page.getByLabel("Expected annual return (%)", { exact: true }),
   ).toHaveValue("12");
@@ -136,7 +153,7 @@ test("available money forecasts a goal once and previews an affordable starting 
   await expect(page.locator(".budget-growth-chart figcaption")).toContainText(
     "Month 12",
   );
-  await page.reload();
+  await reopenWithReport(page);
   await expect(result).toHaveText(withStepUp!);
   await expect(
     page.getByLabel("Years to reach goal", { exact: true }),
@@ -269,7 +286,7 @@ test("recurring bills reserve for the next payment and retain frequency", async 
   await bill.getByLabel("Already reserved", { exact: true }).fill("1000");
   await expect(bill.locator(".budget-bill-total strong")).toHaveText("₹5,000");
   await expect(bill).toContainText("After that, budget ₹2,000 per month");
-  await page.reload();
+  await reopenWithReport(page);
   await expect(
     bill.getByLabel("Payment frequency", { exact: true }),
   ).toHaveValue("3");
@@ -307,10 +324,8 @@ test("expense total warns once when spending crosses the salary limit", async ({
       planned: 0,
     })),
   };
-  await page.addInitScript((budget) => {
-    localStorage.setItem("intimetec-salary-budget-v1", JSON.stringify(budget));
-  }, plan);
   await page.goto(`${base}salary-budget/`);
+  await importBudget(page, plan);
   const total = page.getByTestId("budget-expense-total");
   const rent = page.getByLabel("Rent / home", { exact: true });
   const dialog = page.getByRole("dialog", {
@@ -399,7 +414,11 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     page.getByText("MONTHLY SHORTFALL", { exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("budget-remainder")).toHaveText("₹4,000");
-  await page.reload();
+  await page
+    .getByRole("dialog", { name: "Your monthly plan has a shortfall" })
+    .getByRole("button", { name: "Review my plan" })
+    .click();
+  await reopenWithReport(page);
   await expect(
     page.getByLabel("Take-home salary (INR)", { exact: true }),
   ).toHaveValue("40000");

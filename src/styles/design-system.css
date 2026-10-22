@@ -1178,7 +1178,7 @@ svg [stroke="#2a4550"] {
     gap: 12px;
   }
 }
-@media (max-width: 979px) {
+@media (max-width: 1370px) {
   .home-header .home-currency {
     margin-left: auto;
   }

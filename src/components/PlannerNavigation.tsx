@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { plannerHref } from "../runtime/routes";
+import { SiteSearch } from "./SiteSearch";
 
 export function PlannerNavigation({
   children,
@@ -27,6 +28,7 @@ export function PlannerNavigation({
         ← All planners
       </a>
       <span className="planner-site-name">Financial AI Planner</span>
+      <SiteSearch />
       {children}
     </nav>
   );

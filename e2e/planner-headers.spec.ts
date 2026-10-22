@@ -39,6 +39,12 @@ for (const item of [
     await expect(
       header.getByRole("combobox", { name: "Plan currency", exact: true }),
     ).toHaveValue("USD");
+    if (item.kind === "budget") {
+      await expect(page.getByLabel(item.label, { exact: true })).toHaveValue(
+        "",
+      );
+      await page.getByLabel(item.label, { exact: true }).fill("65000");
+    }
     const downloaded = page.waitForEvent("download");
     await header
       .getByRole("button", { name: "Download report", exact: true })
