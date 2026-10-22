@@ -37,6 +37,12 @@ automatic salary deductions. The old independent goal-return field is superseded
 saved inputs and custom investment amounts remain recoverable when switching
 off automatic investment of the available balance.
 
+Fresh salary budgets and Reset start with all monetary inputs at zero. Existing
+saved budgets remain intact. Keep return assumptions and valid time periods;
+the worked sample is available only through an explicit Load example plan
+action. Suppress shortfall dialogs while total income is zero, and show an
+income-entry prompt instead of claiming an empty budget is fully assigned.
+
 The loan planner opens with an empty personal loan list and an optional example.
 Its primary task is a neutral decision comparison: declare extra/total repayment
 money or import a salary snapshot, list loans, then optionally add spare savings

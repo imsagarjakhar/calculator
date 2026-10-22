@@ -33,7 +33,10 @@ function reactHeader(kind: string, title: string, description: string) {
       {
         id: `${kind}-reset`,
         text: "Reset",
-        title: "Restore the example plan",
+        title:
+          kind === "budget"
+            ? "Clear amounts to zero"
+            : "Restore the example plan",
         description: null,
       },
 

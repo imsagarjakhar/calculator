@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import {
   calculateBudget,
   initialBudget,
+  emptyBudget,
   monthlyReserve,
   validBudget,
   upgradeBudget,
@@ -21,7 +22,7 @@ function load(): Budget {
   } catch {
     /* Storage can be unavailable. */
   }
-  return structuredClone(initialBudget);
+  return emptyBudget();
 }
 function NumberField({
   label,
@@ -154,11 +155,14 @@ export function BudgetPage() {
   const result = calculateBudget(plan);
   const expenseTotal = result.needs + result.wants;
   const expensesOverSalary = expenseTotal - plan.salary > 1e-7;
-  const warningKind = expensesOverSalary
-    ? "expenses"
-    : result.remainder < 0
-      ? "plan"
-      : null;
+  const warningKind =
+    result.income <= 0
+      ? null
+      : expensesOverSalary
+        ? "expenses"
+        : result.remainder < 0
+          ? "plan"
+          : null;
   const expenseAlert = useRef<HTMLDialogElement>(null);
   const expenseWarningShown = useRef<string | null>(null);
   useEffect(() => {
@@ -223,8 +227,12 @@ export function BudgetPage() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function resetPlan() {
-    if (window.confirm("Replace your current budget with the example plan?")) {
-      setPlan(structuredClone(initialBudget));
+    if (
+      window.confirm(
+        "Clear your budget and start again with all amounts at zero?",
+      )
+    ) {
+      setPlan(emptyBudget(plan.currency));
       setNotice("");
       setTab("plan");
     }
@@ -361,13 +369,16 @@ export function BudgetPage() {
   ];
   const chartTotal = Math.max(result.income, result.allocated, 1);
   let offset = 0;
-  const gradient = buckets
-    .map((b) => {
-      const start = offset;
-      offset += (b.value / chartTotal) * 100;
-      return `${b.color} ${start}% ${offset}%`;
-    })
-    .join(",");
+  const gradient =
+    result.income === 0 && result.allocated === 0
+      ? "#e1e9df 0% 100%"
+      : buckets
+          .map((b) => {
+            const start = offset;
+            offset += (b.value / chartTotal) * 100;
+            return `${b.color} ${start}% ${offset}%`;
+          })
+          .join(",");
   const rowScale = Math.max(
     ...result.projection.map((r) => Math.max(r.corpus, r.invested)),
     1,
@@ -407,6 +418,32 @@ export function BudgetPage() {
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          className="budget-example-button"
+          onClick={() => {
+            if (
+              (result.income > 0 ||
+                result.allocated > 0 ||
+                plan.emergencySaved > 0 ||
+                plan.goalSaved > 0) &&
+              !window.confirm(
+                "Replace your current budget with an example plan?",
+              )
+            )
+              return;
+            setPlan({
+              ...structuredClone(initialBudget),
+              currency: plan.currency,
+            });
+            setTab("plan");
+            setNotice(
+              "Example plan loaded. Replace these amounts with your own, or choose Reset to start from zero.",
+            );
+          }}
+        >
+          Load example plan
+        </button>
       </div>
       {notice && (
         <p className="budget-save" role="status">
@@ -1333,21 +1370,25 @@ export function BudgetPage() {
               role="status"
             >
               <span>
-                {result.remainder < 0
-                  ? "MONTHLY SHORTFALL"
-                  : result.remainder === 0
-                    ? "A FULLY ASSIGNED PLAN"
-                    : "STILL YOURS TO ASSIGN"}
+                {result.income <= 0
+                  ? "START WITH YOUR INCOME"
+                  : result.remainder < 0
+                    ? "MONTHLY SHORTFALL"
+                    : result.remainder === 0
+                      ? "A FULLY ASSIGNED PLAN"
+                      : "STILL YOURS TO ASSIGN"}
               </span>
               <strong data-testid="budget-remainder">
                 {money(Math.abs(result.remainder))}
               </strong>
               <p>
-                {result.remainder < 0
-                  ? "Your plan exceeds your income. Explore a smaller optional spend, a longer goal timeline, or a lower allocation."
-                  : result.remainder > 0
-                    ? "Give this a job: an extra saving, a goal, or a little breathing room."
-                    : "Every part of your income has a purpose, including your cash buffer."}
+                {result.income <= 0
+                  ? "Enter your take-home pay and any other income to check your budget. All new plans start with money amounts at zero."
+                  : result.remainder < 0
+                    ? "Your plan exceeds your income. Explore a smaller optional spend, a longer goal timeline, or a lower allocation."
+                    : result.remainder > 0
+                      ? "Give this a job: an extra saving, a goal, or a little breathing room."
+                      : "Every part of your income has a purpose, including your cash buffer."}
               </p>
             </div>
           </section>
@@ -1364,7 +1405,9 @@ export function BudgetPage() {
               max={Math.max(1, result.emergencyTarget)}
             />
             <p>
-              {result.emergencyGap === 0 ? (
+              {result.emergencyTarget === 0 ? (
+                "Add your essential expenses to calculate an emergency savings target."
+              ) : result.emergencyGap === 0 ? (
                 "Your chosen emergency target is covered."
               ) : (
                 <>

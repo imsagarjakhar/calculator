@@ -36,6 +36,7 @@ export type Budget = {
   goalPlannerVersion?: 1;
   buffer: number;
 };
+/** Worked example only; fresh personal plans are created with emptyBudget(). */
 export const initialBudget: Budget = {
   version: 1,
   currency: "INR",
@@ -138,6 +139,28 @@ export const initialBudget: Budget = {
   goalPlannerVersion: 1,
   buffer: 2000,
 };
+/** Keep the worked example separate from a new user's own, zero-based plan. */
+export function emptyBudget(currency = "INR"): Budget {
+  const sample = structuredClone(initialBudget);
+  return {
+    ...sample,
+    currency,
+    salary: 0,
+    otherIncome: 0,
+    expenses: sample.expenses.map((expense) => ({
+      ...expense,
+      planned: 0,
+      actual: null,
+    })),
+    bills: sample.bills.map((bill) => ({ ...bill, amount: 0, reserved: 0 })),
+    investment: 0,
+    emergencySaved: 0,
+    emergencyMonthly: 0,
+    goalAmount: 0,
+    goalSaved: 0,
+    buffer: 0,
+  };
+}
 export function monthlyReserve(amount: number, saved: number, months: number) {
   return Math.max(0, amount - saved) / months;
 }

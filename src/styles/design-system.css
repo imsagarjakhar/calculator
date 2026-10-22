@@ -27,6 +27,16 @@ input,
 textarea {
   caret-color: #2e664f;
 }
+/* Plain number fields across every planner, including dynamically added rows. */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 a {
   text-underline-offset: 4px;
 }

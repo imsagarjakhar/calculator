@@ -2,6 +2,48 @@ import { test, expect } from "./test";
 import { initialBudget } from "../src/budget/model";
 const base = process.env.VITE_BASE_PATH || "/";
 
+test("fresh budget starts at zero and waits for income before warning", async ({
+  page,
+}) => {
+  await page.goto(`${base}salary-budget/`);
+  await expect(
+    page.getByLabel("Take-home salary (INR)", { exact: true }),
+  ).toHaveValue("");
+  const p = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("intimetec-salary-budget-v1")!),
+  );
+  expect(p.salary).toBe(0);
+  expect(p.expenses.every((e: { planned: number }) => e.planned === 0)).toBe(
+    true,
+  );
+  expect(p.bills.every((b: { amount: number }) => b.amount === 0)).toBe(true);
+  await expect(
+    page.getByText("START WITH YOUR INCOME", { exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Rent / home", { exact: true }).fill("1000");
+  await page.waitForTimeout(800);
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.getByLabel("Take-home salary (INR)", { exact: true }).fill("500");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.getByLabel("Take-home salary (INR)", { exact: true }).fill("2000");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByLabel("Take-home salary (INR)", { exact: true }),
+  ).toHaveValue("2000");
+  page.once("dialog", (d) => d.accept());
+  await page
+    .locator(".planner-header")
+    .getByRole("button", { name: "Reset", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Take-home salary (INR)", { exact: true }),
+  ).toHaveValue("");
+  await expect(page.getByLabel("Rent / home", { exact: true })).toHaveValue("");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+});
+
 test("older plans retain goal inputs and start the new forecast at 12 percent", async ({
   page,
 }) => {
@@ -52,6 +94,9 @@ test("available money forecasts a goal once and previews an affordable starting 
   page,
 }, info) => {
   await page.goto(`${base}salary-budget/`);
+  await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
   await page
     .getByLabel("Take-home salary (INR)", { exact: true })
     .fill("60000");
@@ -124,6 +169,9 @@ test("emergency target follows essential costs and bills while existing savings 
 }) => {
   await page.goto(`${base}salary-budget/`);
   await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
+  await page
     .getByLabel("Other monthly income (INR)", { exact: true })
     .fill("100000");
   const saved = page.getByLabel("Emergency savings today", { exact: true });
@@ -152,6 +200,9 @@ test("month inputs can be cleared and replaced without changing the plan mid-edi
   page,
 }) => {
   await page.goto(`${base}salary-budget/`);
+  await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
   const bill = page.getByRole("group", {
     name: "Upcoming bill 1",
     exact: true,
@@ -195,6 +246,9 @@ test("recurring bills reserve for the next payment and retain frequency", async 
   page,
 }, info) => {
   await page.goto(`${base}salary-budget/`);
+  await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
   await page
     .getByLabel("Other monthly income (INR)", { exact: true })
     .fill("100000");
@@ -312,6 +366,9 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
   await page.goto(base);
   await page.getByRole("link", { name: /Plan my monthly budget/ }).click();
   await expect(page).toHaveURL(/salary-budget\/$/);
+  await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "A place for every rupee",
   );
@@ -409,6 +466,9 @@ test("bill due time explains a whole-plan shortfall and resets after it is fixed
   page,
 }, info) => {
   await page.goto(`${base}salary-budget/`);
+  await page
+    .getByRole("button", { name: "Load example plan", exact: true })
+    .click();
   const bill = page.getByRole("group", {
     name: "Upcoming bill 1",
     exact: true,

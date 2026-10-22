@@ -6,8 +6,8 @@ for (const item of [
     route: "salary-budget",
     kind: "budget",
     label: "Take-home salary (USD)",
-    restoredLabel: "Take-home salary (INR)",
-    initial: "50000",
+    restoredLabel: "Take-home salary (USD)",
+    initial: "",
   },
   {
     route: "loan-payoff",
@@ -68,7 +68,7 @@ for (const item of [
     await header.getByRole("button", { name: "Reset", exact: true }).click();
     await expect(
       header.getByRole("combobox", { name: "Plan currency", exact: true }),
-    ).toHaveValue("INR");
+    ).toHaveValue(item.kind === "budget" ? "USD" : "INR");
     await expect(
       page.getByLabel(item.restoredLabel, { exact: true }),
     ).toHaveValue(item.initial);

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   initialBudget,
+  emptyBudget,
   calculateBudget,
   monthlyReserve,
   monthlyGoalSaving,
@@ -11,6 +12,31 @@ import {
   validBudget,
 } from "../src/budget/model.ts";
 const plan = () => structuredClone(initialBudget);
+test("new budgets start with zero money and valid planning assumptions", () => {
+  const p = emptyBudget("USD");
+  assert.ok(validBudget(p));
+  for (const key of [
+    "salary",
+    "otherIncome",
+    "investment",
+    "emergencySaved",
+    "emergencyMonthly",
+    "goalAmount",
+    "goalSaved",
+    "buffer",
+  ])
+    assert.equal(p[key], 0);
+  assert.ok(p.expenses.every((e) => e.planned === 0 && e.actual === null));
+  assert.ok(
+    p.bills.every((b) => b.amount === 0 && b.reserved === 0 && b.months > 0),
+  );
+  assert.equal(p.currency, "USD");
+  assert.equal(p.annualReturn, 12);
+  assert.equal(calculateBudget(p).remainder, 0);
+  assert.equal(calculateBudget(p).end.corpus, 0);
+  p.expenses[0].planned = 100;
+  assert.equal(initialBudget.expenses[0].planned, 12000);
+});
 test("goal contributions reach the target with existing savings and month-end growth", () => {
   assert.equal(monthlyGoalSaving(1000000, 5000, 40, 0), 24875);
   for (const annual of [12, -20, 0.00000001]) {
