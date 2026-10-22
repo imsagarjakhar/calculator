@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  learn: {
+    title: "Finance Basics: SIP, SWP, Returns & More | Financial AI Planner",
+    description:
+      "Learn finance in plain language with interactive examples, illustrated SIP and SWP lessons, quick questions and a searchable glossary of financial terms.",
+    name: "Finance basics",
+  },
   "loan-payoff": {
     title: "Loan Payoff & Investment Planner | Financial AI Planner",
     description:
@@ -31,7 +37,8 @@ export const searchPages = {
     name: "Retirement & SWP Calculator",
   },
   "custom-plan": {
-    title: "Monthly Investment Planner & Loan EMI Calculator | Financial AI Planner",
+    title:
+      "Monthly Investment Planner & Loan EMI Calculator | Financial AI Planner",
     description:
       "Build a monthly plan with Financial AI Planner. Track investment records, calculate loan EMIs and outstanding balances, and project assets, debt and inflation-adjusted net worth.",
     name: "Monthly Investment Planner & Loan EMI Calculator",
@@ -86,7 +93,7 @@ export function searchGraph(page: SearchPage) {
               "@id": url + "#calculators",
               name: "Free financial planning calculators",
               itemListElement: (Object.keys(searchPages) as SearchPage[])
-                .filter((key) => key !== "home")
+                .filter((key) => key !== "home" && key !== "learn")
                 .map((key, index) => ({
                   "@type": "ListItem",
                   position: index + 1,
@@ -115,16 +122,23 @@ export function searchGraph(page: SearchPage) {
               ],
             },
             {
-              "@type": "WebApplication",
-              "@id": url + "#calculator",
+              "@type": page === "learn" ? "LearningResource" : "WebApplication",
+              "@id": url + (page === "learn" ? "#guide" : "#calculator"),
               name: info.name,
               url,
               description: info.description,
-              applicationCategory: "FinanceApplication",
-              operatingSystem: "Any",
+              ...(page === "learn"
+                ? {
+                    learningResourceType: "Interactive glossary",
+                    educationalUse: "instruction",
+                  }
+                : {
+                    applicationCategory: "FinanceApplication",
+                    operatingSystem: "Any",
+                    browserRequirements:
+                      "Requires JavaScript for interactive calculations",
+                  }),
               isAccessibleForFree: true,
-              browserRequirements:
-                "Requires JavaScript for interactive calculations",
               isPartOf: { "@id": siteUrl + "/#website" },
             },
           ]),

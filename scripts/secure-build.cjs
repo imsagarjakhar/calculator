@@ -17,6 +17,7 @@ for (const page of [
   "bucket-plan/index.html",
   "salary-budget/index.html",
   "loan-payoff/index.html",
+  "learn/index.html",
 ]) {
   const file = path.join(output, page);
   let source = fs.readFileSync(file, "utf8");

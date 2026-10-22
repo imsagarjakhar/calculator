@@ -59,6 +59,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           <nav className="home-nav" aria-label="Main navigation">
             <a href="#planners">The planners</a>
             <a href="#financial-planning">Planning guide</a>
+            <a href={plannerHref("learn")}>Learn finance</a>
             <a href="#vlogs">Blog</a>
           </nav>
           <label
@@ -108,6 +109,9 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             <p className="welcome-privacy">
               Calculations stay in your browser. No account needed.
             </p>
+            <a className="home-learn-link" href={plannerHref("learn")}>
+              New to SIP or SWP? Learn the basics →
+            </a>
           </div>
           <aside
             className="starting-point"

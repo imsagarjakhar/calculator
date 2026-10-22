@@ -74,3 +74,13 @@ shows eligible corpus × rate ÷ 12, today's purchasing power and later shortfal
 it must not imply that an automatically derived income covers living costs.
 Older saved spending goals keep their method. Field details use accessible,
 keyboard- and touch-operable info disclosures instead of long inline help.
+
+The Finance Basics guide lives at `/learn/`, linked from the home navigation,
+intro and every page's footer. It combines five interactive lessons (SIP, SWP,
+return, inflation and EMI), authored SVG illustrations, optional play/pause,
+keyboard-accessible sliders and a short quiz for each idea. A searchable,
+category-filtered glossary covers the vocabulary used in the planners. Examples
+follow the shared currency and separate contributions, growth and withdrawals.
+Animation starts only on request and respects reduced-motion settings. The full
+initial guide and glossary are prerendered for reading without JavaScript;
+controls enhance them in the browser. Link primary investor education sources.

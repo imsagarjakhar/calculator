@@ -1,5 +1,6 @@
 export type PlannerRoute =
   | "home"
+  | "learn"
   | "growth"
   | "survival"
   | "custom-plan"

@@ -29,19 +29,26 @@ try {
     if (route === "home") continue;
     const page = `dist/${route}/index.html`;
     const source = await readFile(page, "utf8");
-    const introduction = renderToStaticMarkup(
-      createElement(
-        "main",
-        { className: "static-introduction" },
-        createElement("h1", null, info.name),
-        createElement("p", null, info.description),
-        createElement(
-          "p",
-          null,
-          "Enable JavaScript to enter your assumptions and calculate your plan privately in your browser.",
-        ),
-      ),
-    );
+    const { LearnPage } =
+      route === "learn"
+        ? await server.ssrLoadModule("/src/pages/LearnPage.tsx")
+        : {};
+    const introduction =
+      route === "learn"
+        ? renderToStaticMarkup(createElement(LearnPage))
+        : renderToStaticMarkup(
+            createElement(
+              "main",
+              { className: "static-introduction" },
+              createElement("h1", null, info.name),
+              createElement("p", null, info.description),
+              createElement(
+                "p",
+                null,
+                "Enable JavaScript to enter your assumptions and calculate your plan privately in your browser.",
+              ),
+            ),
+          );
     await writeFile(
       page,
       source.replace(

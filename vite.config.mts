@@ -268,6 +268,7 @@ export default defineConfig({
           "bucket-plan",
           "salary-budget",
           "loan-payoff",
+          "learn",
         ].map((page) => [
           page,
           resolve(

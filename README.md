@@ -107,6 +107,12 @@ such builds must not be deployed after the repository becomes private.
 
 ## Repository layout
 
+The beginner guide at `/learn/` teaches SIP, SWP, returns, inflation and EMI with
+interactive illustrations, sliders and quick quizzes. Its searchable glossary
+and examples are maintained in `src/content/financeBasics.ts`. Currency follows
+the shared site preference. The initial guide is prerendered so definitions can
+be read without JavaScript. Run `npm run test:learn` for the example math checks.
+
 The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It compares highest-interest-first, smallest-balance-first, investing and a configurable split, with a shared monthly commitment and horizon. It supports multiple fixed-rate loans, prepayment fees/lock-ins, explicit tax assumptions, return sensitivity, salary-budget import and an exportable/restorable plan. Method references and assumptions are linked in the page. Run `npm run test:loans` for the model tests.
 
 - `src/` — React pages, shared components and runtime hooks.

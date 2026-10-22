@@ -160,6 +160,7 @@ test("search engines can read content, links and consistent metadata without Jav
       "bucket-plan/",
       "salary-budget/",
       "loan-payoff/",
+      "learn/",
     ]) {
       await staticPage.goto(appPath(route));
       const canonical = "https://intimetec.org/" + route;
@@ -198,7 +199,7 @@ test("search engines can read content, links and consistent metadata without Jav
       await expect(
         staticPage.locator('meta[name="robots"]'),
       ).not.toHaveAttribute("content", /noindex/);
-      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(8);
+      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(9);
     }
     const sitemap = await (await request.get(appPath("sitemap.xml"))).text();
     for (const route of [
@@ -210,6 +211,7 @@ test("search engines can read content, links and consistent metadata without Jav
       "bucket-plan/",
       "salary-budget/",
       "loan-payoff/",
+      "learn/",
     ])
       expect(sitemap).toContain(`<loc>https://intimetec.org/${route}</loc>`);
   } finally {
