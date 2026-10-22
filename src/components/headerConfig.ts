@@ -68,7 +68,7 @@ export const headerConfig = {
   loan: reactHeader(
     "loan",
     "Pay it down. Or build it up?",
-    "Compare paying loans faster with investing, using your actual budget and one fair timeline.",
+    "Your loans, one repayment budget. See how extra payments, spare savings and rental assets change debt and net wealth.",
   ),
 
   growth: {

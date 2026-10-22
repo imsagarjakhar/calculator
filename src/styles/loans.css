@@ -1,4 +1,562 @@
 @import "./budget.css";
+.loan-overview-scope {
+  margin-top: 12px !important;
+  font-size: 12px !important;
+}
+.loan-choice-explainer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 22px 0;
+}
+.loan-choice-explainer > div {
+  min-width: 0;
+}
+.loan-choice-explainer strong {
+  font-size: 15px;
+  color: #214c3a;
+}
+.loan-choice-explainer p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #52685e;
+  margin: 8px 0 0;
+}
+.loan-return-field {
+  max-width: 300px;
+}
+.loan-invest-or-repay > .loan-decision-chart {
+  margin-top: 28px;
+}
+.loan-choice-results {
+  border-top: 1px solid #d5dfd6;
+  padding-top: 24px;
+}
+.loan-choice-results dl,
+.loan-individual-facts {
+  margin: 15px 0 0;
+}
+.loan-choice-results dl > div,
+.loan-individual-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  border-bottom: 1px solid #e0e7df;
+}
+.loan-choice-results dt,
+.loan-individual-facts dt {
+  color: #52685e;
+}
+.loan-choice-results dd,
+.loan-individual-facts dd {
+  margin: 0;
+  font-weight: 650;
+  color: #214c3a;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.loan-per-loan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+.loan-per-loan {
+  min-width: 0;
+}
+.loan-per-loan-grid > .budget-panel {
+  margin: 0;
+  min-width: 0;
+}
+.loan-individual > .budget-eyebrow {
+  margin-bottom: 18px;
+  line-height: 1.8;
+}
+.loan-advanced-scenarios > summary {
+  padding: 20px 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #214c3a;
+  cursor: pointer;
+  border-block: 1px solid #ced9d3;
+}
+.loan-advanced-scenarios[open] > .loan-decision-intro {
+  margin-top: 24px;
+}
+.loan-advanced-scenarios > .budget-panel {
+  margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .loan-choice-explainer,
+  .loan-per-loan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.loan-linked-budget {
+  padding: 20px;
+  background: #edf5ec;
+  border-radius: 10px;
+  margin: 18px 0 24px;
+  color: #214c3a;
+}
+.loan-linked-budget > span {
+  font-size: 13px;
+  line-height: 1.7;
+  display: block;
+}
+.loan-linked-budget > strong {
+  font-size: 29px;
+  line-height: 1.4;
+  display: block;
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.loan-linked-budget > p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 12px 0 0;
+  max-width: 65ch;
+}
+
+/* Decision workspace: explicit funding, readable debt costs, comparable scenarios. */
+.loan-funding-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 18px 0;
+  cursor: pointer;
+}
+.loan-funding-toggle input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: #176b52;
+}
+.loan-funding-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  padding: 20px 0 0;
+  margin: 22px 0 0;
+  border-top: 1px solid #d5dfd6;
+}
+.loan-funding-summary dt {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #53685e;
+}
+.loan-funding-summary dd {
+  font-size: 22px;
+  font-weight: 650;
+  color: #176b52;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+}
+.loan-empty {
+  padding: 22px 0;
+  border-top: 1px solid #d5dfd6;
+  margin-top: 22px;
+}
+.loan-empty h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+.loan-empty p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #53685e;
+  max-width: 60ch;
+}
+.loan-empty button {
+  margin-top: 10px;
+  min-height: 42px;
+}
+.loan-assets-panel > h3 {
+  font-size: 18px;
+  margin: 28px 0 10px;
+}
+.loan-asset-editor > .budget-field {
+  margin-bottom: 20px;
+}
+.loan-asset-rent {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #385a44;
+}
+.loan-decision-lab {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.loan-decision-intro {
+  padding: 8px 0;
+}
+.loan-decision-intro h2 {
+  font: 450 34px/1.15 var(--font-editorial);
+  color: #203b32;
+  margin: 0 0 14px;
+}
+.loan-decision-intro > p {
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 65ch;
+  color: #52685e;
+  margin: 0;
+}
+.loan-decision-lab .budget-panel > h3 {
+  font-size: 19px;
+  line-height: 1.4;
+  margin: 0 0 16px;
+}
+.loan-rate-ranking ol {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: grid;
+  gap: 24px;
+}
+.loan-rate-ranking li > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.loan-rate-ranking li > div strong {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.loan-rate-ranking li b {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: #955224;
+}
+.loan-rate-track {
+  height: 9px;
+  border-radius: 4px;
+  background: #edf1eb;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.loan-rate-track > span {
+  height: 100%;
+  display: block;
+  border-radius: 4px;
+  background: #b6773e;
+}
+.loan-rate-ranking li p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #596b63;
+  margin: 8px 0 0;
+}
+.loan-decision-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding: 24px 0;
+  margin: 24px 0;
+  border-block: 1px solid #d5dfd6;
+}
+.loan-decision-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.loan-decision-stats span {
+  font-size: 12px;
+  color: #52685e;
+}
+.loan-decision-stats strong {
+  font-size: 23px;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  color: #176b52;
+  overflow-wrap: anywhere;
+}
+.loan-decision-stats small {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #596b63;
+}
+.loan-decision-charts {
+  display: grid;
+  gap: 30px;
+  margin-top: 24px;
+}
+.loan-decision-chart {
+  margin: 0;
+  min-width: 0;
+}
+.loan-decision-chart h3 {
+  font-size: 17px;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.loan-decision-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.loan-decision-chart svg text {
+  font: 11px var(--font-ui);
+  fill: #52685e;
+}
+.loan-decision-chart path {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.loan-decision-grid {
+  stroke: #e0e7df;
+  stroke-width: 1;
+}
+.loan-decision-baseline {
+  stroke: #9b662f;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+.loan-decision-line {
+  stroke: #176b52;
+  stroke-width: 3;
+}
+.loan-decision-marker {
+  stroke: #a4b5a7;
+  stroke-dasharray: 3 4;
+}
+.loan-decision-dot {
+  fill: #176b52;
+  stroke: white;
+  stroke-width: 1.5;
+}
+.loan-decision-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  font-size: 11px;
+  color: #52685e;
+  line-height: 1.7;
+  margin: 12px 0;
+}
+.loan-decision-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.loan-decision-legend i {
+  width: 20px;
+  border-top: 3px solid #176b52;
+}
+.loan-decision-legend span + span i {
+  border-top: 2px dashed #9b662f;
+}
+.loan-decision-slider {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 12px;
+}
+.loan-decision-slider input {
+  min-width: 50px;
+  flex: 1;
+  min-height: 40px;
+  accent-color: #176b52;
+}
+.loan-decision-chart figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 12px;
+  color: #52685e;
+  line-height: 1.8;
+  margin: 8px 0 0;
+}
+.loan-decision-chart figcaption strong {
+  color: #176b52;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.loan-decision-note {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #52685e;
+}
+.loan-scenario-warning {
+  padding: 16px;
+  background: #fff0e7;
+  color: #873c26;
+  font-size: 13px;
+  line-height: 1.8;
+  border: 1px solid #e8c7b9;
+  border-radius: 8px;
+}
+.loan-decision-ledger {
+  padding: 20px 0 0;
+  margin: 26px 0 0;
+  border-top: 1px solid #d5dfd6;
+}
+.loan-decision-ledger > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 7px 0;
+}
+.loan-decision-ledger dt {
+  color: #52685e;
+}
+.loan-decision-ledger dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.loan-decision-ledger > div:last-child {
+  border-top: 1px solid #d5dfd6;
+  margin-top: 10px;
+  padding-top: 14px;
+  font-weight: 650;
+}
+.loan-cost-chart {
+  display: grid;
+  gap: 22px;
+  margin-top: 24px;
+}
+.loan-cost-chart > div > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.loan-cost-chart strong {
+  font-variant-numeric: tabular-nums;
+  max-width: 60%;
+  overflow-wrap: anywhere;
+  color: #385a44;
+}
+.loan-cost-chart > div > div:first-child > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.loan-cost-track {
+  height: 12px;
+  background: #edf1eb;
+  margin-top: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.loan-cost-track span {
+  display: block;
+  height: 100%;
+  background: #47755b;
+  border-radius: 4px;
+}
+.loan-cost-chart p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #873c26;
+  margin: 8px 0 0;
+}
+.loan-decision-method {
+  margin-top: 26px;
+  border-top: 1px solid #d5dfd6;
+  padding-top: 20px;
+}
+.loan-decision-method summary,
+.loan-decision-schedule summary {
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1.8;
+  padding: 8px 0;
+}
+.loan-decision-method p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #52685e;
+  margin: 14px 0 0;
+  max-width: 70ch;
+}
+.loan-investment-alternatives {
+  border-top: 1px solid #cad8c9;
+  margin-top: 12px;
+  padding-top: 18px;
+}
+.loan-investment-alternatives > summary {
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 0;
+  line-height: 1.7;
+}
+.loan-investment-boundary {
+  padding: 26px 0;
+}
+.loan-investment-boundary h2 {
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+.loan-investment-boundary p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #52685e;
+}
+@media (max-width: 600px) {
+  .loan-funding-summary,
+  .loan-decision-stats {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .loan-funding-summary > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 15px;
+  }
+  .loan-funding-summary dd {
+    font-size: 21px;
+  }
+  .loan-decision-stats > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px 12px;
+    align-items: baseline;
+  }
+  .loan-decision-stats strong {
+    text-align: right;
+    font-size: 22px;
+  }
+  .loan-decision-stats small {
+    grid-column: 1/-1;
+  }
+  .loan-decision-slider {
+    display: block;
+  }
+  .loan-decision-slider input {
+    display: block;
+    width: 100%;
+  }
+  .loan-decision-intro h2 {
+    font-size: 30px;
+  }
+  .loan-decision-ledger > div {
+    font-size: 12px;
+  }
+}
 .loan-app {
   max-width: 1420px;
 }

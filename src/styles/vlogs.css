@@ -30,18 +30,6 @@
 .vlog-choice .choice-icon {
   color: #176b52;
 }
-.vlog-back {
-  color: var(--text, #27566d);
-  text-decoration: none;
-  padding: 12px 0;
-}
-.vlog-back:hover {
-  color: #176b52;
-}
-.vlog-back:focus-visible {
-  outline: 2px solid #94ad9f;
-  outline-offset: 4px;
-}
 .vlog-error {
   padding: 14px 16px;
   background: #f5f6f333;

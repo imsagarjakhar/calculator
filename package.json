@@ -11,7 +11,7 @@
     "build": "npm run typecheck && vite build && node scripts/prerender.mjs && node scripts/secure-build.cjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "test": "node scripts/test.cjs && npm run test:vlogs && npm run test:budget && npm run test:loans",
-    "test:loans": "node --experimental-strip-types --test scripts/loans.test.mjs",
+    "test:loans": "node --experimental-strip-types --test scripts/loans.test.mjs scripts/loan-decisions.test.mjs",
     "test:budget": "node --experimental-strip-types --test scripts/budget.test.mjs",
     "test:vlogs": "node --test scripts/vlog-worker.test.mjs",
     "test:e2e": "playwright test",

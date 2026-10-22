@@ -509,16 +509,14 @@ export const GrowthPage = memo(function GrowthPage() {
               deposit. Yearly growth is the sum of monthly growth during that
               year. Calendar dates are not assumed: Year 2, Month 1 is
               investment month 13. Displayed amounts are rounded; CSV values are
-              in rupees, to two decimal places.
+              in your selected currency, to two decimal places.
             </p>
             <p>
-              <strong>Currency selector:</strong> currency changes use fixed
-              indicative exchange rates embedded in this offline file (INR 1 =
-              SAR 0.045, USD 1/83.5, AED 1/22.75, EUR 1/90.5, GBP 1/105.5). They
-              are not live rates. Changing currency resets the monthly
-              investment and goal to their default amounts, clears the extra
-              amount and scheduled extra investments, and keeps the percentage
-              and duration assumptions unchanged.
+              <strong>Currency selector:</strong> enter amounts in your selected
+              currency; no exchange-rate conversion is applied. Changing
+              currency resets the monthly investment and goal to their default
+              amounts, clears the extra amount and scheduled extra investments,
+              and keeps the percentage and duration assumptions unchanged.
             </p>
             <p id="storageNote">
               Inputs and extras are saved locally when browser storage is

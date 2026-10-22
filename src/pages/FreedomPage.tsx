@@ -1,8 +1,26 @@
 import { PlannerNavigation } from "../components/PlannerNavigation";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
 import mount from "planner:controller:freedom";
+function FieldInfo({
+  name,
+  id,
+  children,
+}: {
+  name: string;
+  id: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="freedom-field-info">
+      <summary aria-label={`About ${name}`}>
+        <span aria-hidden="true">i</span>
+      </summary>
+      <div id={id}>{children}</div>
+    </details>
+  );
+}
 export const FreedomPage = memo(function FreedomPage() {
   const ref = usePlanner(mount);
   return (
@@ -11,10 +29,9 @@ export const FreedomPage = memo(function FreedomPage() {
         <PlannerNavigation />
         <PlannerHeader kind="freedom" />
         <p className="freedom-intro">
-          Financial freedom here means your investment returns could support the
-          monthly amount you want, with room for inflation and your scheduled
-          future expenses. It is an estimate using fixed assumptions, not a
-          guarantee or a recommendation to resign.
+          See what your future savings could provide each month, or enter a
+          monthly spending goal to estimate when it could be funded. Explore
+          your assumptions before making a decision about stopping work.
         </p>
         <div className="freedom-layout">
           <section className="card">
@@ -23,7 +40,9 @@ export const FreedomPage = memo(function FreedomPage() {
             <form id="freedomForm" noValidate>
               <div className="fields">
                 <label htmlFor="f-age">
-                  Your current age
+                  <span className="freedom-field-heading">
+                    Your current age
+                  </span>
                   <input
                     id="f-age"
                     type="number"
@@ -33,9 +52,17 @@ export const FreedomPage = memo(function FreedomPage() {
                     required
                   />
                 </label>
-                <label htmlFor="f-monthlyInvestment">
-                  How much will you invest each month? (
-                  <span className="f-code">INR</span>)
+                <div className="freedom-input-field">
+                  <div className="freedom-field-heading">
+                    <label htmlFor="f-monthlyInvestment">
+                      Monthly investment (<span className="f-code">INR</span>)
+                    </label>
+                    <FieldInfo name="monthly investment" id="investmentHelp">
+                      Your planned SIP or retirement investment, separate from
+                      living expenses. Enter 0 if you won’t add new investments.
+                      Future step-ups need to be funded from your income.
+                    </FieldInfo>
+                  </div>
                   <input
                     id="f-monthlyInvestment"
                     type="number"
@@ -45,15 +72,19 @@ export const FreedomPage = memo(function FreedomPage() {
                     required
                     aria-describedby="investmentHelp"
                   />
-                  <span id="investmentHelp" className="helper">
-                    Enter your planned monthly SIP or retirement investment,
-                    separate from your living expenses. Enter 0 if you will not
-                    add new investments.
-                  </span>
-                </label>
-                <label htmlFor="f-corpus">
-                  How much have you already saved or invested? (
-                  <span className="f-code">INR</span>)
+                </div>
+                <div className="freedom-input-field">
+                  <div className="freedom-field-heading">
+                    <label htmlFor="f-corpus">
+                      Savings &amp; investments today (
+                      <span className="f-code">INR</span>)
+                    </label>
+                    <FieldInfo name="current savings" id="corpusHelp">
+                      Savings, mutual funds, stocks and deposits available after
+                      stopping work. Exclude your home and money reserved for
+                      other needs.
+                    </FieldInfo>
+                  </div>
                   <input
                     id="f-corpus"
                     type="number"
@@ -63,40 +94,125 @@ export const FreedomPage = memo(function FreedomPage() {
                     required
                     aria-describedby="corpusHelp"
                   />
-                  <span id="corpusHelp" className="helper">
-                    Enter today’s total value of savings, mutual funds, stocks
-                    and deposits you can use after stopping work. Exclude your
-                    home and money reserved for other needs.
-                  </span>
-                </label>
+                </div>
               </div>
               <p className="helper">
-                Your monthly investment is added to the existing corpus. The
-                estimate assumes you can fund the SIP and its future step-ups.
-                Future one-off expenses draw from this investment pot.{" "}
-                <a href="#freedomEvents">Add future expenses below ↓</a>
+                <a href="#freedomEvents">
+                  Have a future one-off cost? Add it below ↓
+                </a>
               </p>
               <p className="eyebrow freedom-step">02 / THE LIFE YOU WANT</p>
               <h2>Your freedom goal</h2>
+              <input id="f-incomeMode" type="hidden" defaultValue="corpus" />
+              <div
+                className="freedom-goal-switch"
+                role="group"
+                aria-label="Choose income goal method"
+              >
+                <button
+                  id="freedomGoalSpending"
+                  type="button"
+                  aria-pressed="false"
+                  aria-controls="spendingGoal"
+                >
+                  Enter monthly income
+                </button>
+                <button
+                  id="freedomGoalCorpus"
+                  type="button"
+                  aria-pressed="true"
+                  aria-controls="withdrawalGoal"
+                >
+                  Use corpus percentage
+                </button>
+              </div>
               <div className="fields">
-                <label htmlFor="f-retirementExpense">
-                  How much do you want each month, at today’s prices? (
-                  <span className="f-code">INR</span>)
+                <label htmlFor="f-targetAge">
+                  Age you would like to stop working
                   <input
-                    id="f-retirementExpense"
+                    id="f-targetAge"
                     type="number"
-                    min="0"
-                    max="1000000000"
-                    step="any"
+                    min="18"
+                    max="119"
+                    step="1"
                     required
                   />
                 </label>
               </div>
-              <p className="helper">
-                Enter what you want to spend each month in today’s money. We
-                increase that amount with inflation and find when your corpus
-                could support it.
-              </p>
+              <section
+                id="withdrawalGoal"
+                className="freedom-withdrawal"
+                aria-labelledby="withdrawalTitle"
+              >
+                <div className="freedom-withdrawal-heading">
+                  <div>
+                    <p className="eyebrow">YOUR CORPUS → YOUR INCOME</p>
+                    <h3 id="withdrawalTitle">Choose your annual withdrawal</h3>
+                  </div>
+                  <output id="withdrawalRateValue" htmlFor="f-withdrawalRate">
+                    3%
+                  </output>
+                </div>
+                <label htmlFor="f-withdrawalRate">
+                  Annual withdrawal rate (%)
+                </label>
+                <input
+                  id="f-withdrawalRate"
+                  type="range"
+                  min="2"
+                  max="6"
+                  step="0.25"
+                  defaultValue="3"
+                  aria-describedby="withdrawalHelp"
+                />
+                <div className="freedom-withdrawal-scale" aria-hidden="true">
+                  <span>2% · Lower income</span>
+                  <span>6% · Higher withdrawals</span>
+                </div>
+                <p id="withdrawalHelp" className="helper">
+                  Annual percentage of your projected corpus, paid monthly.
+                  Default: 3%.
+                </p>
+                <div
+                  id="withdrawalPreview"
+                  className="freedom-withdrawal-preview"
+                  aria-live="polite"
+                />
+                <FieldInfo
+                  name="withdrawal assumptions"
+                  id="withdrawalAssumptions"
+                >
+                  Scheduled future costs and your extra cushion are reserved
+                  first. Monthly withdrawals then rise with inflation. This is a
+                  withdrawal assumption, not a return or guaranteed income;
+                  higher withdrawals can exhaust the corpus sooner.
+                </FieldInfo>
+              </section>
+              <div id="spendingGoal" hidden>
+                <div className="fields">
+                  <label htmlFor="f-retirementExpense">
+                    Monthly income you need, in today’s money (
+                    <span className="f-code">INR</span>)
+                    <input
+                      id="f-retirementExpense"
+                      type="number"
+                      min="0"
+                      max="1000000000"
+                      step="any"
+                      required
+                    />
+                  </label>
+                </div>
+                <p className="helper">
+                  Include your expected living costs. We adjust this amount for
+                  inflation.
+                </p>
+                <div
+                  id="spendingRatePreview"
+                  className="freedom-spending-preview"
+                  aria-live="polite"
+                />
+              </div>
               <section className="freedom-simple-assumptions">
                 <h3>Play with just three assumptions</h3>
                 <div className="fields">
@@ -111,8 +227,8 @@ export const FreedomPage = memo(function FreedomPage() {
                       required
                     />
                     <span className="helper">
-                      The annual increase in your monthly SIP. Use 0 for a fixed
-                      SIP.
+                      Yearly increase to your monthly investment. 0% keeps it
+                      fixed.
                     </span>
                   </label>
                   <label htmlFor="f-inflation">
@@ -150,12 +266,12 @@ export const FreedomPage = memo(function FreedomPage() {
                     step="0.5"
                   />
                 </label>
-                <p id="returnHelp" className="helper">
+                <FieldInfo name="expected returns" id="returnHelp">
                   One expected return applies throughout the plan. Change it to
                   see your freedom age and monthly support update. Use an
                   assumption after taxes and fees; returns are not guaranteed
                   monthly interest payments.
-                </p>
+                </FieldInfo>
               </section>
               <section
                 className="investment-schedule"
@@ -247,17 +363,6 @@ export const FreedomPage = memo(function FreedomPage() {
                   aria-live="polite"
                 ></p>
                 <div className="fields">
-                  <label htmlFor="f-targetAge">
-                    Age you would like to stop working
-                    <input
-                      id="f-targetAge"
-                      type="number"
-                      min="18"
-                      max="119"
-                      step="1"
-                      required
-                    />
-                  </label>
                   <label htmlFor="f-endAge">
                     Search for freedom up to age
                     <input
@@ -390,16 +495,26 @@ export const FreedomPage = memo(function FreedomPage() {
         <details className="card">
           <summary>How this estimate works</summary>
           <p>
-            The regular-income target is a growing monthly withdrawal stream
-            under a constant-return illustration. If r is the monthly growth
-            factor from your expected annual return and i is the monthly
-            inflation factor, the spending corpus required at a candidate date
-            is the next month’s desired spending divided by (r − i). This allows
-            the income pot’s purchasing power to keep pace with inflation. With
-            positive spending and return at or below inflation, there is no
-            finite target under this model. This does not mean retirement is
-            impossible; it means this ongoing-income assumption is not
-            supported.
+            In corpus-based mode, savings grow to your selected stop-work age.
+            We reserve future one-off costs and your optional cushion, then
+            multiply the remaining corpus by your annual withdrawal rate and
+            divide by 12. The default is 3%, adjustable from 2–6%. Contributions
+            stop at the selected age and withdrawals start the next month,
+            rising with inflation. The schedule shows any later shortfall. This
+            calculates an income amount; it does not prove that amount covers
+            your spending or lasts for life.
+          </p>
+          <p>
+            In monthly-spending mode, the regular-income target is a growing
+            monthly withdrawal stream under a constant-return illustration. If r
+            is the monthly growth factor from your expected annual return and i
+            is the monthly inflation factor, the spending corpus required at a
+            candidate date is the next month’s desired spending divided by (r −
+            i). This allows the income pot’s purchasing power to keep pace with
+            inflation. With positive spending and return at or below inflation,
+            there is no finite target under this model. This does not mean
+            retirement is impossible; it means this ongoing-income assumption is
+            not supported.
           </p>
           <p>
             We separately reserve the present value of included future one-off

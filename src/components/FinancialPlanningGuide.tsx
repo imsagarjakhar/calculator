@@ -1,6 +1,9 @@
 import { plannerHref } from "../runtime/routes";
+import { currencyMoney, useCurrency } from "../runtime/currency";
 
 export function FinancialPlanningGuide() {
+  const currency = useCurrency();
+  const money = (n: number) => currencyMoney(n, currency);
   return (
     <section
       id="financial-planning"
@@ -44,9 +47,9 @@ export function FinancialPlanningGuide() {
           <h3>Set an emergency savings target</h3>
           <p>
             Choose a reserve based on essential costs, income stability and
-            dependants. For example, four months of ₹25,000 in essential costs
-            means a ₹1,00,000 target. This is an illustration; your target may
-            differ. Keep emergency money accessible when needed.
+            dependants. For example, four months of {money(25000)} in essential
+            costs means a {money(100000)} target. This is an illustration; your
+            target may differ. Keep emergency money accessible when needed.
           </p>
           <a href={plannerHref("salary-budget")}>
             Estimate your emergency savings gap →
@@ -101,10 +104,10 @@ export function FinancialPlanningGuide() {
         <h3>What is the 50/30/20 budget rule?</h3>
         <p>
           It is a starting framework for splitting take-home pay: 50% for needs,
-          30% for wants and 20% for savings and debt reduction. With ₹50,000 a
-          month, that is ₹25,000, ₹15,000 and ₹10,000 respectively. Adjust the
-          split for your required payments, living costs and goals; do not count
-          the same EMI twice.
+          30% for wants and 20% for savings and debt reduction. With{" "}
+          {money(50000)} a month, that is {money(25000)}, {money(15000)} and{" "}
+          {money(10000)} respectively. Adjust the split for your required
+          payments, living costs and goals; do not count the same EMI twice.
         </p>
         <p>
           The Salary Budget Planner uses your actual categories instead of

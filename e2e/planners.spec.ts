@@ -543,6 +543,9 @@ test("Freedom responds to returns, retains values across reloads, and explains i
   page,
 }) => {
   await page.goto(appPath("/freedom/"));
+  await page
+    .getByRole("button", { name: "Enter monthly income", exact: true })
+    .click();
   await page.locator("#f-monthlyInvestment").fill("60000");
   await page.locator("#f-expectedReturn").fill("10");
   await page.reload();

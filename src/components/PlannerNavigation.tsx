@@ -5,10 +5,12 @@ export function PlannerNavigation({
   children,
   hidden = false,
   id,
+  homeHref,
 }: {
   children?: ReactNode;
   hidden?: boolean;
   id?: string;
+  homeHref?: string;
 }) {
   return (
     <nav
@@ -18,8 +20,8 @@ export function PlannerNavigation({
       hidden={hidden}
     >
       <a
-        href={plannerHref("home")}
-        data-screen="home"
+        href={homeHref ?? plannerHref("home")}
+        data-screen={homeHref === undefined ? "home" : undefined}
         className="planner-home-link back-to-planners"
       >
         ← All planners

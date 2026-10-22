@@ -33,3 +33,41 @@ month slider. Extra monthly funding and yearly step-ups are alternatives, not
 automatic salary deductions. The old independent goal-return field is superseded;
 saved inputs and custom investment amounts remain recoverable when switching
 off automatic investment of the available balance.
+
+The loan planner opens with an empty personal loan list and an optional example.
+Its primary task is a neutral decision comparison: declare extra/total repayment
+money or import a salary snapshot, list loans, then optionally add spare savings
+and rental assets. Rank interest rates without labeling debt morally. Cash-only
+debt and net-wealth charts use the same starting wealth and non-rental commitment,
+include lost rent and sale/settlement costs, and keep emergency cash protected.
+The main comparison shows one balance graph per loan and a two-path net-wealth
+graph: repay extra versus invest the surplus while continuing required EMIs.
+The investment return can be adjusted beside the graph; fees and tax remain
+explicit. Extra payments are allocated across loans once, never duplicated per
+loan. These primary graphs use only the declared monthly budget. Spare-savings
+and asset-sale scenarios sit under a separate optional disclosure, along with
+the original four-strategy detail view. Negative funding is visible rather
+than silently financed. Never present a modeled asset sale as a recommendation.
+
+Loan funding is a single total budget, covering required EMIs first. One checkbox
+copies the salary planner's saved monthly investment allocation; when unchecked,
+one amount input replaces the read-only source value. No second salary form or
+extra-versus-total selector is shown. Importing changes only this budget/source
+and matching currency, never existing loans, assets or emergency/spare savings.
+
+The home page has a shared currency selector. The browser remembers this choice
+across routes; planner selectors update the same preference. Home guide examples,
+planner labels, charts and authored examples use that currency, with Indian
+digit grouping only for INR. Amounts are not exchange-rate converted. Growth
+retains its existing currency-change reset of SIP, goal and extra deposits;
+currency-specific asset and expense lists remain separate. Imported reports
+keep their stated currency and update the shared preference to match.
+
+Freedom offers two explicit income methods: a monthly spending target or a
+2–6% annual withdrawal from the corpus projected at the chosen stop-work age
+(3% by default). The spending method displays its annualized percentage of that
+age's projected corpus, after inflating the monthly goal. The corpus method
+shows eligible corpus × rate ÷ 12, today's purchasing power and later shortfalls;
+it must not imply that an automatically derived income covers living costs.
+Older saved spending goals keep their method. Field details use accessible,
+keyboard- and touch-operable info disclosures instead of long inline help.

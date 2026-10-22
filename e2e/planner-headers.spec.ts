@@ -12,9 +12,9 @@ for (const item of [
   {
     route: "loan-payoff",
     kind: "loan",
-    label: "Monthly take-home income",
-    restoredLabel: "Monthly take-home income",
-    initial: "80000",
+    label: "Monthly repayment budget",
+    restoredLabel: "Monthly repayment budget",
+    initial: "25000",
   },
 ]) {
   test(`${item.kind} shared header controls and hidden-data HTML report round trip`, async ({
@@ -22,6 +22,10 @@ for (const item of [
     context,
   }, info) => {
     await page.goto(`${base}${item.route}/`);
+    if (item.kind === "loan")
+      await page
+        .getByRole("button", { name: "Load example plan", exact: true })
+        .click();
     const header = page.locator(".planner-header");
     await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
     await header

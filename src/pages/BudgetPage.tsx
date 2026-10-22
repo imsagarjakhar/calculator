@@ -1,4 +1,5 @@
 import { PlannerNavigation } from "../components/PlannerNavigation";
+import { preferredCurrency, usePlanCurrency } from "../runtime/currency";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { BudgetGrowthChart } from "../components/BudgetGrowthChart";
 import { downloadReport, readPortablePlan } from "../runtime/portableReport";
@@ -142,7 +143,11 @@ function NumberField({
   );
 }
 export function BudgetPage() {
-  const [plan, setPlan] = useState<Budget>(load);
+  const [plan, setPlan] = useState<Budget>(() => {
+    const saved = load();
+    return { ...saved, currency: preferredCurrency() ?? saved.currency };
+  });
+  usePlanCurrency(plan, setPlan);
   const [saved, setSaved] = useState("");
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState<"plan" | "outlook" | "actual">("plan");
@@ -173,7 +178,7 @@ export function BudgetPage() {
     return () => window.clearTimeout(timer);
   }, [expenseTotal, plan.salary, result.allocated, result.income, warningKind]);
   const money = (n: number) =>
-    new Intl.NumberFormat("en-IN", {
+    new Intl.NumberFormat(plan.currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
       currency: plan.currency,
       maximumFractionDigits: 0,

@@ -50,3 +50,13 @@ const migrated=E.migrate(legacy);assert.equal(migrated.monthlyInvestment,1000);a
 for(const bad of [{age:0},{targetAge:29},{endAge:30},{targetAge:40},{expectedReturn:Infinity},{inflation:-1},{currency:'<img>'},{age:30.5},{monthlyInvestment:-1},{investmentGrowth:31}])assert.throws(()=>E.project(basic(bad)));
 assert.throws(()=>E.project(basic(),[event({amount:-1})]));const original=basic();E.project(original);assert.deepEqual(original,basic());
 console.log('Financial freedom passed: ongoing monthly income, inflation-linked principal, event reserves, first crossing, SIP-only accumulation, budget separation, 50 independent cash-flow/PV scenarios, sensitivity, saved plans and impossible-income cases.');
+
+// Corpus-based withdrawal mode: selected age, monthly percentage and cash-flow conservation.
+let corpusPlan=basic({incomeMode:'corpus',age:30,targetAge:30,endAge:40,corpus:1200000,monthlyInvestment:0,expectedReturn:0,inflation:0,withdrawalRate:3});
+let corpusResult=E.project(corpusPlan);near(corpusResult.withdrawalIncome,3000);near(corpusResult.balance,840000);assert.equal(corpusResult.freedomMonth,0);
+for(const pct of [2,3,4.25,6]){const result=E.project({...corpusPlan,withdrawalRate:pct});near(result.withdrawalIncome,1200000*pct/1200);let previous=corpusPlan.corpus;for(const row of result.rows){near(row.balance,Math.max(0,previous+row.growth+row.investment-row.living-row.event));previous=row.balance;}}
+const delayed=E.project({...corpusPlan,targetAge:35,monthlyInvestment:1000});near(delayed.target.balance,1260000);near(delayed.withdrawalIncome,3150);assert.equal(delayed.rows[59].investment,1000);assert.equal(delayed.rows[60].investment,0);
+const stressed=E.project({...corpusPlan,withdrawalRate:6,inflation:20});assert.ok(stressed.firstShortfallMonth!==null);assert.ok(stressed.shortfall>0);
+for(const withdrawalRate of [1,6.1,NaN,Infinity])assert.throws(()=>E.project({...corpusPlan,withdrawalRate}));
+const oldPlan=basic();delete oldPlan.withdrawalRate;delete oldPlan.incomeMode;const restored=E.migrate(oldPlan);assert.equal(restored.incomeMode,'spending');assert.equal(restored.withdrawalRate,3);
+console.log('Corpus-based income passed: 2–6% limits, default 3%, selected age, inflation, depletion, conservation and legacy migration.');

@@ -1,8 +1,11 @@
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
 import { useEffect, useState } from "react";
+import { currencies, selectCurrency, useCurrency } from "../runtime/currency";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
 export function HomeContent({ active = true }: { active?: boolean }) {
+  const currency = useCurrency();
   const [vlogsOpen, setVlogsOpen] = useState(
     () => typeof window !== "undefined" && window.location.hash === "#vlogs",
   );
@@ -57,6 +60,24 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             <a href="#financial-planning">Planning guide</a>
             <a href="#vlogs">Blog</a>
           </nav>
+          <label
+            className="planner-currency home-currency"
+            htmlFor="home-currency"
+          >
+            <select
+              id="home-currency"
+              aria-label="Your currency"
+              title="Used across planners and examples. Amounts aren’t converted. The SIP planner resets contribution amounts when currency changes."
+              value={currency}
+              onChange={(e) => selectCurrency(e.target.value)}
+            >
+              {currencies.map(([code, symbol]) => (
+                <option key={code} value={code}>
+                  {code} — {symbol}
+                </option>
+              ))}
+            </select>
+          </label>
           <VlogAccountButton />
         </div>
         <div className="welcome-hero">
@@ -225,8 +246,8 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           <details>
             <summary>Is this an AI financial planner?</summary>
             <p>
-              Financial AI Planner uses financial formulas and the assumptions you
-              enter. These tools do not use generative AI or predict market
+              Financial AI Planner uses financial formulas and the assumptions
+              you enter. These tools do not use generative AI or predict market
               prices. Your results are calculated scenarios, with methods and
               detailed schedules you can review.
             </p>
@@ -255,12 +276,9 @@ export function HomeContent({ active = true }: { active?: boolean }) {
       </section>
       {vlogsOpen && (
         <section className="welcome vlog-directory" aria-label="Blog">
-          <div className="welcome-topbar">
-            <a className="vlog-back" href="#">
-              ← All planners
-            </a>
+          <PlannerNavigation homeHref="#">
             <VlogAccountButton />
-          </div>
+          </PlannerNavigation>
           <VlogFeed />
         </section>
       )}

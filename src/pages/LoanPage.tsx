@@ -1,9 +1,13 @@
 import { PlannerNavigation } from "../components/PlannerNavigation";
+import { preferredCurrency, usePlanCurrency } from "../runtime/currency";
 import { PlannerHeader } from "../components/PlannerHeader";
+import { LoanDecisionLab } from "../components/LoanDecisionLab";
+import { compareDecisions, netRent } from "../loans/decisions";
 import { downloadReport, readPortablePlan } from "../runtime/portableReport";
 import { useEffect, useId, useMemo, useState } from "react";
 import {
   cashFlow,
+  withRepaymentBudget,
   compare,
   breakEven,
   initialLoanPlan,
@@ -15,6 +19,7 @@ import {
   type LoanPlan,
   type Strategy,
   type Simulation,
+  type LoanAsset,
 } from "../loans/model";
 import { calculateBudget, validBudget } from "../budget/model";
 const storageKey = "intimetec-loan-payoff-v1";
@@ -22,14 +27,33 @@ function example() {
   const p = structuredClone(initialLoanPlan);
   const d = new Date();
   p.start = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  return p;
+  return withRepaymentBudget({
+    ...p,
+    fundingMode: "manual",
+    repaymentBudget: 25000,
+  });
 }
 function load() {
   try {
     const p = JSON.parse(localStorage.getItem(storageKey) || "null");
-    if (!validateLoanPlan(p).length) return p as LoanPlan;
+    if (!validateLoanPlan(p).length) return withRepaymentBudget(p as LoanPlan);
   } catch {}
-  return example();
+  return {
+    ...example(),
+    loans: [],
+    fundingMode: "manual" as const,
+    salary: 0,
+    expenses: 0,
+    reserve: 0,
+    buffer: 0,
+    emergency: 0,
+    extra: 0,
+    repaymentBudget: 0,
+    returns: 12,
+    lumpSum: 0,
+    cashReturn: 0,
+    assets: [],
+  };
 }
 function Numeric({
   label,
@@ -39,6 +63,7 @@ function Numeric({
   max = 1e9,
   hint,
   step = "any",
+  wholeAmount = false,
 }: {
   label: string;
   value: number;
@@ -47,6 +72,7 @@ function Numeric({
   max?: number;
   hint?: string;
   step?: string;
+  wholeAmount?: boolean;
 }) {
   const hintId = useId();
   return (
@@ -56,11 +82,11 @@ function Numeric({
         aria-label={label}
         aria-describedby={hint ? hintId : undefined}
         type="number"
-        inputMode="decimal"
+        inputMode={wholeAmount ? "numeric" : "decimal"}
         min={min}
         max={max}
-        step={step}
-        value={value === 0 ? "" : value}
+        step={wholeAmount ? "1" : step}
+        value={value === 0 ? "" : wholeAmount ? Math.round(value) : value}
         placeholder="0"
         onChange={(e) =>
           onChange(
@@ -75,7 +101,11 @@ function Numeric({
   );
 }
 export function LoanPage() {
-  const [plan, setPlan] = useState<LoanPlan>(load);
+  const [plan, setPlan] = useState<LoanPlan>(() => {
+    const saved = load();
+    return { ...saved, currency: preferredCurrency() ?? saved.currency };
+  });
+  usePlanCurrency(plan, setPlan);
   const [view, setView] = useState<"setup" | "compare" | "guide">("setup");
   const [selected, setSelected] = useState<Strategy>("avalanche");
   const [notice, setNotice] = useState("");
@@ -122,7 +152,7 @@ export function LoanPage() {
     [plan, view, comparison.errors.length],
   );
   const money = (n: number) =>
-    new Intl.NumberFormat("en-IN", {
+    new Intl.NumberFormat(plan.currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
       currency: plan.currency,
       maximumFractionDigits: 0,
@@ -144,6 +174,18 @@ export function LoanPage() {
     setPlan((p) => ({
       ...p,
       loans: p.loans.map((l) => (l.id === id ? { ...l, [key]: value } : l)),
+    }));
+  }
+  function patchAsset(
+    id: string,
+    key: keyof LoanAsset,
+    value: string | number | boolean,
+  ) {
+    setPlan((p) => ({
+      ...p,
+      assets: (p.assets ?? []).map((a) =>
+        a.id === id ? { ...a, [key]: value } : a,
+      ),
     }));
   }
   useEffect(() => {
@@ -169,24 +211,30 @@ export function LoanPage() {
         );
         return;
       }
-      const r = calculateBudget(source),
-        emiCategory = source.expenses
-          .filter((e) => e.id === "debt")
-          .reduce((s, e) => s + e.planned, 0);
+      if (
+        source.currency !== plan.currency &&
+        (plan.loans.some((loan) => loan.balance > 0) ||
+          (plan.assets ?? []).some((asset) => asset.value > 0) ||
+          (plan.lumpSum ?? 0) > 0 ||
+          plan.emergency > 0)
+      ) {
+        setNotice(
+          `Your salary budget uses ${source.currency}, but this loan plan uses ${plan.currency}. Match the currencies and review the amounts before importing; no currency conversion is performed.`,
+        );
+        return;
+      }
+      const r = calculateBudget(source);
       setPlan((p) => ({
         ...p,
         currency: source.currency,
-        salary: r.income,
-        expenses: r.needs + r.wants + r.bills - emiCategory,
-        reserve: source.emergencyMonthly,
-        buffer: source.buffer,
-        emergency: source.emergencySaved,
-        coverMonths: Math.min(24, source.emergencyMonths),
-        extra: r.monthlyInvestment + Math.max(0, r.remainder),
-        loans: [],
+        extra: 0,
+        fundingMode: "manual",
+        repaymentBudget: r.monthlyInvestment,
+        useSalaryInvestment: true,
+        useAvailable: false,
       }));
       setNotice(
-        "Budget imported. The budget’s EMI category was excluded from living costs. Sample loans were cleared: add each real loan below so its EMI is counted once.",
+        "Using the salary planner’s saved monthly investment amount as the total repayment budget. Required EMIs are included, not added again. Your loans and assets stay unchanged.",
       );
       setView("setup");
     } catch {
@@ -200,7 +248,13 @@ export function LoanPage() {
       new Blob(
         [
           JSON.stringify(
-            { plan, results: comparison.results.map(({ rows, ...r }) => r) },
+            {
+              plan,
+              results: comparison.results.map(({ rows, ...r }) => r),
+              decisions: compareDecisions(plan).map(
+                ({ rows, ...scenario }) => scenario,
+              ),
+            },
             null,
             2,
           ),
@@ -220,7 +274,7 @@ export function LoanPage() {
       const value = await readPortablePlan(file, "loan");
       const errors = validateLoanPlan(value);
       if (errors.length) throw Error(errors[0]);
-      setPlan(value as LoanPlan);
+      setPlan(withRepaymentBudget(value as LoanPlan));
       setNotice("Your loan plan was restored.");
       setView("setup");
     } catch (e) {
@@ -240,7 +294,7 @@ export function LoanPage() {
   function report() {
     if (!valid) return;
     downloadReport(
-      "Loan payoff & investment comparison",
+      "Loan repayment, savings & asset comparison",
       "money-planner-loan-payoff.html",
       "loan",
       plan,
@@ -250,11 +304,21 @@ export function LoanPage() {
           headers: ["Setting", "Value"],
           rows: [
             ["Currency", plan.currency],
-            ["Income", money(plan.salary)],
-            ["Living costs", money(plan.expenses)],
             ["Emergency saving", money(plan.reserve)],
-            ["Cash buffer", money(plan.buffer)],
-            ["Extra monthly budget", money(plan.extra)],
+            ["Protected emergency savings", money(plan.emergency)],
+            [
+              "Funding mode",
+              plan.useSalaryInvestment
+                ? "Salary planner’s saved monthly investment amount"
+                : "Manually entered total repayment budget",
+            ],
+            ["Extra monthly budget", money(cash?.extra ?? plan.extra)],
+            [
+              "Total monthly repayment budget",
+              money(plan.repaymentBudget ?? 0),
+            ],
+            ["Spare savings available for scenario", money(plan.lumpSum ?? 0)],
+            ["After-tax annual cash return", `${plan.cashReturn ?? 0}%`],
             ["Starting month", plan.start],
             ["Comparison horizon", `${plan.horizon} months`],
             ["Expected return", `${plan.returns}%`],
@@ -262,6 +326,66 @@ export function LoanPage() {
             ["Tax on gains", `${plan.gainsTax}%`],
             ["Split to loan prepayments", `${plan.split}%`],
           ],
+        },
+        {
+          title:
+            "Savings and asset scenarios (cash-only; same starting wealth)",
+          headers: [
+            "Scenario",
+            "Interest",
+            "Fees",
+            "Ending cash",
+            "Retained assets",
+            "Debt",
+            "Net wealth",
+            "Debt-free month",
+            "Funding gap / issue",
+          ],
+          rows: compareDecisions(plan).map((s) => {
+            const end = s.rows.at(-1)!;
+            return [
+              s.name,
+              money(s.interest),
+              money(s.fees),
+              money(end.liquid),
+              money(end.assetValue),
+              money(end.debt),
+              money(end.net),
+              s.debtFree === 0 ? "Cleared at start" : when(s.debtFree),
+              s.error ?? money(s.fundingGap),
+            ];
+          }),
+        },
+        {
+          title: "Asset inputs",
+          headers: [
+            "Asset",
+            "Current value",
+            "Gross monthly rent",
+            "Monthly costs/taxes",
+            "Vacancy",
+            "Value growth",
+            "Rent growth",
+            "Selling cost",
+            "Sale tax",
+            "Linked loan",
+            "Net rent already in budget",
+            "Replacement monthly cost if sold",
+          ],
+          rows: (plan.assets ?? []).map((a) => [
+            a.name,
+            money(a.value),
+            money(a.rent),
+            money(a.costs),
+            `${a.vacancy}%`,
+            `${a.appreciation}%`,
+            `${a.rentGrowth}%`,
+            `${a.sellingCost}%`,
+            money(a.saleTax),
+            plan.loans.find((l) => l.id === a.linkedLoanId)?.name ?? "None",
+            a.rentIncluded ? "Yes" : "No",
+            money(a.replacementCost ?? 0),
+          ]),
         },
         {
           title: "Your loans",
@@ -287,7 +411,8 @@ export function LoanPage() {
           ]),
         },
         {
-          title: "Same budget, same timeline",
+          title:
+            "Salary-funded investment alternatives (exclude separate assets and spare savings)",
           headers: [
             "Path",
             "Interest",
@@ -329,7 +454,7 @@ export function LoanPage() {
           ]),
         })),
       ],
-      "Fixed assumptions, not guaranteed investment returns. Each path uses the same monthly commitment and horizon. Emergency savings and cash buffers stay protected. Import restores inputs and recalculates with the current model.",
+      "Fixed assumptions, not instructions to sell, keep or invest. Cash-only decisions and salary-only investment alternatives are separate comparisons. Asset sales remove their value and rental cash flow, settle the linked loan and deduct entered sale costs/taxes. Emergency savings stay protected; spare savings must exclude them. Retained asset values exclude future liquidation costs/taxes. Imports restore inputs and recalculate.",
     );
   }
   const totalDebt = plan.loans.reduce((s, l) => s + Math.max(0, l.balance), 0);
@@ -378,9 +503,6 @@ export function LoanPage() {
             </button>
           ))}
         </div>
-        <div className="budget-tools">
-          <button onClick={importBudget}>Use my salary budget</button>
-        </div>
       </div>
       <p className="budget-save" role="status">
         {saved}
@@ -400,62 +522,78 @@ export function LoanPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">
-                      01 / KEEP THE PLAN AFFORDABLE
-                    </p>
-                    <h2 id="loan-budget-title">What can your month support?</h2>
+                    <h2 id="loan-budget-title">
+                      Set your monthly repayment money.
+                    </h2>
                   </div>
                   <span className="budget-step" aria-hidden="true">
                     01
                   </span>
                 </div>
                 <p className="budget-help">
-                  Living costs exclude loan EMIs. Reserve savings and a cash
-                  buffer stay protected in every strategy. Extra money is an
-                  allocation you choose, not a requirement to use every spare
-                  rupee.
+                  Choose the salary planner’s monthly investment amount, or
+                  enter your own total repayment budget. Required EMIs are paid
+                  from this amount first; the rest is available for extra
+                  repayments.
                 </p>
-                <div className="budget-fields">
-                  <Numeric
-                    label="Monthly take-home income"
-                    value={plan.salary}
-                    onChange={(n) => update("salary", n)}
+                <label className="loan-funding-toggle">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(plan.useSalaryInvestment)}
+                    onChange={(e) =>
+                      e.target.checked
+                        ? importBudget()
+                        : setPlan((p) => ({ ...p, useSalaryInvestment: false }))
+                    }
                   />
+                  Use saved salary budget
+                </label>
+                {plan.useSalaryInvestment ? (
+                  <div className="loan-linked-budget" aria-live="polite">
+                    <span>
+                      Monthly investment amount from your salary planner
+                    </span>
+                    <strong data-testid="loan-linked-budget">
+                      {money(plan.repaymentBudget ?? 0)}
+                    </strong>
+                    <p>
+                      This saved amount is now your total monthly loan budget.
+                      Required EMIs are included. Uncheck above to enter a
+                      different amount; your salary plan stays unchanged.
+                    </p>
+                    <button
+                      type="button"
+                      className="budget-text-button"
+                      onClick={importBudget}
+                    >
+                      Refresh saved amount
+                    </button>
+                  </div>
+                ) : (
                   <Numeric
-                    label="Living costs, bills & other goals"
-                    value={plan.expenses}
-                    onChange={(n) => update("expenses", n)}
+                    label="Monthly repayment budget"
+                    wholeAmount
+                    value={plan.repaymentBudget ?? 0}
+                    onChange={(n) => update("repaymentBudget", n)}
+                    hint="Total including required EMIs and extra repayments. Enter money available after expenses and protected savings; exclude rent entered separately below."
                   />
-                  <Numeric
-                    label="Monthly emergency saving"
-                    value={plan.reserve}
-                    onChange={(n) => update("reserve", n)}
-                  />
-                  <Numeric
-                    label="Monthly cash buffer"
-                    value={plan.buffer}
-                    onChange={(n) => update("buffer", n)}
-                  />
-                  <Numeric
-                    label="Emergency savings today"
-                    value={plan.emergency}
-                    onChange={(n) => update("emergency", n)}
-                  />
-                  <Numeric
-                    label="Emergency cover (months)"
-                    value={plan.coverMonths}
-                    min={1}
-                    max={24}
-                    step="1"
-                    onChange={(n) => update("coverMonths", n)}
-                  />
-                  <Numeric
-                    label="Extra monthly budget"
-                    value={plan.extra}
-                    onChange={(n) => update("extra", n)}
-                    hint="This amount goes toward prepayments, investing, or both."
-                  />
-                </div>
+                )}
+                <dl className="loan-funding-summary">
+                  <div>
+                    <dt>Required EMIs</dt>
+                    <dd>{cash ? money(cash.emis) : "—"}</dd>
+                  </div>
+                  <div>
+                    <dt>Extra available to allocate</dt>
+                    <dd data-testid="loan-declared-extra">
+                      {cash ? money(cash.extra) : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Monthly commitment before separate rent</dt>
+                    <dd>{cash ? money(cash.commitment) : "—"}</dd>
+                  </div>
+                </dl>
               </section>
               <section
                 className="budget-panel"
@@ -463,9 +601,6 @@ export function LoanPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">
-                      02 / EVERY LOAN, IN ONE PLACE
-                    </p>
                     <h2 id="loan-list-title">Know what you owe.</h2>
                   </div>
                   <span className="budget-step" aria-hidden="true">
@@ -473,11 +608,32 @@ export function LoanPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Example figures are provided on first use. Replace them with
-                  current balances from your lender statements. Fixed monthly
-                  reducing-balance interest is modeled; revolving credit-card
-                  minimums and changing rates need a separate approximation.
+                  Add each loan individually using current lender balances.
+                  Fixed monthly reducing-balance interest is modeled; revolving
+                  credit-card minimums and changing rates need a separate
+                  approximation.
                 </p>
+                {plan.loans.length === 0 && (
+                  <div className="loan-empty">
+                    <h3>Start with your first loan.</h3>
+                    <p>
+                      Add its balance, annual interest rate and required EMI or
+                      remaining term. We’ll calculate the payment and show where
+                      the interest goes.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPlan(example());
+                        setNotice(
+                          "Example plan loaded. Replace its loans and budget with your own values.",
+                        );
+                      }}
+                    >
+                      Load example plan
+                    </button>
+                  </div>
+                )}
                 {plan.loans.map((l, index) => (
                   <fieldset className="budget-bill loan-editor" key={l.id}>
                     <legend>Loan {index + 1}</legend>
@@ -508,6 +664,7 @@ export function LoanPage() {
                     <div className="budget-fields">
                       <Numeric
                         label="Outstanding balance"
+                        wholeAmount
                         value={l.balance}
                         onChange={(n) => patchLoan(l.id, "balance", n)}
                       />
@@ -527,6 +684,7 @@ export function LoanPage() {
                       />
                       <Numeric
                         label="Actual monthly EMI (optional)"
+                        wholeAmount
                         value={l.emi}
                         onChange={(n) => patchLoan(l.id, "emi", n)}
                         hint="Leave 0 to calculate from the balance, rate and term."
@@ -601,10 +759,221 @@ export function LoanPage() {
                 </button>
               </section>
               <section
+                className="budget-panel loan-assets-panel"
+                aria-labelledby="loan-assets-title"
+              >
+                <h2 id="loan-assets-title">
+                  What else could change the picture?
+                </h2>
+                <p className="budget-help">
+                  Optional scenarios. Spare savings and assets are compared with
+                  keeping them; nothing is assumed to be sold or withdrawn.
+                </p>
+                <div className="budget-fields">
+                  <Numeric
+                    label="Spare savings available now"
+                    wholeAmount
+                    value={plan.lumpSum ?? 0}
+                    onChange={(n) => update("lumpSum", n)}
+                    hint="Only money outside your emergency fund and reserved bills."
+                  />
+                  <Numeric
+                    label="Annual cash return after tax (%)"
+                    value={plan.cashReturn ?? 0}
+                    min={-99}
+                    max={100}
+                    onChange={(n) => update("cashReturn", n)}
+                    hint="0% means cash stays flat. Used for idle savings in these scenarios."
+                  />
+                  {plan.fundingMode === "manual" && (
+                    <Numeric
+                      label="Protected emergency savings"
+                      wholeAmount
+                      value={plan.emergency}
+                      onChange={(n) => update("emergency", n)}
+                      hint="Shown in net wealth, never available to prepay a loan."
+                    />
+                  )}
+                </div>
+                <h3>Your rental or other assets</h3>
+                <p className="budget-help">
+                  Enter rent separately from the monthly repayment money above.
+                  If net rent is already included there, mark it below to
+                  prevent double-counting.
+                </p>
+                {(plan.assets ?? []).map((asset, index) => (
+                  <fieldset
+                    className="budget-bill loan-asset-editor"
+                    key={asset.id}
+                  >
+                    <legend>Asset {index + 1}</legend>
+                    <label className="budget-field">
+                      <span>Asset name</span>
+                      <input
+                        value={asset.name}
+                        maxLength={80}
+                        onChange={(e) =>
+                          patchAsset(asset.id, "name", e.target.value)
+                        }
+                      />
+                    </label>
+                    <div className="budget-fields">
+                      <Numeric
+                        label="Current asset market value"
+                        wholeAmount
+                        value={asset.value}
+                        onChange={(n) => patchAsset(asset.id, "value", n)}
+                      />
+                      <Numeric
+                        label="Gross monthly rent"
+                        wholeAmount
+                        value={asset.rent}
+                        onChange={(n) => patchAsset(asset.id, "rent", n)}
+                      />
+                      <Numeric
+                        label="Monthly running costs & rental taxes"
+                        wholeAmount
+                        value={asset.costs}
+                        onChange={(n) => patchAsset(asset.id, "costs", n)}
+                      />
+                      <label className="budget-field">
+                        <span>Loan secured against this asset</span>
+                        <select
+                          aria-label="Loan secured against this asset"
+                          value={asset.linkedLoanId}
+                          onChange={(e) =>
+                            patchAsset(asset.id, "linkedLoanId", e.target.value)
+                          }
+                        >
+                          <option value="">No secured loan</option>
+                          {plan.loans.map((loan) => (
+                            <option key={loan.id} value={loan.id}>
+                              {loan.name}
+                            </option>
+                          ))}
+                        </select>
+                        <small>
+                          Link the mortgage or property loan so a sale settles
+                          it first.
+                        </small>
+                      </label>
+                    </div>
+                    <label className="loan-funding-toggle">
+                      <input
+                        type="checkbox"
+                        checked={asset.rentIncluded}
+                        onChange={(e) =>
+                          patchAsset(asset.id, "rentIncluded", e.target.checked)
+                        }
+                      />
+                      This asset’s net rent is already in my monthly income or
+                      repayment budget
+                    </label>
+                    <p className="loan-asset-rent">
+                      Initial net rental cash flow:{" "}
+                      <strong>{money(netRent(asset))} / month</strong>
+                    </p>
+                    <details className="loan-terms">
+                      <summary>
+                        Vacancy, value growth & selling assumptions
+                      </summary>
+                      <div className="budget-fields">
+                        <Numeric
+                          label="Vacancy / unpaid rent (%)"
+                          value={asset.vacancy}
+                          max={100}
+                          onChange={(n) => patchAsset(asset.id, "vacancy", n)}
+                        />
+                        <Numeric
+                          label="Annual asset value growth (%)"
+                          value={asset.appreciation}
+                          min={-99}
+                          max={100}
+                          onChange={(n) =>
+                            patchAsset(asset.id, "appreciation", n)
+                          }
+                        />
+                        <Numeric
+                          label="Annual rent growth (%)"
+                          value={asset.rentGrowth}
+                          min={-99}
+                          max={100}
+                          onChange={(n) =>
+                            patchAsset(asset.id, "rentGrowth", n)
+                          }
+                        />
+                        <Numeric
+                          label="Selling costs (% of value)"
+                          value={asset.sellingCost}
+                          max={30}
+                          onChange={(n) =>
+                            patchAsset(asset.id, "sellingCost", n)
+                          }
+                        />
+                        <Numeric
+                          label="Estimated tax payable on sale"
+                          wholeAmount
+                          value={asset.saleTax}
+                          onChange={(n) => patchAsset(asset.id, "saleTax", n)}
+                          hint="Enter a cash estimate based on your situation; no tax rate is assumed."
+                        />
+                        <Numeric
+                          label="Replacement monthly cost if sold"
+                          wholeAmount
+                          value={asset.replacementCost ?? 0}
+                          onChange={(n) =>
+                            patchAsset(asset.id, "replacementCost", n)
+                          }
+                          hint="For example, rent for another home. Deducted only in this asset’s sale scenario."
+                        />
+                      </div>
+                    </details>
+                    <button
+                      type="button"
+                      className="budget-text-button"
+                      aria-label={`Remove asset ${index + 1}`}
+                      onClick={() =>
+                        update(
+                          "assets",
+                          (plan.assets ?? []).filter((a) => a.id !== asset.id),
+                        )
+                      }
+                    >
+                      Remove asset
+                    </button>
+                  </fieldset>
+                ))}
+                <button
+                  type="button"
+                  className="budget-add"
+                  disabled={(plan.assets ?? []).length >= 8}
+                  onClick={() =>
+                    update("assets", [
+                      ...(plan.assets ?? []),
+                      {
+                        id: crypto.randomUUID(),
+                        name: `Asset ${(plan.assets ?? []).length + 1}`,
+                        value: 0,
+                        rent: 0,
+                        costs: 0,
+                        vacancy: 0,
+                        appreciation: 0,
+                        rentGrowth: 0,
+                        sellingCost: 3,
+                        saleTax: 0,
+                        linkedLoanId: "",
+                        rentIncluded: false,
+                      },
+                    ])
+                  }
+                >
+                  Add an asset to compare
+                </button>
+              </section>
+              <section
                 className="budget-panel"
                 aria-labelledby="loan-assumptions-title"
               >
-                <p className="budget-eyebrow">03 / ONE FAIR COMPARISON</p>
                 <h2 id="loan-assumptions-title">Set the same finish line.</h2>
                 <div className="budget-fields">
                   <label className="budget-field">
@@ -625,34 +994,41 @@ export function LoanPage() {
                     step="1"
                     onChange={(n) => update("horizon", n)}
                   />
-                  <Numeric
-                    label="Expected annual investment return (%)"
-                    value={plan.returns}
-                    min={-99}
-                    max={100}
-                    onChange={(n) => update("returns", n)}
-                  />
-                  <Numeric
-                    label="Annual investment fee (%)"
-                    value={plan.investmentFee}
-                    max={10}
-                    onChange={(n) => update("investmentFee", n)}
-                  />
-                  <Numeric
-                    label="Tax on investment gains at the end (%)"
-                    value={plan.gainsTax}
-                    max={60}
-                    onChange={(n) => update("gainsTax", n)}
-                    hint="Simplified tax on positive total gains. Enter your effective assumption."
-                  />
-                  <Numeric
-                    label="Split strategy: extra money to loans (%)"
-                    value={plan.split}
-                    max={100}
-                    onChange={(n) => update("split", n)}
-                    hint="The remainder is invested. Released EMIs follow the same split."
-                  />
                 </div>
+                <details className="loan-terms">
+                  <summary>
+                    Investment alternatives: return, fees and split (optional)
+                  </summary>
+                  <div className="budget-fields">
+                    <Numeric
+                      label="Expected annual investment return (%)"
+                      value={plan.returns}
+                      min={-99}
+                      max={100}
+                      onChange={(n) => update("returns", n)}
+                    />
+                    <Numeric
+                      label="Annual investment fee (%)"
+                      value={plan.investmentFee}
+                      max={10}
+                      onChange={(n) => update("investmentFee", n)}
+                    />
+                    <Numeric
+                      label="Tax on investment gains at the end (%)"
+                      value={plan.gainsTax}
+                      max={60}
+                      onChange={(n) => update("gainsTax", n)}
+                      hint="Simplified tax on positive total gains. Enter your effective assumption."
+                    />
+                    <Numeric
+                      label="Split strategy: extra money to loans (%)"
+                      value={plan.split}
+                      max={100}
+                      onChange={(n) => update("split", n)}
+                      hint="The remainder is invested. Released EMIs follow the same split."
+                    />
+                  </div>
+                </details>
                 <button
                   className="budget-primary"
                   onClick={() => {
@@ -665,251 +1041,278 @@ export function LoanPage() {
               </section>
             </>
           )}
-          {comparison.errors.length > 0 && (
-            <section className="loan-errors" role="alert">
-              <h2>Let’s make the plan workable first.</h2>
-              {comparison.errors.map((e) => (
-                <p key={e}>{e}</p>
-              ))}
-              {cash && cash.capacity < 0 && (
-                <strong>Monthly shortfall: {money(-cash.capacity)}</strong>
-              )}
-              {cash && cash.capacity >= 0 && cash.unassigned < 0 && (
-                <strong>
-                  Extra allocation exceeds your budget by{" "}
-                  {money(-cash.unassigned)}
-                </strong>
-              )}
-              {view !== "setup" && (
-                <button onClick={() => setView("setup")}>
-                  Review my inputs
-                </button>
-              )}
-            </section>
-          )}
+          {comparison.errors.length > 0 &&
+            (plan.loans.length > 0 || view !== "setup") && (
+              <section className="loan-errors" role="alert">
+                <h2>Let’s make the plan workable first.</h2>
+                {comparison.errors.map((e) => (
+                  <p key={e}>{e}</p>
+                ))}
+                {cash && cash.capacity < 0 && (
+                  <strong>Monthly shortfall: {money(-cash.capacity)}</strong>
+                )}
+                {cash && cash.capacity >= 0 && cash.unassigned < 0 && (
+                  <strong>
+                    Extra allocation exceeds your budget by{" "}
+                    {money(-cash.unassigned)}
+                  </strong>
+                )}
+                {view !== "setup" && (
+                  <button onClick={() => setView("setup")}>
+                    Review my inputs
+                  </button>
+                )}
+              </section>
+            )}
           {view === "compare" && !comparison.errors.length && best && base && (
             <>
-              <section className="loan-insight">
-                <p className="budget-eyebrow">YOUR NUMBERS / YOUR TRADE-OFFS</p>
-                <h2>
-                  {winners.length === 1
-                    ? `${label(best.strategy)} leads on projected net position.`
-                    : `${winners.length} paths tie for highest projected net position.`}
-                </h2>
-                <p>
-                  At {plan.returns}% assumed annual return, after the entered
-                  fees and tax, it ends at <strong>{money(best.net)}</strong>.
-                  This is the highest of the four modeled paths at month{" "}
-                  {plan.horizon}, not a promise of market performance.
-                </p>
-                <span>
-                  {label(efficient!.strategy)} is among the paths with the
-                  lowest modeled borrowing cost in this period.
-                </span>
-              </section>
-              <div className="loan-strategy-grid">
-                {comparison.results.map((r) => (
-                  <button
-                    className={`loan-strategy ${selected === r.strategy ? "is-selected" : ""}`}
-                    key={r.strategy}
-                    aria-pressed={selected === r.strategy}
-                    onClick={() => setSelected(r.strategy)}
-                  >
-                    <span className="loan-strategy-label">
-                      {winners.some((w) => w.strategy === r.strategy)
-                        ? "HIGHEST PROJECTED NET"
-                        : "EXPLORE THIS PATH"}
-                    </span>
-                    <h3>{label(r.strategy)}</h3>
-                    <p>
-                      {strategies.find((s) => s.id === r.strategy)!.description}
-                    </p>
-                    <strong>{money(r.net)}</strong>
-                    <small>Net position at month {plan.horizon}</small>
-                    <dl>
-                      <div>
-                        <dt>Debt-free</dt>
-                        <dd>{when(r.debtFree)}</dd>
-                      </div>
-                      <div>
-                        <dt>Interest + prepayment fees</dt>
-                        <dd>{money(r.interest + r.fees)}</dd>
-                      </div>
-                      <div>
-                        <dt>Investments after tax</dt>
-                        <dd>{money(r.portfolio - r.investmentTax)}</dd>
-                      </div>
-                      <div>
-                        <dt>Debt still owed</dt>
-                        <dd>{money(r.debt)}</dd>
-                      </div>
-                    </dl>
-                    <span className="loan-card-action">
-                      {selected === r.strategy
-                        ? "Selected path ✓"
-                        : "Inspect this path →"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              {current && (
-                <section className="budget-panel">
+              <LoanDecisionLab
+                plan={plan}
+                money={money}
+                when={when}
+                onReturnChange={(n) => update("returns", n)}
+              />
+              <details className="loan-investment-alternatives">
+                <summary>
+                  Explore four salary-funded investment alternatives
+                </summary>
+                <div className="loan-investment-boundary">
+                  <h2>Optional: compare investing the monthly extra</h2>
+                  <p>
+                    These four salary-funded paths exclude the spare savings,
+                    assets and their rental cash flow above. They use the same
+                    monthly commitment but a different investment-return
+                    assumption. Keep these results separate from the
+                    cash-and-asset scenarios.
+                  </p>
+                </div>
+                <section className="loan-insight">
                   <p className="budget-eyebrow">
-                    A CLOSER LOOK / {label(selected).toUpperCase()}
+                    YOUR NUMBERS / YOUR TRADE-OFFS
                   </p>
-                  <h2>Two balances. One honest picture.</h2>
-                  <p className="budget-help">
-                    Net position = investments after assumed gains tax +
-                    emergency cash − remaining debt. Property values, other
-                    assets, the cash buffer and unused salary are excluded
-                    equally from every path. Emergency cash at month{" "}
-                    {plan.horizon}:{" "}
-                    {money(plan.emergency + plan.reserve * plan.horizon)}, the
-                    same in every path.
+                  <h2>
+                    {winners.length === 1
+                      ? `${label(best.strategy)} leads on projected net position.`
+                      : `${winners.length} paths tie for highest projected net position.`}
+                  </h2>
+                  <p>
+                    At {plan.returns}% assumed annual return, after the entered
+                    fees and tax, it ends at <strong>{money(best.net)}</strong>.
+                    This is the highest of the four modeled paths at month{" "}
+                    {plan.horizon}, not a promise of market performance.
                   </p>
-                  <div
-                    className="loan-trend"
-                    role="img"
-                    aria-label={`Debt and investment balances over ${plan.horizon} months. Ending debt ${money(current.debt)}; investments ${money(current.portfolio - current.investmentTax)}.`}
-                  >
-                    <svg viewBox="0 0 680 220">
-                      <defs>
-                        <pattern
-                          id="loan-grid"
-                          width="68"
-                          height="44"
-                          patternUnits="userSpaceOnUse"
-                        >
-                          <path
-                            d="M 68 0 L 0 0 0 44"
-                            fill="none"
-                            stroke="#2a4550"
-                            strokeWidth="1"
-                          />
-                        </pattern>
-                      </defs>
-                      <rect width="680" height="220" fill="url(#loan-grid)" />
-                      {(() => {
-                        const rows = [
-                          { debt: totalDebt, portfolio: 0 },
-                          ...current.rows,
-                        ];
-                        const scale = Math.max(
-                          1,
-                          ...rows.map((r) => Math.max(r.debt, r.portfolio)),
-                        );
-                        return (
-                          <>
-                            <polyline
-                              fill="none"
-                              stroke="#e6b78c"
-                              strokeWidth="3"
-                              points={rows
-                                .map(
-                                  (r, i) =>
-                                    `${(i / plan.horizon) * 680},${210 - (r.debt / scale) * 195}`,
-                                )
-                                .join(" ")}
-                            />
-                            <polyline
-                              fill="none"
-                              stroke="#82dfc4"
-                              strokeWidth="3"
-                              points={rows
-                                .map(
-                                  (r, i) =>
-                                    `${(i / plan.horizon) * 680},${210 - (r.portfolio / scale) * 195}`,
-                                )
-                                .join(" ")}
-                            />
-                          </>
-                        );
-                      })()}
-                    </svg>
-                    <div className="loan-trend-legend">
-                      <span>Month 0</span>
-                      <span>
-                        <i />
-                        Debt <i />
-                        Investments before gains tax
-                      </span>
-                      <span>Month {plan.horizon}</span>
-                    </div>
-                  </div>
-                  <p className="budget-help">
-                    {money(
-                      base.interest +
-                        base.fees -
-                        current.interest -
-                        current.fees,
-                    )}{" "}
-                    difference in interest and fees versus investing the extra,
-                    measured over the same {plan.horizon} months.
-                  </p>
-                  <button
-                    className="budget-primary"
-                    onClick={() => {
-                      setView("guide");
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                  >
-                    Build my monthly guide →
-                  </button>
+                  <span>
+                    {label(efficient!.strategy)} is among the paths with the
+                    lowest modeled borrowing cost in this period.
+                  </span>
                 </section>
-              )}
-              <section className="budget-panel">
-                <p className="budget-eyebrow">WHAT IF RETURNS DISAPPOINT?</p>
-                <h2>Test the assumption, not just the upside.</h2>
-                <p className="budget-help">
-                  Same plan, fees and tax assumptions. Only investment return
-                  changes. Values are end-of-horizon net positions; negative
-                  returns can change which path leads.
-                </p>
-                <div className="budget-table-scroll">
-                  <table className="loan-table">
-                    <caption>
-                      Investment return sensitivity · {plan.currency}
-                    </caption>
-                    <thead>
-                      <tr>
-                        <th>Annual return</th>
-                        {strategies.map((s) => (
-                          <th key={s.id}>{s.name}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {stress.map((s) => (
-                        <tr key={s.rate}>
-                          <th>{s.rate}%</th>
-                          {s.results.map((r) => (
-                            <td key={r.strategy}>{money(r.net)}</td>
+                <div className="loan-strategy-grid">
+                  {comparison.results.map((r) => (
+                    <button
+                      className={`loan-strategy ${selected === r.strategy ? "is-selected" : ""}`}
+                      key={r.strategy}
+                      aria-pressed={selected === r.strategy}
+                      onClick={() => setSelected(r.strategy)}
+                    >
+                      <span className="loan-strategy-label">
+                        {winners.some((w) => w.strategy === r.strategy)
+                          ? "HIGHEST PROJECTED NET"
+                          : "EXPLORE THIS PATH"}
+                      </span>
+                      <h3>{label(r.strategy)}</h3>
+                      <p>
+                        {
+                          strategies.find((s) => s.id === r.strategy)!
+                            .description
+                        }
+                      </p>
+                      <strong>{money(r.net)}</strong>
+                      <small>Net position at month {plan.horizon}</small>
+                      <dl>
+                        <div>
+                          <dt>Debt-free</dt>
+                          <dd>{when(r.debtFree)}</dd>
+                        </div>
+                        <div>
+                          <dt>Interest + prepayment fees</dt>
+                          <dd>{money(r.interest + r.fees)}</dd>
+                        </div>
+                        <div>
+                          <dt>Investments after tax</dt>
+                          <dd>{money(r.portfolio - r.investmentTax)}</dd>
+                        </div>
+                        <div>
+                          <dt>Debt still owed</dt>
+                          <dd>{money(r.debt)}</dd>
+                        </div>
+                      </dl>
+                      <span className="loan-card-action">
+                        {selected === r.strategy
+                          ? "Selected path ✓"
+                          : "Inspect this path →"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {current && (
+                  <section className="budget-panel">
+                    <p className="budget-eyebrow">
+                      A CLOSER LOOK / {label(selected).toUpperCase()}
+                    </p>
+                    <h2>Two balances. One honest picture.</h2>
+                    <p className="budget-help">
+                      Net position = investments after assumed gains tax +
+                      emergency cash − remaining debt. Property values, other
+                      assets, the cash buffer and unused salary are excluded
+                      equally from every path. Emergency cash at month{" "}
+                      {plan.horizon}:{" "}
+                      {money(plan.emergency + plan.reserve * plan.horizon)}, the
+                      same in every path.
+                    </p>
+                    <div
+                      className="loan-trend"
+                      role="img"
+                      aria-label={`Debt and investment balances over ${plan.horizon} months. Ending debt ${money(current.debt)}; investments ${money(current.portfolio - current.investmentTax)}.`}
+                    >
+                      <svg viewBox="0 0 680 220">
+                        <defs>
+                          <pattern
+                            id="loan-grid"
+                            width="68"
+                            height="44"
+                            patternUnits="userSpaceOnUse"
+                          >
+                            <path
+                              d="M 68 0 L 0 0 0 44"
+                              fill="none"
+                              stroke="#2a4550"
+                              strokeWidth="1"
+                            />
+                          </pattern>
+                        </defs>
+                        <rect width="680" height="220" fill="url(#loan-grid)" />
+                        {(() => {
+                          const rows = [
+                            { debt: totalDebt, portfolio: 0 },
+                            ...current.rows,
+                          ];
+                          const scale = Math.max(
+                            1,
+                            ...rows.map((r) => Math.max(r.debt, r.portfolio)),
+                          );
+                          return (
+                            <>
+                              <polyline
+                                fill="none"
+                                stroke="#e6b78c"
+                                strokeWidth="3"
+                                points={rows
+                                  .map(
+                                    (r, i) =>
+                                      `${(i / plan.horizon) * 680},${210 - (r.debt / scale) * 195}`,
+                                  )
+                                  .join(" ")}
+                              />
+                              <polyline
+                                fill="none"
+                                stroke="#82dfc4"
+                                strokeWidth="3"
+                                points={rows
+                                  .map(
+                                    (r, i) =>
+                                      `${(i / plan.horizon) * 680},${210 - (r.portfolio / scale) * 195}`,
+                                  )
+                                  .join(" ")}
+                              />
+                            </>
+                          );
+                        })()}
+                      </svg>
+                      <div className="loan-trend-legend">
+                        <span>Month 0</span>
+                        <span>
+                          <i />
+                          Debt <i />
+                          Investments before gains tax
+                        </span>
+                        <span>Month {plan.horizon}</span>
+                      </div>
+                    </div>
+                    <p className="budget-help">
+                      {money(
+                        base.interest +
+                          base.fees -
+                          current.interest -
+                          current.fees,
+                      )}{" "}
+                      difference in interest and fees versus investing the
+                      extra, measured over the same {plan.horizon} months.
+                    </p>
+                    <button
+                      className="budget-primary"
+                      onClick={() => {
+                        setView("guide");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      Build my monthly guide →
+                    </button>
+                  </section>
+                )}
+                <section className="budget-panel">
+                  <p className="budget-eyebrow">WHAT IF RETURNS DISAPPOINT?</p>
+                  <h2>Test the assumption, not just the upside.</h2>
+                  <p className="budget-help">
+                    Same plan, fees and tax assumptions. Only investment return
+                    changes. Values are end-of-horizon net positions; negative
+                    returns can change which path leads.
+                  </p>
+                  <div className="budget-table-scroll">
+                    <table className="loan-table">
+                      <caption>
+                        Investment return sensitivity · {plan.currency}
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th>Annual return</th>
+                          {strategies.map((s) => (
+                            <th key={s.id}>{s.name}</th>
                           ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="loan-crossover">
-                  <h3>Approximate investment break-even</h3>
-                  <strong>
-                    {crossing?.kind === "crossing"
-                      ? `${crossing.rates[0].toFixed(2)}% annual return`
-                      : crossing?.kind === "tie"
-                        ? "These two paths are tied"
-                        : crossing?.kind === "multiple"
-                          ? "More than one crossover"
-                          : "No crossover found from −50% to +50%"}
-                  </strong>
-                  <p>
-                    Compares investing the extra with highest-interest-first at
-                    your chosen horizon, including entered fees and taxes. Scans
-                    5-point intervals, then refines detected crossings. It is a
-                    scenario threshold, not a forecast; complex cases may have
-                    additional crossings.
-                  </p>
-                </div>
-              </section>
+                      </thead>
+                      <tbody>
+                        {stress.map((s) => (
+                          <tr key={s.rate}>
+                            <th>{s.rate}%</th>
+                            {s.results.map((r) => (
+                              <td key={r.strategy}>{money(r.net)}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="loan-crossover">
+                    <h3>Approximate investment break-even</h3>
+                    <strong>
+                      {crossing?.kind === "crossing"
+                        ? `${crossing.rates[0].toFixed(2)}% annual return`
+                        : crossing?.kind === "tie"
+                          ? "These two paths are tied"
+                          : crossing?.kind === "multiple"
+                            ? "More than one crossover"
+                            : "No crossover found from −50% to +50%"}
+                    </strong>
+                    <p>
+                      Compares investing the extra with highest-interest-first
+                      at your chosen horizon, including entered fees and taxes.
+                      Scans 5-point intervals, then refines detected crossings.
+                      It is a scenario threshold, not a forecast; complex cases
+                      may have additional crossings.
+                    </p>
+                  </div>
+                </section>
+              </details>
             </>
           )}
           {view === "guide" && current && !comparison.errors.length && (
@@ -917,6 +1320,11 @@ export function LoanPage() {
               <section className="budget-panel">
                 <p className="budget-eyebrow">A PLAN YOU CAN FOLLOW</p>
                 <h2>Your next payment, made clear.</h2>
+                <p className="budget-help">
+                  This guide follows the salary-funded strategy selected below.
+                  It excludes spare savings and asset sales; those scenarios
+                  have their own monthly schedule in Compare paths.
+                </p>
                 <label className="budget-field">
                   <span>Choose the path for your guide</span>
                   <select
@@ -951,7 +1359,9 @@ export function LoanPage() {
                     </span>
                   </li>
                   <li>
-                    <strong>Give the extra {money(plan.extra)} its job.</strong>
+                    <strong>
+                      Give the extra {money(cash?.extra ?? plan.extra)} its job.
+                    </strong>
                     <span>
                       {current.rows[0].loans.some((l) => l.extra > 0)
                         ? `First extra payment: ${current.rows[0].loans
@@ -1087,14 +1497,21 @@ export function LoanPage() {
             <p className="budget-eyebrow">YOUR MONTHLY ROOM TO MOVE</p>
             <h2>A plan that fits real life.</h2>
             <dl className="budget-breakdown">
-              {[
-                ["Take-home income", plan.salary],
-                ["Living costs & goals", plan.expenses],
-                ["Emergency saving", plan.reserve],
-                ["Cash buffer", plan.buffer],
-                ["Required EMIs", cash?.emis ?? 0],
-                ["Chosen extra", plan.extra],
-              ].map(([text, value]) => (
+              {(plan.fundingMode === "manual"
+                ? [
+                    ["Required EMIs", cash?.emis ?? 0],
+                    ["Extra above EMIs", cash?.extra ?? 0],
+                    ["Declared monthly repayment", cash?.commitment ?? 0],
+                  ]
+                : [
+                    ["Take-home income", plan.salary],
+                    ["Living costs & goals", plan.expenses],
+                    ["Emergency saving", plan.reserve],
+                    ["Cash buffer", plan.buffer],
+                    ["Required EMIs", cash?.emis ?? 0],
+                    ["Chosen extra", cash?.extra ?? plan.extra],
+                  ]
+              ).map(([text, value]) => (
                 <div key={text}>
                   <dt>{text}</dt>
                   <dd>{money(Number(value))}</dd>
@@ -1109,15 +1526,25 @@ export function LoanPage() {
                   ? "COMPLETE YOUR INPUTS"
                   : cash.unassigned < 0
                     ? "MONTHLY SHORTFALL"
-                    : "LEFT UNASSIGNED"}
+                    : plan.fundingMode === "manual"
+                      ? "DECLARED MONTHLY REPAYMENT"
+                      : "LEFT UNASSIGNED"}
               </span>
               <strong data-testid="loan-monthly-room">
-                {cash ? money(Math.abs(cash.unassigned)) : "—"}
+                {cash
+                  ? money(
+                      plan.fundingMode === "manual" && cash.unassigned >= 0
+                        ? cash.commitment
+                        : Math.abs(cash.unassigned),
+                    )
+                  : "—"}
               </strong>
               <p>
                 The comparison uses {cash ? money(cash.commitment) : "—"} a
                 month for debt payments, prepayment fees and investing. That
-                commitment stays constant as loans close.
+                commitment stays constant as loans close. Cash-and-asset
+                scenarios adjust it for separate rent kept or lost and entered
+                replacement costs.
               </p>
             </div>
           </section>
@@ -1125,6 +1552,14 @@ export function LoanPage() {
             <section className="budget-cushion">
               <p className="budget-eyebrow">ROOM FOR THE UNEXPECTED</p>
               <h3>Keep an emergency cushion.</h3>
+              {plan.fundingMode === "manual" && (
+                <p>
+                  Manual mode doesn’t collect a full household budget. This
+                  target uses the living costs already stored in this plan, if
+                  any, plus required EMIs. Review all household essentials
+                  separately.
+                </p>
+              )}
               <div className="budget-cushion-value">
                 <strong>{money(plan.emergency)}</strong>
                 <span>Target {money(cash.emergencyTarget)}</span>
@@ -1149,7 +1584,12 @@ export function LoanPage() {
             </p>
           )}
           <details className="budget-guideline">
-            <summary>How the comparison stays fair</summary>
+            <summary>About the investment-only alternatives</summary>
+            <p>
+              These notes describe the optional four salary-funded paths. The
+              cash-and-asset comparisons explain their own assumptions beneath
+              the charts.
+            </p>
             <p>
               Same starting loans, salary allocation and horizon. Full EMIs are
               paid first. Extra payments reduce tenure; scheduled EMIs stay
@@ -1184,10 +1624,18 @@ export function LoanPage() {
           <span>
             {cash && cash.unassigned < 0
               ? "Monthly shortfall"
-              : "Left unassigned"}
+              : plan.fundingMode === "manual"
+                ? "Monthly repayment money"
+                : "Left unassigned"}
           </span>
           <strong>
-            {cash ? money(Math.abs(cash.unassigned)) : "Check inputs"}
+            {cash
+              ? money(
+                  plan.fundingMode === "manual" && cash.unassigned >= 0
+                    ? cash.commitment
+                    : Math.abs(cash.unassigned),
+                )
+              : "Check inputs"}
           </strong>
         </div>
         <a href="#loan-monthly-snapshot">Monthly breakdown ↑</a>

@@ -70,6 +70,36 @@ h3 {
   margin-left: auto;
   margin-right: 32px;
 }
+.home-currency {
+  flex: 0 0 145px;
+  margin: 0;
+}
+.home-currency select {
+  min-height: 42px;
+  width: 100%;
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+  .welcome-topbar .home-nav {
+    display: none;
+  }
+  .welcome-topbar .home-currency {
+    margin-left: auto;
+  }
+}
+@media (max-width: 700px) {
+  .welcome-topbar:has(.home-currency) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 16px;
+  }
+  .welcome-topbar:has(.home-currency) .home-wordmark {
+    grid-column: 1 / -1;
+  }
+  .home-currency {
+    max-width: 160px;
+  }
+}
 .home-nav a {
   font-size: 13px;
   color: var(--muted);

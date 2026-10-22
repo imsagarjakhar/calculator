@@ -7,6 +7,7 @@ class Node{
 }
 const nodes=new Map([...fs.readFileSync('freedom.html','utf8').matchAll(/id="([^"]+)"/g)].map(m=>[m[1],new Node(m[1])]));
 const get=id=>{assert.ok(nodes.has(id),'Missing '+id);return nodes.get(id);},saved=new Map([['intimetec-custom-plan-v1','custom-preserved'],['corpus-survival-v1','survival-preserved'],['InTimeTec-investment-planner-v2','growth-preserved']]),downloads=[];
+saved.set('intimetec-freedom-v1',JSON.stringify(E.defaults));
 let change,latestChart,latestContext;
 const ctx=vm.createContext({FinancialFreedom:E,LifeEvents:{load:(mode,currency)=>Life.validate(JSON.parse(saved.get('life-events-v1-'+mode+'-'+currency)||'[]')),mount(host,mode,context,callback){assert.equal(mode,'freedom');change=callback;return {refresh(next){latestContext=next;},impact(text){host.textContent=text;}};}},ChartHover:{attach(host,options){latestChart=options;}},
  localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},document:{getElementById:get,querySelectorAll:()=>[],createElement:()=>new Node('download'),body:{append(){}}},Blob,URL:{createObjectURL(blob){downloads.push(blob);return 'test-url';},revokeObjectURL(){}},setTimeout:fn=>fn()});
@@ -38,7 +39,7 @@ assert.equal(lossPlan.freedomMonth,null);assert.ok(growth<0);
 assert.equal(summaryValue('Total invested by age 40'),money0(principal));assert.equal(summaryValue('Investment growth / loss by age 40'),money0(growth));
 assert.ok(Math.abs(principal+growth-lossPlan.rows.reduce((sum,row)=>sum+row.event,0)-lossPlan.balance)<0.01);
 saved.delete('life-events-v1-freedom-INR');
-get('freedomReset').onclick();
+get('freedomReset').onclick();set('incomeMode','spending');submit();
 const originalFreedom=E.project(read()).freedomMonth;
 set('salary',200000);submit();assert.equal(read().salary,200000);const richer=E.project(read());assert.ok(get('freedomOutput').innerHTML.includes('Age '+Math.floor(richer.freedomAge)));
 assert.equal(richer.freedomMonth,originalFreedom,'Salary increases alone must not invest the unused surplus');
@@ -55,7 +56,7 @@ async function check(){
  set('age','');submit();assert.ok(get('freedomError').textContent.includes('current age'));assert.equal(get('freedomCsv').disabled,true);assert.equal(get('freedomRows').innerHTML,'');
  assert.equal(get('investmentScheduleRows').innerHTML,'');assert.equal(get('investmentScheduleTotal').textContent,'');
  set('age',30);set('targetAge',20);submit();assert.ok(get('freedomError').textContent.includes('preferred stop-work'));
- get('freedomResetTop').onclick();assert.deepEqual(read(),E.defaults);assert.equal(get('freedomError').textContent,'');assert.equal(get('freedomCsv').disabled,false);assert.ok(saved.has('life-events-v1-freedom-USD'),'Reset inputs retains future expenses');
+ get('freedomResetTop').onclick();set('incomeMode','spending');submit();assert.deepEqual(read(),E.defaults);assert.equal(get('freedomError').textContent,'');assert.equal(get('freedomCsv').disabled,false);assert.ok(saved.has('life-events-v1-freedom-USD'),'Reset inputs retains future expenses');
  set('age',100);get('freedomForm').listeners.input({target:get('f-age')});assert.equal(read().endAge,101);assert.equal(read().targetAge,100);get('freedomReset').onclick();
  assert.equal(saved.get('intimetec-custom-plan-v1'),'custom-preserved');assert.equal(saved.get('corpus-survival-v1'),'survival-preserved');assert.equal(saved.get('InTimeTec-investment-planner-v2'),'growth-preserved');
  assert.ok(fs.readFileSync('index.html','utf8').includes('class="choice freedom-choice" href="freedom.html"'));

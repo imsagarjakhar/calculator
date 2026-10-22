@@ -1,20 +1,7 @@
 import { useRef } from "react";
+import { currencies } from "../runtime/currency";
 
 import { budgetHeading, headerConfig, type PlannerKind } from "./headerConfig";
-
-const currencies = [
-  ["INR", "₹"],
-
-  ["SAR", "ر.س"],
-
-  ["USD", "$"],
-
-  ["AED", "د.إ"],
-
-  ["EUR", "€"],
-
-  ["GBP", "£"],
-] as const;
 
 type HeaderControls = {
   currency: string;

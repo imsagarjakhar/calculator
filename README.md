@@ -1,5 +1,19 @@
 # Financial AI Planner — React migration
 
+The loan planner now accepts individually entered loans, one total monthly
+repayment budget or the salary planner's saved monthly investment amount, spare savings outside the
+emergency fund, and up to eight assets. Cash-only scenarios compare required
+EMIs, monthly prepayments, an upfront savings payment, and selling one asset at a
+time. They include rent/vacancy/running costs, linked-loan settlement, sale costs
+and entered tax estimates, sale-only replacement costs, and retained asset value.
+Debt and net-wealth charts, cost bars and monthly schedules explain trade-offs;
+there is no buy/sell recommendation. Investment alternatives use their own stated
+basis. `test:loans` includes ledger and asset-scenario regression checks. New
+fields are optional, so saved plans and exported reports remain restorable.
+One checkbox selects the saved investment amount; unchecking it reveals one
+editable repayment input. Required EMIs come from that total and are not added
+again. Salary import leaves loans, assets and emergency/spare savings untouched.
+
 The salary planner invests the balance after living expenses, bill reserves,
 emergency saving and cash set aside. Its goal check evaluates that same investment,
 with a 12% editable return assumption, years plus months, a contribution/growth

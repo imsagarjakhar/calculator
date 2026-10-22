@@ -9,6 +9,21 @@ export type Loan = {
   lock: number;
   taxRelief: number;
 };
+export type LoanAsset = {
+  id: string;
+  name: string;
+  value: number;
+  rent: number;
+  costs: number;
+  vacancy: number;
+  appreciation: number;
+  rentGrowth: number;
+  sellingCost: number;
+  saleTax: number;
+  linkedLoanId: string;
+  rentIncluded: boolean;
+  replacementCost?: number;
+};
 export type LoanPlan = {
   version: 1;
   currency: string;
@@ -26,6 +41,13 @@ export type LoanPlan = {
   gainsTax: number;
   split: number;
   loans: Loan[];
+  fundingMode?: "manual" | "salary";
+  repaymentBudget?: number;
+  useAvailable?: boolean;
+  lumpSum?: number;
+  cashReturn?: number;
+  assets?: LoanAsset[];
+  useSalaryInvestment?: boolean;
 };
 export type Strategy = "avalanche" | "snowball" | "invest" | "split";
 export const strategies: { id: Strategy; name: string; description: string }[] =
@@ -106,12 +128,36 @@ export function cashFlow(p: LoanPlan) {
     .filter((l) => l.balance > 0)
     .reduce((s, l) => s + payment(l), 0);
   const capacity = p.salary - p.expenses - p.reserve - p.buffer - emis;
+  const manual = p.fundingMode === "manual";
+  const available = manual
+    ? p.repaymentBudget === undefined
+      ? p.extra
+      : p.repaymentBudget - emis
+    : capacity;
+  const extra = manual
+    ? Math.max(0, available)
+    : p.useAvailable
+      ? Math.max(0, capacity)
+      : p.extra;
   return {
     emis,
-    capacity,
-    commitment: emis + p.extra,
-    unassigned: capacity - p.extra,
+    capacity: available,
+    extra,
+    commitment: emis + extra,
+    unassigned: available - extra,
     emergencyTarget: (p.expenses + emis) * p.coverMonths,
+  };
+}
+/** Preserve older extra/EMI plans as one explicit total repayment budget. */
+export function withRepaymentBudget(p: LoanPlan): LoanPlan {
+  return {
+    ...p,
+    fundingMode: "manual",
+    repaymentBudget:
+      p.fundingMode === "manual" && p.repaymentBudget !== undefined
+        ? p.repaymentBudget
+        : cashFlow(p).commitment,
+    useSalaryInvestment: p.useSalaryInvestment ?? false,
   };
 }
 export function validateLoanPlan(value: unknown): string[] {
@@ -169,6 +215,53 @@ export function validateLoanPlan(value: unknown): string[] {
     ];
   if (new Set(p.loans.map((l) => l.id)).size !== p.loans.length)
     return ["Loan identifiers must be unique."];
+  if (
+    (p.fundingMode !== undefined &&
+      !["manual", "salary"].includes(p.fundingMode)) ||
+    (p.repaymentBudget !== undefined && !amount(p.repaymentBudget)) ||
+    (p.useAvailable !== undefined && typeof p.useAvailable !== "boolean") ||
+    (p.useSalaryInvestment !== undefined &&
+      typeof p.useSalaryInvestment !== "boolean") ||
+    (p.lumpSum !== undefined && !amount(p.lumpSum)) ||
+    (p.cashReturn !== undefined && !range(p.cashReturn, -99, 100))
+  )
+    return [
+      "Check the monthly repayment budget, spare savings and cash-return assumption.",
+    ];
+  if (p.assets !== undefined) {
+    if (
+      !Array.isArray(p.assets) ||
+      p.assets.length > 8 ||
+      !p.assets.every(
+        (a) =>
+          a &&
+          typeof a === "object" &&
+          typeof a.id === "string" &&
+          a.id.length <= 80 &&
+          typeof a.name === "string" &&
+          a.name.trim().length > 0 &&
+          a.name.length <= 80 &&
+          [a.value, a.rent, a.costs, a.saleTax].every(amount) &&
+          (a.replacementCost === undefined || amount(a.replacementCost)) &&
+          range(a.vacancy, 0, 100) &&
+          range(a.appreciation, -99, 100) &&
+          range(a.rentGrowth, -99, 100) &&
+          range(a.sellingCost, 0, 30) &&
+          typeof a.rentIncluded === "boolean" &&
+          typeof a.linkedLoanId === "string" &&
+          (a.linkedLoanId === "" ||
+            p.loans.some((l) => l.id === a.linkedLoanId)),
+      )
+    )
+      return [
+        "Check each asset’s name, value, rent, running costs, selling assumptions and linked loan.",
+      ];
+    if (new Set(p.assets.map((a) => a.id)).size !== p.assets.length)
+      return ["Asset identifiers must be unique."];
+    const linked = p.assets.map((a) => a.linkedLoanId).filter(Boolean);
+    if (new Set(linked).size !== linked.length)
+      return ["Link each secured loan to only one asset."];
+  }
   return [];
 }
 export type LoanMonth = {
@@ -332,7 +425,7 @@ export function simulate(
 export function compare(p: LoanPlan) {
   const errors = validateLoanPlan(p);
   if (errors.length) return { errors, results: [] as Simulation[] };
-  if (p.loans.length === 0)
+  if (!p.loans.some((l) => l.balance > 0))
     return {
       errors: [
         "Add at least one loan from your lender statements before comparing paths.",
@@ -342,7 +435,9 @@ export function compare(p: LoanPlan) {
   const cash = cashFlow(p);
   if (cash.capacity < -1e-6)
     errors.push(
-      "Income does not cover living costs, reserves, the buffer and required EMIs. Reduce commitments or review the income before comparing strategies.",
+      p.fundingMode === "manual"
+        ? "The total repayment budget does not cover all required EMIs. Increase it or review the loan payments before comparing."
+        : "Income does not cover living costs, reserves, the buffer and required EMIs. Reduce commitments or review the income before comparing strategies.",
     );
   else if (cash.unassigned < -1e-6)
     errors.push(

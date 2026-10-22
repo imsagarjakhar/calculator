@@ -58,7 +58,7 @@ export function BudgetGrowthChart({
       )
       .join(" ");
   const compact = (value: number) =>
-    new Intl.NumberFormat("en-IN", {
+    new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
       currency,
       notation: "compact",
