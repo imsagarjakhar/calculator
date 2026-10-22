@@ -9,8 +9,11 @@ preserved.
   headings and wordmark. Segoe UI supplies controls and readable body copy.
 - Warm ivory backgrounds, white surfaces, dark forest headings and green actions give the
   homepage and shared calculator shell one visual voice. Chart colors retain their categories with darker strokes for light surfaces.
-- Use open sections, fine dividers and compact directory entries. Avoid decorative
-  gradients, repeated uppercase labels and icon tiles for the planner directory.
+- The planner directory is a visual shelf: two larger tinted entries for salary
+  budgeting and loan decisions, followed by six compact white tool cards. Use
+  short descriptions, consistent authored line icons, and clear actions. Budget
+  categories and the repay/invest choice provide a conceptual preview without
+  invented financial results. Avoid gradients, uppercase labels and icon tiles.
 - The homepage pairs an introduction with three real starting questions. All
   planners remain available in the directory, followed by the guide and FAQ.
 - At narrow widths, sections stack in reading order. Keep every planner reachable,

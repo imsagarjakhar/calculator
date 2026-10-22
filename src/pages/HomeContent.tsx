@@ -1,3 +1,4 @@
+import { PlannerDirectory } from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
@@ -140,106 +141,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </div>
           </aside>
         </div>
-        <div className="planner-directory-heading" id="planners">
-          <h2>A tool for every chapter.</h2>
-          <p>Choose a question. Explore the possibilities.</p>
-        </div>
-        <div className="planner-choices has-custom has-freedom">
-          <a
-            href={plannerHref("growth")}
-            className="choice growth-choice"
-            data-screen="growth"
-          >
-            <strong>Check Growth</strong>
-            <span className="choice-copy">
-              See where your SIP can take you, with annual step-ups and extra
-              investments along the way.
-            </span>
-            <span className="choice-link">
-              Open SIP planner <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a
-            href={plannerHref("survival")}
-            className="choice survival-choice"
-            data-screen="survival"
-          >
-            <strong>Check Survival</strong>
-            <span className="choice-copy">
-              Start with your current corpus. See how withdrawals, inflation and
-              returns shape its lifetime.
-            </span>
-            <span className="choice-link">
-              Explore corpus survival <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a className="choice custom-choice" href={plannerHref("custom-plan")}>
-            <strong>Custom Plan</strong>
-            <span className="choice-copy">
-              Adjust any month's SIP, invest a bonus, or pay a loan sooner. Save
-              your plan and pick it up later.
-            </span>
-            <span className="choice-link">
-              Build a monthly plan <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a className="choice freedom-choice" href={plannerHref("freedom")}>
-            <strong>Financial Freedom</strong>
-            <span className="choice-copy">
-              Set your monthly SIP and desired monthly income. Adjust step-up,
-              inflation and expected return to explore your freedom age.
-            </span>
-            <span className="choice-link">
-              Find my freedom age <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a
-            className="choice retirement-choice"
-            href={plannerHref("bucket-plan")}
-          >
-            <strong>Retirement Bucket Planner</strong>
-            <span className="choice-copy">
-              Plan living costs, emergencies and long-term growth with three
-              retirement buckets.
-            </span>
-            <span className="choice-link">
-              Plan my retirement buckets <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a
-            className="choice salary-choice"
-            href={plannerHref("salary-budget")}
-          >
-            <strong>Monthly Salary &amp; Budget Planner</strong>
-            <span className="choice-copy">
-              Balance your salary, bills and savings. See what a year of
-              investing could become.
-            </span>
-            <span className="choice-link">
-              Plan my monthly budget <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a className="choice loan-choice" href={plannerHref("loan-payoff")}>
-            <strong>Loan Payoff &amp; Investment Planner</strong>
-            <span className="choice-copy">
-              Pay loans faster or invest the extra? Compare your options and
-              build a monthly payoff guide that fits your budget.
-            </span>
-            <span className="choice-link">
-              Compare my loan options <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-          <a className="choice vlog-choice" href="#vlogs">
-            <strong>Blog</strong>
-            <span className="choice-copy">
-              Money conversations, practical ideas and the latest updates, all
-              in one place.
-            </span>
-            <span className="choice-link">
-              View all blogs <span aria-hidden="true">↗</span>
-            </span>
-          </a>
-        </div>
+        <PlannerDirectory />
         <FinancialPlanningGuide />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
           <h2 id="planningQuestions">A few things worth knowing.</h2>

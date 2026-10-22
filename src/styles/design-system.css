@@ -766,6 +766,208 @@ svg [stroke="#56b8f5"] {
   background: #f0f4ec;
   margin-top: 36px;
 }
+
+/* A visual tool shelf: two everyday decisions, followed by focused planners. */
+.tool-directory .planner-choices.tool-directory-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px;
+}
+.planner-choices.tool-directory-grid .tool-card.choice {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 215px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #d2ded2;
+  border-radius: 14px;
+  box-shadow: none;
+  text-decoration: none;
+  color: #234a39;
+}
+.planner-choices.tool-directory-grid .tool-feature.choice {
+  grid-column: span 3;
+  min-height: 280px;
+  padding: 28px 30px 22px;
+  background: #e8f0e3;
+  border-color: #c8d9c1;
+}
+.planner-choices.tool-directory-grid .loan-choice.tool-feature {
+  background: #f2eee4;
+  border-color: #ded6c3;
+  color: #69552c;
+}
+.tool-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 12px;
+}
+.tool-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.tool-directory .tool-card-heading strong {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: #253f32;
+}
+.tool-directory .tool-feature .tool-card-heading strong {
+  font-size: 24px;
+}
+.planner-choices .tool-card .choice-copy {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #496253;
+  max-width: 48ch;
+}
+.planner-choices .loan-choice.tool-card .choice-copy {
+  color: #6c6047;
+}
+.planner-choices .tool-card .choice-link {
+  margin-top: auto;
+  padding-top: 20px;
+  min-height: 44px;
+  font-size: 12px;
+  color: #176b52;
+  gap: 14px;
+}
+.tool-open-arrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #c3d5c6;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tool-budget-preview,
+.tool-loan-preview {
+  display: block;
+  margin: 24px 0 2px;
+  max-width: 390px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #385e43;
+}
+.tool-budget-track {
+  display: flex;
+  height: 12px;
+  gap: 4px;
+  margin: 10px 0;
+}
+.tool-budget-track i {
+  background: #39775b;
+  flex: 6;
+  border-radius: 3px;
+}
+.tool-budget-track i:nth-child(2) {
+  background: #879e60;
+  flex: 3;
+}
+.tool-budget-track i:nth-child(3) {
+  background: #c4aa65;
+  flex: 2;
+}
+.tool-preview-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+.tool-preview-key > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tool-preview-key i {
+  width: 6px;
+  height: 6px;
+  background: #39775b;
+  border-radius: 50%;
+}
+.tool-preview-key > span:nth-child(2) i {
+  background: #879e60;
+}
+.tool-preview-key > span:nth-child(3) i {
+  background: #c4aa65;
+}
+.tool-loan-preview {
+  color: #69552c;
+}
+.tool-loan-paths {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.tool-loan-paths > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 12px;
+  border: 1px solid #d9cfb8;
+  border-radius: 6px;
+  background: #faf8f2;
+}
+.planner-choices.tool-directory-grid .tool-card:hover {
+  border-color: #7b9c83;
+  box-shadow: 0 6px 18px #234a390a;
+}
+.tool-card:focus-visible {
+  outline: 2px solid #176b52;
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .planner-choices.tool-directory-grid .tool-card {
+    transition:
+      border-color 180ms ease-out,
+      box-shadow 180ms ease-out;
+  }
+  .tool-open-arrow {
+    transition: transform 180ms ease-out;
+  }
+  .tool-card:hover .tool-open-arrow {
+    transform: translateX(3px);
+  }
+}
+@media (max-width: 950px) {
+  .planner-choices.tool-directory-grid .tool-card.choice {
+    grid-column: span 3;
+  }
+  .planner-choices.tool-directory-grid .tool-feature.choice {
+    padding: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .tool-directory .planner-choices.tool-directory-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .planner-choices.tool-directory-grid .tool-card.choice {
+    grid-column: auto;
+    min-height: 190px;
+    padding: 22px;
+  }
+  .planner-choices.tool-directory-grid .tool-feature.choice {
+    min-height: 270px;
+  }
+  .tool-directory .tool-feature .tool-card-heading strong {
+    font-size: 22px;
+  }
+  .tool-card-heading {
+    gap: 11px;
+  }
+  .tool-directory .tool-card-heading strong {
+    font-size: 18px;
+  }
+}
 @media (max-width: 700px) {
   .welcome-topbar {
     padding-top: 0;
