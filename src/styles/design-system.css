@@ -1097,6 +1097,40 @@ svg [stroke="#2a4550"] {
   }
 }
 
+/* Keep optional explanations available without crowding the main task. */
+.planner-explanation {
+  margin: 14px 0;
+  border-block: 1px solid #dce5d9;
+  padding: 0;
+  color: #405c4b;
+}
+.planner-explanation > summary {
+  cursor: pointer;
+  color: #176b52;
+  font: 600 13px/1.6 var(--font-ui);
+  padding: 12px 2px;
+}
+.planner-explanation > summary::marker {
+  color: #176b52;
+}
+.planner-explanation > summary:focus-visible {
+  outline: 2px solid #176b52;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.planner-explanation > p {
+  max-width: 72ch;
+  margin: 0 0 16px;
+  color: #405c4b;
+  font: 13px/1.8 var(--font-ui);
+}
+.planner-explanation[open] > summary {
+  padding-bottom: 10px;
+}
+.planner-header-status:empty {
+  display: none;
+}
+
 /* One header row; compact navigation opens in place when space is limited. */
 .welcome-topbar.home-header {
   position: relative;

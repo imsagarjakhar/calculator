@@ -531,10 +531,9 @@ export function LoanPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Choose the salary planner’s monthly investment amount, or
-                  enter your own total repayment budget. Required EMIs are paid
-                  from this amount first; the rest is available for extra
-                  repayments.
+                  Import your salary planner’s investment amount or enter a
+                  budget. Required EMIs come first; the rest funds extra
+                  payments.
                 </p>
                 <label className="loan-funding-toggle">
                   <input
@@ -557,9 +556,8 @@ export function LoanPage() {
                       {money(plan.repaymentBudget ?? 0)}
                     </strong>
                     <p>
-                      This saved amount is now your total monthly loan budget.
-                      Required EMIs are included. Uncheck above to enter a
-                      different amount; your salary plan stays unchanged.
+                      Includes required EMIs. Uncheck to enter another amount;
+                      your salary plan stays unchanged.
                     </p>
                     <button
                       type="button"
@@ -575,7 +573,7 @@ export function LoanPage() {
                     wholeAmount
                     value={plan.repaymentBudget ?? 0}
                     onChange={(n) => update("repaymentBudget", n)}
-                    hint="Total including required EMIs and extra repayments. Enter money available after expenses and protected savings; exclude rent entered separately below."
+                    hint="EMIs plus extra payments, after expenses and protected savings. Exclude rent entered separately below."
                   />
                 )}
                 <dl className="loan-funding-summary">
@@ -608,18 +606,15 @@ export function LoanPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Add each loan individually using current lender balances.
-                  Fixed monthly reducing-balance interest is modeled; revolving
-                  credit-card minimums and changing rates need a separate
-                  approximation.
+                  Add each loan’s current balance. Uses fixed rates on reducing
+                  balances; changing rates and card minimums are approximate.
                 </p>
                 {plan.loans.length === 0 && (
                   <div className="loan-empty">
                     <h3>Start with your first loan.</h3>
                     <p>
-                      Add its balance, annual interest rate and required EMI or
-                      remaining term. We’ll calculate the payment and show where
-                      the interest goes.
+                      Enter a balance, rate and EMI or remaining term to see the
+                      cost and payoff date.
                     </p>
                     <button
                       type="button"
@@ -687,7 +682,7 @@ export function LoanPage() {
                         wholeAmount
                         value={l.emi}
                         onChange={(n) => patchLoan(l.id, "emi", n)}
-                        hint="Leave 0 to calculate from the balance, rate and term."
+                        hint="Leave 0 to calculate from balance, rate and term."
                       />
                     </div>
                     <p className="loan-emi">
@@ -722,7 +717,7 @@ export function LoanPage() {
                           value={l.taxRelief}
                           max={60}
                           onChange={(n) => patchLoan(l.id, "taxRelief", n)}
-                          hint="Use 0 unless you qualify. Effective relief after your eligibility limits; not your tax bracket automatically."
+                          hint="Use 0 unless eligible. Enter effective relief after limits, not your tax bracket."
                         />
                       </div>
                       <p className="budget-help">
@@ -766,8 +761,8 @@ export function LoanPage() {
                   What else could change the picture?
                 </h2>
                 <p className="budget-help">
-                  Optional scenarios. Spare savings and assets are compared with
-                  keeping them; nothing is assumed to be sold or withdrawn.
+                  Optional: compare using spare savings or selling an asset with
+                  keeping them.
                 </p>
                 <div className="budget-fields">
                   <Numeric
@@ -775,7 +770,7 @@ export function LoanPage() {
                     wholeAmount
                     value={plan.lumpSum ?? 0}
                     onChange={(n) => update("lumpSum", n)}
-                    hint="Only money outside your emergency fund and reserved bills."
+                    hint="Exclude your emergency fund and reserved bills."
                   />
                   <Numeric
                     label="Annual cash return after tax (%)"
@@ -783,7 +778,7 @@ export function LoanPage() {
                     min={-99}
                     max={100}
                     onChange={(n) => update("cashReturn", n)}
-                    hint="0% means cash stays flat. Used for idle savings in these scenarios."
+                    hint="Return on idle cash; 0% keeps its value flat."
                   />
                   {plan.fundingMode === "manual" && (
                     <Numeric
@@ -791,15 +786,14 @@ export function LoanPage() {
                       wholeAmount
                       value={plan.emergency}
                       onChange={(n) => update("emergency", n)}
-                      hint="Shown in net wealth, never available to prepay a loan."
+                      hint="Included in wealth; kept out of loan payments."
                     />
                   )}
                 </div>
                 <h3>Your rental or other assets</h3>
                 <p className="budget-help">
-                  Enter rent separately from the monthly repayment money above.
-                  If net rent is already included there, mark it below to
-                  prevent double-counting.
+                  Keep rent separate from your repayment budget, or mark it as
+                  already included to avoid counting it twice.
                 </p>
                 {(plan.assets ?? []).map((asset, index) => (
                   <fieldset
@@ -852,10 +846,7 @@ export function LoanPage() {
                             </option>
                           ))}
                         </select>
-                        <small>
-                          Link the mortgage or property loan so a sale settles
-                          it first.
-                        </small>
+                        <small>A sale pays off this linked loan first.</small>
                       </label>
                     </div>
                     <label className="loan-funding-toggle">
@@ -915,7 +906,7 @@ export function LoanPage() {
                           wholeAmount
                           value={asset.saleTax}
                           onChange={(n) => patchAsset(asset.id, "saleTax", n)}
-                          hint="Enter a cash estimate based on your situation; no tax rate is assumed."
+                          hint="Your cash estimate; no tax rate is assumed."
                         />
                         <Numeric
                           label="Replacement monthly cost if sold"
@@ -924,7 +915,7 @@ export function LoanPage() {
                           onChange={(n) =>
                             patchAsset(asset.id, "replacementCost", n)
                           }
-                          hint="For example, rent for another home. Deducted only in this asset’s sale scenario."
+                          hint="For example, replacement rent. Applies only if this asset is sold."
                         />
                       </div>
                     </details>
@@ -1079,17 +1070,12 @@ export function LoanPage() {
                 <div className="loan-investment-boundary">
                   <h2>Optional: compare investing the monthly extra</h2>
                   <p>
-                    These four salary-funded paths exclude the spare savings,
-                    assets and their rental cash flow above. They use the same
-                    monthly commitment but a different investment-return
-                    assumption. Keep these results separate from the
-                    cash-and-asset scenarios.
+                    Salary-funded paths only: excludes spare savings, assets and
+                    rent. The monthly budget is the same; the return assumption
+                    differs from the cash-and-asset scenarios above.
                   </p>
                 </div>
                 <section className="loan-insight">
-                  <p className="budget-eyebrow">
-                    YOUR NUMBERS / YOUR TRADE-OFFS
-                  </p>
                   <h2>
                     {winners.length === 1
                       ? `${label(best.strategy)} leads on projected net position.`
@@ -1156,9 +1142,6 @@ export function LoanPage() {
                 </div>
                 {current && (
                   <section className="budget-panel">
-                    <p className="budget-eyebrow">
-                      A CLOSER LOOK / {label(selected).toUpperCase()}
-                    </p>
                     <h2>Two balances. One honest picture.</h2>
                     <p className="budget-help">
                       Net position = investments after assumed gains tax +
@@ -1260,7 +1243,6 @@ export function LoanPage() {
                   </section>
                 )}
                 <section className="budget-panel">
-                  <p className="budget-eyebrow">WHAT IF RETURNS DISAPPOINT?</p>
                   <h2>Test the assumption, not just the upside.</h2>
                   <p className="budget-help">
                     Same plan, fees and tax assumptions. Only investment return
@@ -1318,12 +1300,10 @@ export function LoanPage() {
           {view === "guide" && current && !comparison.errors.length && (
             <>
               <section className="budget-panel">
-                <p className="budget-eyebrow">A PLAN YOU CAN FOLLOW</p>
                 <h2>Your next payment, made clear.</h2>
                 <p className="budget-help">
-                  This guide follows the salary-funded strategy selected below.
-                  It excludes spare savings and asset sales; those scenarios
-                  have their own monthly schedule in Compare paths.
+                  For the salary-funded path below. Savings and asset-sale
+                  schedules are in Compare paths.
                 </p>
                 <label className="budget-field">
                   <span>Choose the path for your guide</span>
@@ -1353,9 +1333,8 @@ export function LoanPage() {
                   <li>
                     <strong>Cover every required EMI first.</strong>
                     <span>
-                      {money(cash!.emis)} across your active loans in the first
-                      month. Confirm due dates and lender instructions before
-                      arranging transfers.
+                      {money(cash!.emis)} in the first month. Check lender due
+                      dates and payment instructions.
                     </span>
                   </li>
                   <li>
@@ -1376,8 +1355,7 @@ export function LoanPage() {
                   <li>
                     <strong>Keep the commitment when a loan closes.</strong>
                     <span>
-                      Released EMIs are rolled forward automatically in this
-                      schedule.{" "}
+                      Released EMIs fund the next payments or investments.{" "}
                       {when(current.debtFree) === "Beyond this horizon"
                         ? "Some debt remains at the end of this horizon."
                         : `All modeled debt clears ${when(current.debtFree)}.`}
@@ -1386,14 +1364,13 @@ export function LoanPage() {
                   <li>
                     <strong>Review after each statement.</strong>
                     <span>
-                      Update balances, rates and charges when they change. This
-                      local plan is not connected to your lender or bank.
+                      Update balances, rates and fees. This plan isn’t linked to
+                      your bank.
                     </span>
                   </li>
                 </ol>
               </section>
               <section className="budget-panel">
-                <p className="budget-eyebrow">YOUR LOAN MILESTONES</p>
                 <h2>One balance at a time.</h2>
                 <div className="loan-milestones">
                   {[...plan.loans]
@@ -1416,14 +1393,10 @@ export function LoanPage() {
                 </div>
               </section>
               <section className="budget-panel">
-                <p className="budget-eyebrow">
-                  THE MONTH-BY-MONTH PAYMENT PLAN
-                </p>
                 <h2>Know exactly where it goes.</h2>
                 <p className="budget-help">
-                  Payments occur at month end, after monthly interest. All
-                  amounts are {plan.currency}. Select a month to inspect the
-                  payment for each loan.
+                  Open a month for each loan’s payments. Month-end amounts in{" "}
+                  {plan.currency}, after interest.
                 </p>
                 <div className="loan-schedule">
                   {current.rows.slice(0, visibleMonths).map((r) => (
@@ -1494,7 +1467,6 @@ export function LoanPage() {
           aria-label="Monthly loan budget"
         >
           <section className="budget-summary">
-            <p className="budget-eyebrow">YOUR MONTHLY ROOM TO MOVE</p>
             <h2>A plan that fits real life.</h2>
             <dl className="budget-breakdown">
               {(plan.fundingMode === "manual"
@@ -1540,24 +1512,19 @@ export function LoanPage() {
                   : "—"}
               </strong>
               <p>
-                The comparison uses {cash ? money(cash.commitment) : "—"} a
-                month for debt payments, prepayment fees and investing. That
-                commitment stays constant as loans close. Cash-and-asset
-                scenarios adjust it for separate rent kept or lost and entered
-                replacement costs.
+                {cash ? money(cash.commitment) : "—"}/month covers debt, fees
+                and investing, even after loans close. Asset scenarios adjust
+                for rent and replacement costs.
               </p>
             </div>
           </section>
           {cash && (
             <section className="budget-cushion">
-              <p className="budget-eyebrow">ROOM FOR THE UNEXPECTED</p>
               <h3>Keep an emergency cushion.</h3>
               {plan.fundingMode === "manual" && (
                 <p>
-                  Manual mode doesn’t collect a full household budget. This
-                  target uses the living costs already stored in this plan, if
-                  any, plus required EMIs. Review all household essentials
-                  separately.
+                  Manual mode uses stored living costs plus EMIs. Check the
+                  target against all your household essentials.
                 </p>
               )}
               <div className="budget-cushion-value">
@@ -1640,9 +1607,8 @@ export function LoanPage() {
         </div>
         <a href="#loan-monthly-snapshot">Monthly breakdown ↑</a>
       </div>
-      <section className="loan-reading">
-        <p className="budget-eyebrow">METHODS & FURTHER READING</p>
-        <h2>Useful ideas. Transparent assumptions.</h2>
+      <details className="loan-reading planner-explanation">
+        <summary>Repayment methods & further reading</summary>
         <div>
           <article>
             <h3>The Total Money Makeover · Dave Ramsey</h3>
@@ -1697,15 +1663,13 @@ export function LoanPage() {
             </a>
           </article>
         </div>
-      </section>
+      </details>
       <footer className="budget-foot">
         <span>Financial AI Planner / LESS GUESSWORK, MORE DIRECTION</span>
         <p>
-          An educational scenario model using your inputs. These resources
-          inform the methods; the authors do not endorse this tool. No
-          guaranteed investment return or jurisdiction-specific tax treatment is
-          assumed. Plans stay in this browser when storage is available. Export
-          a copy to keep or restore it.
+          Educational estimates, not guaranteed returns or tax advice. Resource
+          authors do not endorse this tool. Plans save in this browser when
+          available; download a report to keep a backup.
         </p>
         <button
           className="budget-text-button"

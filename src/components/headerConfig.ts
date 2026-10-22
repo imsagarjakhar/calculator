@@ -65,13 +65,13 @@ export const headerConfig = {
   budget: reactHeader(
     "budget",
     budgetHeading(),
-    "Give your salary a purpose, make room for life, and see what a year of investing could become.",
+    "Plan your spending. See what’s left to save.",
   ),
 
   loan: reactHeader(
     "loan",
     "Pay it down. Or build it up?",
-    "Your loans, one repayment budget. See how extra payments, spare savings and rental assets change debt and net wealth.",
+    "List your loans. Compare repaying extra with investing.",
   ),
 
   growth: {
@@ -79,8 +79,7 @@ export const headerConfig = {
 
     title: "From your salary to your goal",
 
-    description:
-      "Existing assets, monthly investments and life expenses—all in one plan.",
+    description: "See where your monthly investments could take you.",
 
     currencyId: "currency",
 
@@ -152,8 +151,7 @@ export const headerConfig = {
 
     title: "Your money, month by month",
 
-    description:
-      "Plan your investments and loans. Record each contribution and see where it takes you.",
+    description: "Investments, loans and actual contributions in one timeline.",
 
     currencyId: "currency",
 
@@ -233,8 +231,7 @@ export const headerConfig = {
 
     title: "When could you be financially free?",
 
-    description:
-      "Set your monthly investments and the income you want. Explore when your savings could support it.",
+    description: "Explore when your savings could support the life you want.",
 
     currencyId: "f-currency",
 
@@ -309,8 +306,7 @@ export const headerConfig = {
 
     title: "One retirement.Three purposeful buckets.",
 
-    description:
-      "Spend from the first, keep a reserve in the second, and let the third fund the years ahead.",
+    description: "Living costs. Emergency cash. Long-term growth.",
 
     currencyId: "b-currency",
 
@@ -381,8 +377,7 @@ export const headerConfig = {
 
     title: "How long will your money last?",
 
-    description:
-      "Your savings, monthly spending and the years ahead. See what your corpus could support.",
+    description: "Explore how long your savings could cover your spending.",
 
     currencyId: "s-currency",
 

@@ -63,7 +63,7 @@ export const SurvivalPage = memo(function SurvivalPage() {
             <div className="eyebrow">01 / YOUR STARTING POINT</div>
             <h2 style={{ marginTop: "8px" }}>Set your survival plan</h2>
             <p className="helper">
-              Your SWP is the monthly spending you want your corpus to fund.
+              SWP = the monthly amount you withdraw from savings.
             </p>
             <p id="survivalStartStatus" className="helper"></p>
             <form id="survivalForm" noValidate>
@@ -105,8 +105,8 @@ export const SurvivalPage = memo(function SurvivalPage() {
               </div>
             </form>
             <p className="helper">
-              Inflation increases the SWP budget once per year. Use a return
-              assumption after any expected taxes and costs.
+              Spending rises with inflation yearly. Enter a return after
+              expected taxes and costs.
             </p>
           </section>
           <section

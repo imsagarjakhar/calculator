@@ -120,17 +120,20 @@ export const CustomPage = memo(function CustomPage() {
               </label>
             </div>
             <p id="settingsUpdateStatus" className="helper" role="status">
-              Calculations update automatically. Valid changes are saved in this
-              browser.
+              Updates automatically · Saved in this browser.
             </p>
           </form>
           <p className="helper">
-            All amounts use the selected currency; no currency conversion is
-            applied. Asset and loan values below are as of the starting month.
-            Changing the start month keeps all custom entries on their original
-            calendar dates. Imports restore the original plan; dates and
-            balances do not advance automatically.
+            Enter asset and loan balances as of the starting month.
           </p>
+          <details className="planner-explanation">
+            <summary>Dates, imports &amp; currency</summary>
+            <p>
+              Changing the start month keeps entries on their original dates.
+              Imports restore the original plan without advancing dates or
+              balances. Currency changes labels without converting amounts.
+            </p>
+          </details>
         </section>
         <div className="two-columns">
           <section className="card" aria-labelledby="assetsTitle">
@@ -216,9 +219,8 @@ export const CustomPage = memo(function CustomPage() {
             <p className="eyebrow">03 / WHAT YOU OWE</p>
             <h2 id="loansTitle">Current loans</h2>
             <p className="helper">
-              Enter the original loan details to estimate what is left to pay.
-              Already know your lender's outstanding balance? Choose that entry
-              method below.
+              Estimate from the original loan, or enter your lender’s current
+              balance.
             </p>
             <form id="loanForm">
               <div className="fields">
@@ -373,14 +375,18 @@ export const CustomPage = memo(function CustomPage() {
                 aria-live="polite"
               ></p>
               <p className="helper">
-                Paid months assume every monthly EMI was paid on time, starting
-                one month after the loan start date. Month-end dates use the
-                last day of shorter months. Estimates assume fixed interest,
-                with no past prepayments, missed payments or fees. Use your
-                lender's outstanding balance if these apply. The saved balance
-                is used at the plan's starting month; align that month with the
-                balance date. Extra payments can be scheduled below.
+                Had missed payments, fees or past prepayments? Use your lender’s
+                outstanding balance.
               </p>
+              <details className="planner-explanation">
+                <summary>How the loan estimate works</summary>
+                <p>
+                  Assumes fixed interest and on-time EMIs, starting one month
+                  after the loan date. Shorter months use their last day. The
+                  balance applies at your plan’s starting month; align it with
+                  the balance date. Schedule future extra payments below.
+                </p>
+              </details>
               <div className="actions">
                 <button id="loanSubmit" type="submit">
                   Add loan
@@ -405,11 +411,8 @@ export const CustomPage = memo(function CustomPage() {
               <p className="eyebrow">04 / MAKE IT YOURS</p>
               <h2 id="monthlyTitle">Your monthly plan</h2>
               <p className="helper">
-                Edit any month's SIP directly. A blank box uses your default;
-                enter 0 to skip that month's SIP. Record transactions for
-                completed months. The box shows the recorded total for those
-                months; edit the records below to change it. Unrecorded months
-                keep the editable SIP forecast.
+                Edit a month’s SIP: leave blank for the default, or enter 0 to
+                skip. Recorded months use your actual transactions.
               </p>
             </div>
             <label>
@@ -467,8 +470,7 @@ export const CustomPage = memo(function CustomPage() {
               <p className="eyebrow">04 / WHERE YOUR MONEY WENT</p>
               <h2 id="transactionTitle">Your investment transactions</h2>
               <p className="helper">
-                Record where you actually invested: stocks, mutual funds, gold
-                or silver ETFs, and other accounts.
+                Track actual contributions by investment account.
               </p>
             </div>
             <button id="transactionCsv" type="button">
@@ -478,10 +480,9 @@ export const CustomPage = memo(function CustomPage() {
           <div className="transaction-rule">
             <strong>Recorded month = your actual investments</strong>
             <p className="helper">
-              Once a month has a transaction, its records replace that month’s
-              planned SIP and planned extra deposits. Loan payments and expenses
-              still apply. Months without records keep the forecast. Removing
-              the last record restores that month’s planned investments.
+              Transactions replace that month’s planned SIP and extras. Loans
+              and expenses still apply. Delete the last record to restore the
+              forecast.
             </p>
           </div>
           <form id="transactionForm">
@@ -559,13 +560,18 @@ export const CustomPage = memo(function CustomPage() {
               </label>
             </div>
             <p className="helper">
-              New names create an account with zero starting balance, using the
-              category and return you enter here. Record contributions made
-              after the plan starts; starting balances already include earlier
-              investments. Exact dates are saved in history; projections and
-              XIRR apply deposits at month-end using your return assumptions.
-              This tracks invested money, not units or live market prices.
+              Record contributions after the plan starts; earlier investments
+              belong in starting balances.
             </p>
+            <details className="planner-explanation">
+              <summary>How transactions affect your projection</summary>
+              <p>
+                New accounts start at zero using the category and return entered
+                here. History keeps exact dates; projections and XIRR place
+                deposits at month-end. This tracks invested amounts, not units
+                or live market prices.
+              </p>
+            </details>
             <div className="actions">
               <button id="transactionSubmit" className="primary" type="submit">
                 Add transaction

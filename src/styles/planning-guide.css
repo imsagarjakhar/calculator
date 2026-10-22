@@ -1,0 +1,214 @@
+.planning-guide--compact.planning-guide {
+  padding-bottom: 32px;
+}
+.planning-guide--compact .planning-guide-intro {
+  margin: 0;
+  color: #465b52;
+}
+.planning-guide--compact .planning-steps {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 0 48px;
+  padding: 0;
+  margin: 28px 0 34px;
+  list-style: none;
+  counter-reset: planning-step;
+}
+.planning-guide--compact .planning-steps > li {
+  counter-increment: planning-step;
+  min-width: 0;
+  padding: 0;
+  border-top: 1px solid #ced9d3;
+}
+.planning-guide--compact .planning-steps summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px 2px;
+  min-height: 96px;
+  cursor: pointer;
+  list-style: none;
+}
+.planning-guide--compact .planning-steps summary::-webkit-details-marker {
+  display: none;
+}
+.planning-guide--compact .planning-steps summary::before {
+  content: counter(planning-step);
+  flex: 0 0 20px;
+  font: 500 22px/1.4 var(--font-editorial);
+  color: #176b52;
+}
+.planning-guide--compact .planning-steps summary::after {
+  content: "+";
+  flex: 0 0 20px;
+  margin: 1px 0 0 auto;
+  text-align: center;
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #176b52;
+}
+.planning-guide--compact .planning-steps details[open] > summary::after {
+  content: "−";
+}
+.planning-guide--compact .planning-steps summary > h3 {
+  min-width: 0;
+}
+.planning-guide--compact .planning-steps h3 {
+  margin: 0 0 4px;
+  color: #203b32;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.planning-guide--compact .planning-steps h3 > small {
+  display: block;
+  margin-top: 4px;
+  color: #465b52;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+.planning-guide--compact .planning-steps summary:hover h3 {
+  color: #176b52;
+}
+.planning-guide--compact .planning-step-detail {
+  padding: 0 22px 22px 37px;
+}
+.planning-guide--compact .planning-step-detail p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0 0 10px;
+}
+.planning-guide--compact .planning-step-detail a {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.planning-guide--compact .planning-example {
+  padding: 24px 28px;
+}
+.planning-example-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+}
+.planning-example-heading h3 {
+  font: 450 27px/1.3 var(--font-editorial);
+  margin: 0;
+  color: #203b32;
+}
+.planning-example-heading p {
+  font-size: 12px;
+  margin: 0;
+}
+.planning-example-heading strong {
+  font-weight: 600;
+}
+.planning-budget-bar {
+  display: flex;
+  height: 12px;
+  gap: 4px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 24px 0 16px;
+}
+.planning-budget-bar > span:nth-child(1) {
+  flex: 5;
+  background: #176b52;
+}
+.planning-budget-bar > span:nth-child(2) {
+  flex: 3;
+  background: #8fa97f;
+}
+.planning-budget-bar > span:nth-child(3) {
+  flex: 2;
+  background: #bba36f;
+}
+.planning-budget-split {
+  display: grid;
+  grid-template-columns: 5fr 3fr 2fr;
+  gap: 16px;
+  margin: 0 0 20px;
+}
+.planning-budget-split dt {
+  color: #465b52;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.planning-budget-split dt > span {
+  color: #203b32;
+  font-weight: 700;
+  margin-right: 6px;
+}
+.planning-budget-split dd {
+  margin: 3px 0 0;
+  color: #203b32;
+  font-size: 20px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.planning-guide--compact .planning-budget-note {
+  font-size: 12px;
+  margin: 0 0 6px;
+}
+.planning-budget-help > summary,
+.planning-guide--compact .planning-guide-sources > summary,
+.home-backup-help > summary {
+  width: fit-content;
+  min-height: 32px;
+  padding: 7px 0;
+  color: #176b52;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.planning-guide--compact .planning-budget-help p,
+.planning-guide--compact .planning-guide-sources p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 6px 0;
+}
+.planning-guide--compact .planning-guide-sources {
+  margin-top: 16px;
+}
+.planning-guide--compact .planning-guide-sources ul {
+  padding-left: 20px;
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 2;
+}
+.home-backup-help p {
+  max-width: 75ch;
+}
+@media (max-width: 700px) {
+  .planning-guide--compact .planning-steps {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 22px;
+  }
+  .planning-guide--compact .planning-steps summary {
+    min-height: 90px;
+    padding-top: 17px;
+    padding-bottom: 17px;
+  }
+  .planning-guide--compact .planning-example {
+    padding: 20px;
+  }
+  .planning-example-heading h3 {
+    font-size: 25px;
+  }
+  .planning-budget-split {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .planning-budget-split dt > span {
+    display: block;
+  }
+  .planning-budget-split dd {
+    font-size: 17px;
+    overflow-wrap: anywhere;
+  }
+}

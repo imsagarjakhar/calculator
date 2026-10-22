@@ -116,9 +116,8 @@ export const GrowthPage = memo(function GrowthPage() {
             </div>
             <div className="hint calculated" id="stepHint"></div>
             <p className="helper">
-              The step-up happens <strong>once a year</strong>, starting in
-              month 13, not every month. Starting salary is not the same as your
-              monthly investment. Increase only what remains affordable.
+              Step-up starts in month 13 and applies once a year. Keep future
+              contributions affordable.
             </p>
           </section>
           <section
@@ -184,8 +183,7 @@ export const GrowthPage = memo(function GrowthPage() {
               </span>
             </div>
             <p className="subtitle">
-              Add one-time amounts in any year and month. Your regular SIP
-              continues unchanged.
+              Add a one-time deposit alongside your regular SIP.
             </p>
             <form id="extraForm" className="extra-form" noValidate>
               <label htmlFor="extraYear">
@@ -232,11 +230,13 @@ export const GrowthPage = memo(function GrowthPage() {
               </button>
               <div id="extraError" className="error" role="alert"></div>
             </form>
-            <p className="helper">
-              Example: Year 3, Month 6 means the{" "}
-              <strong>30th investment month</strong>, not June. Extras are added
-              at month-end and start growing the following month.
-            </p>
+            <details className="planner-explanation">
+              <summary>When does an extra deposit start growing?</summary>
+              <p>
+                Year 3, Month 6 means investment month 30, not June. A deposit
+                is added at month-end and starts growing the following month.
+              </p>
+            </details>
             <div id="extrasEmpty" className="empty">
               <strong>No extra amounts added yet.</strong>Add an amount above,
               or use the + Add buttons in the monthly table.
@@ -280,11 +280,9 @@ export const GrowthPage = memo(function GrowthPage() {
               </span>
             </div>
             <p className="helper">
-              Hover, tap, or focus the chart and use arrow keys to see full
-              amounts at each yearly point. This chart shows gross assets,
-              before subtracting loans. The headline and schedule also show net
-              wealth. A smooth mathematical illustration, not the path actual
-              markets will follow.
+              Tap a point or use arrow keys for amounts. The chart shows assets
+              before debt; the headline shows net wealth. Actual returns will
+              vary.
             </p>
             <h3 style={{ marginTop: "17px" }}>
               Net wealth at reference SIP rates
@@ -303,12 +301,15 @@ export const GrowthPage = memo(function GrowthPage() {
                 <strong id="cMF"></strong>
               </div>
             </div>
-            <p className="helper">
-              All three show net wealth with the same existing assets, loans,
-              life expenses, SIP, step-up and extras; only the new SIP return
-              changes. Their reference rates stay fixed; editing the rate above
-              changes the main result, chart and tables.
-            </p>
+            <details className="planner-explanation">
+              <summary>What changes in these comparisons?</summary>
+              <p>
+                Only the return on new SIP deposits changes. Existing assets,
+                loans, life expenses and contributions stay the same. These
+                reference rates stay fixed; your selected rate updates the main
+                result, chart and tables.
+              </p>
+            </details>
             <div id="risk"></div>
           </section>
         </div>

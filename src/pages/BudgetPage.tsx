@@ -462,9 +462,6 @@ export function BudgetPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">
-                      01 / START WITH WHAT COMES IN
-                    </p>
                     <h2 id="budget-income-title">Your payday, on paper.</h2>
                   </div>
                   <span className="budget-step" aria-hidden="true">
@@ -472,8 +469,7 @@ export function BudgetPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Use income received after tax and payroll deductions. For
-                  variable income, enter an amount you can reasonably count on.
+                  Enter income after tax. If it varies, use a dependable amount.
                 </p>
                 <div className="budget-fields">
                   <NumberField
@@ -490,7 +486,7 @@ export function BudgetPage() {
                     label="Keep some Cash aside from Salary"
                     value={plan.buffer}
                     onChange={(n) => update("buffer", n)}
-                    hint="Money kept available for small, unexpected expenses."
+                    hint="For small, unexpected expenses."
                     info="Isn’t included in the investment growth projection."
                   />
                 </div>
@@ -501,9 +497,6 @@ export function BudgetPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">
-                      02 / MAKE ROOM FOR REAL LIFE
-                    </p>
                     <h2 id="budget-expenses-title">Where your money goes.</h2>
                   </div>
                   <span className="budget-step" aria-hidden="true">
@@ -511,8 +504,8 @@ export function BudgetPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Enter a monthly plan. Keep minimum debt payments here; don’t
-                  count purchases again when paying a credit-card bill.
+                  Include minimum debt payments. Count card purchases or their
+                  bill, never both.
                 </p>
                 {(["needs", "wants"] as const).map((group) => (
                   <div className="budget-expense-group" key={group}>
@@ -564,8 +557,7 @@ export function BudgetPage() {
                       : `${money(Math.max(0, plan.salary - expenseTotal))} of your salary remains after these expenses.`}
                   </p>
                   <small>
-                    Essentials and extras above only. Bills, savings and cash
-                    set aside are separate.
+                    Excludes upcoming bills, savings and cash set aside.
                   </small>
                 </div>
               </section>
@@ -575,9 +567,6 @@ export function BudgetPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">
-                      03 / NO MORE SURPRISE BILLS
-                    </p>
                     <h2 id="budget-bills-title">
                       Future bills. Monthly pieces.
                     </h2>
@@ -587,9 +576,8 @@ export function BudgetPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Plan for gym fees, school fees, renewals or a one-time repair.
-                  Choose how often you pay and when the next payment is due.
-                  Don’t also include the same bill in expenses above.
+                  Split larger bills into monthly savings. Don’t count them in
+                  expenses above too.
                 </p>
                 {plan.bills.map((bill, index) => {
                   const patch = (key: string, value: string | number) =>
@@ -659,7 +647,6 @@ export function BudgetPage() {
                         />
                         <NumberField
                           label="Next Payment after (Months)"
-                          hint="Adjust if the next payment is sooner."
                           value={bill.months}
                           onChange={(n) => patch("months", n)}
                           min={1}
@@ -681,9 +668,9 @@ export function BudgetPage() {
                       </div>
                       <p className="budget-help">
                         {bill.intervalMonths
-                          ? `Next payment: set aside ${money(monthlyReserve(bill.amount, bill.reserved, bill.months))} each month for ${bill.months} ${bill.months === 1 ? "month" : "months"}. After that, budget ${money(bill.amount / bill.intervalMonths)} per month for repeat payments.`
-                          : "A one-time bill: the monthly amount covers the next payment only."}{" "}
-                        Already reserved applies to the next payment only.
+                          ? `After the next payment: ${money(bill.amount / bill.intervalMonths)} per month for repeat bills.`
+                          : "One-time bill: savings cover the next payment only."}{" "}
+                        Reserved money applies once.
                       </p>
                       <button
                         className="budget-text-button"
@@ -726,7 +713,6 @@ export function BudgetPage() {
               >
                 <div className="budget-panel-heading">
                   <div>
-                    <p className="budget-eyebrow">04 / PAY YOUR FUTURE SELF</p>
                     <h2 id="budget-future-title">
                       Protection. Progress. Possibility.
                     </h2>
@@ -738,14 +724,13 @@ export function BudgetPage() {
                 <div className="budget-subsection">
                   <h3>Your emergency cushion</h3>
                   <p className="budget-help">
-                    Target based on essentials plus monthly bill reserves.
-                    Existing savings are kept separate from new monthly
-                    contributions.
+                    Cover essentials and bill reserves. Existing savings stay
+                    separate from monthly contributions.
                   </p>
                   <div className="budget-fields">
                     <NumberField
                       label="Emergency savings today"
-                      hint="Money you already have saved. Enter your current balance."
+                      hint="Your current balance, not a monthly expense."
                       value={plan.emergencySaved}
                       onChange={(n) => update("emergencySaved", n)}
                     />
@@ -807,10 +792,6 @@ export function BudgetPage() {
                       {money(Math.abs(result.available))}
                     </strong>
                   </div>
-                  <p>
-                    Income − living expenses − bill reserves − emergency saving
-                    − cash set aside.
-                  </p>
                   <details>
                     <summary>See how this is calculated</summary>
                     <dl>
@@ -881,15 +862,15 @@ export function BudgetPage() {
                       max={100}
                       value={plan.annualReturn}
                       onChange={updateExpectedReturn}
-                      hint="Starts at 12%. An assumption, not a guaranteed return."
+                      hint="Assumed return, not guaranteed."
                     />
                   </div>
                 </div>
                 <div className="budget-goal-inputs">
                   <h3>Will it get you to your goal?</h3>
                   <p className="budget-help">
-                    Enter a target and timeline. We’ll check it against this
-                    same monthly investment, without adding another expense.
+                    Test this same investment against a target. No extra budget
+                    allocation is added.
                   </p>
                   <label className="budget-field">
                     <span>Goal name</span>
@@ -939,7 +920,7 @@ export function BudgetPage() {
                           ),
                         )
                       }
-                      hint="0–11 months, in addition to years. Minimum total: 1 month."
+                      hint="0–11 extra months. Total must be at least 1 month."
                     />
                   </div>
                 </div>
@@ -1001,9 +982,8 @@ export function BudgetPage() {
                               month
                             </strong>
                             <br />
-                            Invest {money(result.goal)} per month in total, with
-                            no annual step-up. This extra amount needs room in
-                            your budget.
+                            Total: {money(result.goal)}/month, with no step-up.
+                            Allow room for the extra in your budget.
                           </p>
                           {result.goalStepUpNeeded !== null &&
                           result.goalStepUpNeeded > 0 ? (
@@ -1014,9 +994,9 @@ export function BudgetPage() {
                                 each year
                               </strong>
                               <br />
-                              Start at {money(result.monthlyInvestment)} per
-                              month; increase after every 12 contributions. This
-                              needs extra future income.
+                              Start at {money(result.monthlyInvestment)}/month.
+                              Increase every 12 months; future income must cover
+                              it.
                               <br />
                               <button
                                 type="button"
@@ -1046,8 +1026,7 @@ export function BudgetPage() {
                   </div>
                 ) : (
                   <p className="budget-help">
-                    Add a goal amount above to see whether this plan reaches it
-                    and how to close any gap.
+                    Add a goal amount to check progress and any gap.
                   </p>
                 )}
                 <details className="budget-stepup-settings">
@@ -1080,10 +1059,6 @@ export function BudgetPage() {
                     possible. A goal is a target for this investment, not a
                     second budget allocation.
                   </p>
-                  <p>
-                    Existing plans start this redesigned forecast at 12%; check
-                    and adjust the assumption to suit your plan.
-                  </p>
                 </details>
               </section>
             </>
@@ -1095,9 +1070,6 @@ export function BudgetPage() {
             >
               <div className="budget-panel-heading">
                 <div>
-                  <p className="budget-eyebrow">
-                    12 MONTHS / ONE CONSISTENT HABIT
-                  </p>
                   <h2 id="budget-outlook-title">
                     What a year could look like.
                   </h2>
@@ -1107,9 +1079,8 @@ export function BudgetPage() {
                 </span>
               </div>
               <p className="budget-help">
-                Explore 12 equal monthly investments starting from zero. The
-                expense plan, bill reserves and cash savings are not part of
-                this investment corpus.
+                Twelve monthly investments, starting from zero. Excludes
+                expenses, bill reserves and cash savings.
               </p>
               <div className="budget-fields">
                 <NumberField
@@ -1214,8 +1185,8 @@ export function BudgetPage() {
                   </table>
                 </div>
               </details>
-              <div className="budget-method">
-                <h3>The assumptions behind the picture</h3>
+              <details className="planner-explanation budget-method">
+                <summary>How the one-year estimate works</summary>
                 <p>
                   Contributions arrive at the end of each month. Monthly return
                   = (1 + annual return)^(1/12) − 1. The first contribution has
@@ -1228,7 +1199,7 @@ export function BudgetPage() {
                   your budget after a bill is paid or a goal is funded.
                   Emergency and goal savings earn no assumed interest here.
                 </p>
-              </div>
+              </details>
             </section>
           )}
           {tab === "actual" && (
@@ -1238,7 +1209,6 @@ export function BudgetPage() {
             >
               <div className="budget-panel-heading">
                 <div>
-                  <p className="budget-eyebrow">A MOMENT TO CHECK IN</p>
                   <h2 id="budget-check-title">The plan meets real life.</h2>
                 </div>
                 <span className="budget-step" aria-hidden="true">
@@ -1246,9 +1216,9 @@ export function BudgetPage() {
                 </span>
               </div>
               <p className="budget-help">
-                Track this month’s expenses against your plan. Leave unrecorded
-                amounts blank; enter 0 to mark no spending. This compares
-                spending only, not investment transfers or savings.
+                Compare spending with your plan. Leave unrecorded amounts blank;
+                use 0 for no spending. Excludes savings and investment
+                transfers.
               </p>
               <div className="budget-actual-summary">
                 <div>
@@ -1265,7 +1235,7 @@ export function BudgetPage() {
               </div>
               <p className="budget-help">
                 {result.recordedCount} of {plan.expenses.length} categories
-                recorded. Totals are incomplete until every category is entered.
+                recorded. Totals are partial until all are entered.
               </p>
               <div className="budget-actual-head">
                 <span>Expense category</span>
@@ -1330,7 +1300,6 @@ export function BudgetPage() {
           aria-label="Live monthly budget summary"
         >
           <section className="budget-summary">
-            <p className="budget-eyebrow">YOUR MONTHLY SNAPSHOT</p>
             <h2>Every bit, accounted for.</h2>
             <div
               className="budget-donut"
@@ -1382,17 +1351,16 @@ export function BudgetPage() {
               </strong>
               <p>
                 {result.income <= 0
-                  ? "Enter your take-home pay and any other income to check your budget. All new plans start with money amounts at zero."
+                  ? "Enter your income to begin. New plans start at zero."
                   : result.remainder < 0
-                    ? "Your plan exceeds your income. Explore a smaller optional spend, a longer goal timeline, or a lower allocation."
+                    ? "Reduce optional spending or allocations to close the gap."
                     : result.remainder > 0
-                      ? "Give this a job: an extra saving, a goal, or a little breathing room."
-                      : "Every part of your income has a purpose, including your cash buffer."}
+                      ? "Put this toward savings, a goal or breathing room."
+                      : "Your income is fully allocated, including cash set aside."}
               </p>
             </div>
           </section>
           <section className="budget-cushion">
-            <p className="budget-eyebrow">YOUR SAFETY NET</p>
             <h3>A cushion for the unexpected.</h3>
             <div className="budget-cushion-value">
               <strong>{money(plan.emergencySaved)}</strong>

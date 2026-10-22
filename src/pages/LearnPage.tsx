@@ -194,10 +194,7 @@ export function LearnPage() {
             <br />
             <em>Made simple.</em>
           </h1>
-          <p>
-            No finance background needed. See what the words mean, move a
-            slider, and watch the idea click.
-          </p>
+          <p>Move a slider. See what changes. Learn one idea at a time.</p>
           <a href="#term-library">
             Looking for a word? Find it below <span aria-hidden="true">↓</span>
           </a>
@@ -210,7 +207,7 @@ export function LearnPage() {
       <section className="learn-playground" aria-labelledby="learn-play-title">
         <div className="learn-section-heading">
           <h2 id="learn-play-title">Five ideas. Try them for yourself.</h2>
-          <p>Start anywhere. There’s no wrong question.</p>
+          <p>Pick a topic. Try it out.</p>
         </div>
         <div
           className="learn-topics"
@@ -434,14 +431,23 @@ export function LearnPage() {
               </p>
             )}
             <p className="learn-microcopy">
-              {topic === "inflation"
-                ? "Prices compound at the entered annual inflation rate."
-                : "Simplified example: annual rate ÷ 12; growth or interest first, deposits and payments at month-end."}{" "}
-              {topic !== "emi" && topic !== "inflation"
-                ? "Returns can be negative. "
-                : ""}
-              Taxes, fees and changing rates are excluded.
+              Illustrative examples
+              {topic === "sip" || topic === "return" || topic === "swp"
+                ? " · Returns can be negative."
+                : "."}
             </p>
+            <details className="planner-explanation">
+              <summary>How this example is calculated</summary>
+              <p className="learn-microcopy">
+                {topic === "inflation"
+                  ? "Prices compound at the entered annual inflation rate."
+                  : "Simplified example: annual rate ÷ 12; growth or interest first, deposits and payments at month-end."}{" "}
+                {topic !== "emi" && topic !== "inflation"
+                  ? "Returns can be negative. "
+                  : ""}
+                Taxes, fees and changing rates are excluded.
+              </p>
+            </details>
           </div>
         </div>
         <div className="learn-check">

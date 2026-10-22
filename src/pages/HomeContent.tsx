@@ -149,9 +149,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               <em>A clearer future.</em>
             </h1>
             <p>
-              A little clarity goes a long way. Bring your budget, investments
-              and retirement into focus with free calculators that put your
-              assumptions in your hands.
+              Free calculators for your budget, investments and life after work.
             </p>
             <div className="welcome-actions">
               <a
@@ -166,7 +164,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               </a>
             </div>
             <p className="welcome-privacy">
-              Calculations stay in your browser. No account needed.
+              Your numbers stay private. No account needed.
             </p>
             <a className="home-learn-link" href={plannerHref("learn")}>
               New to SIP or SWP? Learn the basics →
@@ -177,62 +175,54 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             aria-labelledby="startingPointTitle"
           >
             <h2 id="startingPointTitle">What’s on your mind?</h2>
-            <p>Start with the question you have today.</p>
             <a href={plannerHref("salary-budget")}>
               <span>
-                Make room in my budget
-                <small>Income, spending &amp; savings</small>
+                Organise my salary
+                <small>Budget &amp; savings</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
             <a href={plannerHref("loan-payoff")}>
               <span>
-                Get ahead of my loans
+                Pay off my loans
                 <small>Repay debt or invest the extra</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
             <a href={plannerHref("freedom")}>
               <span>
-                Work towards more freedom
-                <small>Explore when work could be a choice</small>
+                Plan my freedom
+                <small>When could I stop working?</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
-            <div className="starting-point-note">
-              Your numbers. Your assumptions. Your next step.
-            </div>
           </aside>
         </div>
         <PlannerDirectory />
         <FinancialPlanningGuide />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
-          <h2 id="planningQuestions">A few things worth knowing.</h2>
+          <h2 id="planningQuestions">Questions, answered.</h2>
           <details>
             <summary>Is this an AI financial planner?</summary>
             <p>
-              Financial AI Planner uses financial formulas and the assumptions
-              you enter. These tools do not use generative AI or predict market
-              prices. Your results are calculated scenarios, with methods and
-              detailed schedules you can review.
+              These tools use financial formulas and your assumptions. They do
+              not use generative AI or predict market prices. Review the
+              calculations and schedules behind your results.
             </p>
           </details>
           <details>
             <summary>How can I explore a different financial future?</summary>
             <p>
-              Change your monthly investment, expected return, inflation or
-              future expenses. Compare the resulting projections to see how each
-              assumption affects your plan.
+              Change your investment, expected return, inflation or expenses.
+              The charts show how your assumptions affect the result.
             </p>
           </details>
           <details>
             <summary>Can I keep my plan and return later?</summary>
             <p>
-              Some planners keep a browser copy when storage is available. The
-              salary planner starts at zero on each visit; use Import report to
-              restore it. Download an original HTML report or JSON plan to keep
-              a portable copy, then import it into the matching calculator to
-              continue editing.
+              Download your report, then use Import report in the same planner
+              to continue later. The salary planner starts at zero on every
+              visit; other planners may restore a browser copy.
             </p>
           </details>
         </section>
@@ -257,19 +247,22 @@ export function HomeContent({ active = true }: { active?: boolean }) {
           <div>
             <strong>Your financial plan stays in your browser.</strong>
             <p>
-              We don’t store your calculator entries on our servers. Your plan
-              may be saved in this browser only. <b>Download report</b> to keep
-              your own copy, then use <b>Import report</b> to continue
-              later—even on another device.
+              We don’t store your calculator entries on our servers. Use{" "}
+              <b>Download report</b> to keep your own copy.
             </p>
-            <small>
-              Clearing browser data can remove your saved plan. Keep the
-              original report file as your backup.
-            </small>
+            <details className="home-backup-help">
+              <summary>How to save and restore a plan</summary>
+              <p>
+                Keep the original report file, then use <b>Import report</b> in
+                the same planner—even on another device. Clearing browser data
+                can remove browser copies. The salary planner starts at zero
+                until you import a report.
+              </p>
+            </details>
           </div>
         </aside>
         <p className="welcome-foot">
-          Private by design. Calculations run in your browser. No sign-up.
+          Educational tools. Your assumptions, your decisions.
         </p>
       </section>
       {vlogsOpen && (

@@ -129,7 +129,7 @@ test("available money forecasts a goal once and previews an affordable starting 
   const result = page.getByTestId("goal-projected-balance");
   const verdict = page.getByTestId("goal-verdict");
   await expect(verdict).toContainText("Add ₹4,521 more each month");
-  await expect(verdict).toContainText("Invest ₹20,521 per month in total");
+  await expect(verdict).toContainText("Total: ₹20,521/month");
   await expect(page.getByTestId("budget-remainder")).toHaveText("₹0");
   const withReturn = await result.textContent();
   await page
@@ -285,7 +285,7 @@ test("recurring bills reserve for the next payment and retain frequency", async 
     .fill("1");
   await bill.getByLabel("Already reserved", { exact: true }).fill("1000");
   await expect(bill.locator(".budget-bill-total strong")).toHaveText("₹5,000");
-  await expect(bill).toContainText("After that, budget ₹2,000 per month");
+  await expect(bill).toContainText("After the next payment: ₹2,000 per month");
   await reopenWithReport(page);
   await expect(
     bill.getByLabel("Payment frequency", { exact: true }),

@@ -13,10 +13,9 @@ export const BucketPage = memo(function BucketPage() {
         <PlannerHeader kind="bucket" />
         <div className="bucket-workspace">
           <section className="card setup-card" aria-labelledby="setupTitle">
-            <p className="eyebrow">01 / YOUR RETIREMENT STARTS HERE</p>
             <h2 id="setupTitle">Set your starting point</h2>
             <p className="helper">
-              Start withdrawals now. No new investments are added in this plan.
+              Spend from your existing savings. No new investments are added.
             </p>
             <form id="bucketForm" noValidate>
               <div className="fields">
@@ -197,8 +196,8 @@ export const BucketPage = memo(function BucketPage() {
                 Build my bucket plan <span aria-hidden="true">↗</span>
               </button>
               <p className="helper">
-                Your plan saves in this browser under its own storage key.
-                Changing currency changes units without converting amounts.
+                Saved in this browser. Changing currency does not convert
+                amounts.
               </p>
             </form>
             <p id="bucketError" className="error" role="alert"></p>
@@ -209,7 +208,6 @@ export const BucketPage = memo(function BucketPage() {
           >
             <div className="allocation-heading">
               <div>
-                <p className="eyebrow">02 / THE MONEY MAP</p>
                 <h2 id="allocationTitle">Your buckets through time</h2>
               </div>
               <span className="pill">5-year spending buffer</span>
@@ -226,7 +224,6 @@ export const BucketPage = memo(function BucketPage() {
             >
               <div className="navigator-top">
                 <div>
-                  <p className="eyebrow">EXPLORE A MONTH</p>
                   <h3 id="navigatorTitle">
                     Watch withdrawals and refills happen
                   </h3>
@@ -299,7 +296,6 @@ export const BucketPage = memo(function BucketPage() {
             >
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">BUCKET 02 · EXTRA SPENDING</p>
                   <h3 id="extraWithdrawalTitle">Extra withdrawal</h3>
                 </div>
                 <button
@@ -311,8 +307,8 @@ export const BucketPage = memo(function BucketPage() {
                 </button>
               </div>
               <p className="helper">
-                A one-off payment from your emergency bucket. Your regular
-                monthly SWP stays the same.
+                A one-off emergency payment. Regular monthly withdrawals stay
+                the same.
               </p>
               <form id="extraWithdrawalForm" noValidate>
                 <div className="fields">
@@ -378,7 +374,6 @@ export const BucketPage = memo(function BucketPage() {
             >
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">BUCKET TRANSACTION HISTORY</p>
                   <h3 id="bucketHistoryTitle">Bucket history</h3>
                 </div>
                 <button
@@ -427,12 +422,15 @@ export const BucketPage = memo(function BucketPage() {
                   </button>
                 </div>
               </div>
-              <p className="helper">
-                Opening + refills in − refills out − withdrawals + market change
-                + year-end return = closing. Returns are credited every 12 plan
-                months; scheduled refills happen at the start of the next review
-                period. Select a period to inspect its playback movements below.
-              </p>
+              <details className="planner-explanation">
+                <summary>How to read these balances</summary>
+                <p>
+                  Opening + refills in − refills out − withdrawals + market
+                  change + year-end return = closing. Returns are credited
+                  every 12 plan months; scheduled refills start the next review
+                  period. Select a period to inspect its movements below.
+                </p>
+              </details>
               <p
                 id="bucketHistoryStatus"
                 className="helper"
@@ -462,8 +460,7 @@ export const BucketPage = memo(function BucketPage() {
               </div>
               <h4 id="bucketHistoryDetailTitle">Playback movements</h4>
               <p className="helper">
-                This follows the selected month and step as you play. Amounts
-                show this bucket only.
+                Movements for this bucket at the selected playback step.
               </p>
               <div
                 className="table-wrap"
@@ -501,8 +498,7 @@ export const BucketPage = memo(function BucketPage() {
                 </button>
               </div>
               <p className="refill-intro">
-                Your long-term bucket tops up living costs and your emergency
-                reserve at each scheduled review.
+                Long-term savings refill the other two buckets at each review.
               </p>
               <div className="refill-visual-meta">
                 <span id="refillRule" className="pill"></span>
@@ -536,7 +532,6 @@ export const BucketPage = memo(function BucketPage() {
             <section className="rolling-reserve" aria-labelledby="rollingTitle">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">THE FIVE-YEAR WINDOW MOVES WITH YOU</p>
                   <h3 id="rollingTitle">What do the next 5 years cost?</h3>
                 </div>
               </div>
@@ -575,12 +570,11 @@ export const BucketPage = memo(function BucketPage() {
                 </div>
               </details>
             </section>
-            <details className="month-ledger" open>
+            <details className="month-ledger">
               <summary>Money movements in the selected month</summary>
               <p className="helper">
-                Opening and closing rows are balances. The other rows show money
-                moving in or out. A refill adds to one bucket and subtracts the
-                same amount from Bucket 3.
+                Refills move money from Bucket 3; they do not add new money.
+                Opening and closing rows show balances.
               </p>
               <div
                 className="table-wrap"
@@ -614,13 +608,10 @@ export const BucketPage = memo(function BucketPage() {
         >
           <div className="section-heading">
             <div>
-              <p className="eyebrow">
-                03 / LIFE DOES NOT FOLLOW A STRAIGHT LINE
-              </p>
               <h2 id="emergencyTitle">Plan a medical or one-off expense</h2>
               <p className="helper">
-                Optional. Paid from Bucket 2, with the option to replenish from
-                Bucket 3 immediately or at the next scheduled review.
+                Optional. Paid from emergency savings; choose when long-term
+                savings refill it.
               </p>
             </div>
             <span className="pill">Separate from monthly spending</span>
@@ -697,7 +688,6 @@ export const BucketPage = memo(function BucketPage() {
         <section className="card projection-section">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">04 / WATCH THE BUCKETS WORK</p>
               <h2>Three buckets, one retirement timeline</h2>
             </div>
             <span className="pill">Projected future values</span>
@@ -709,15 +699,13 @@ export const BucketPage = memo(function BucketPage() {
           </div>
           <div id="bucketChart"></div>
           <p className="helper">
-            Hover, tap or use arrow keys for exact amounts. The chart stacks the
-            three bucket balances; refilling moves money between buckets and
-            does not create a return.
+            Hover, tap or use arrow keys for amounts. Refills move money between
+            buckets; they are not returns.
           </p>
         </section>
         <section className="card">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">05 / EVERY WITHDRAWAL, EVERY REFILL</p>
               <h2>Follow your money</h2>
             </div>
             <div
@@ -734,8 +722,8 @@ export const BucketPage = memo(function BucketPage() {
             </div>
           </div>
           <p className="helper">
-            Balances are after that period’s withdrawals, transfers and returns.
-            Unfunded amounts remain unpaid; they do not create debt.
+            End-of-period balances. Unfunded costs remain unpaid; they do not
+            create debt.
           </p>
           <div
             className="table-wrap"

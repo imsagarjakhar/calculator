@@ -29,13 +29,11 @@ export const FreedomPage = memo(function FreedomPage() {
         <PlannerNavigation />
         <PlannerHeader kind="freedom" />
         <p className="freedom-intro">
-          See what your future savings could provide each month, or enter a
-          monthly spending goal to estimate when it could be funded. Explore
-          your assumptions before making a decision about stopping work.
+          Choose a monthly income or a withdrawal rate. See what your savings
+          could support.
         </p>
         <div className="freedom-layout">
           <section className="card">
-            <p className="eyebrow">01 / WHERE YOU ARE TODAY</p>
             <h2>Your starting point</h2>
             <form id="freedomForm" noValidate>
               <div className="fields">
@@ -58,9 +56,9 @@ export const FreedomPage = memo(function FreedomPage() {
                       Monthly investment (<span className="f-code">INR</span>)
                     </label>
                     <FieldInfo name="monthly investment" id="investmentHelp">
-                      Your planned SIP or retirement investment, separate from
-                      living expenses. Enter 0 if you won’t add new investments.
-                      Future step-ups need to be funded from your income.
+                      Money you plan to invest each month, after living costs.
+                      Enter 0 for no new investments. Future increases need to
+                      come from your income.
                     </FieldInfo>
                   </div>
                   <input
@@ -101,8 +99,7 @@ export const FreedomPage = memo(function FreedomPage() {
                   Have a future one-off cost? Add it below ↓
                 </a>
               </p>
-              <p className="eyebrow freedom-step">02 / THE LIFE YOU WANT</p>
-              <h2>Your freedom goal</h2>
+              <h2 className="freedom-step">Your freedom goal</h2>
               <input id="f-incomeMode" type="hidden" defaultValue="corpus" />
               <div
                 className="freedom-goal-switch"
@@ -146,7 +143,6 @@ export const FreedomPage = memo(function FreedomPage() {
               >
                 <div className="freedom-withdrawal-heading">
                   <div>
-                    <p className="eyebrow">YOUR CORPUS → YOUR INCOME</p>
                     <h3 id="withdrawalTitle">Choose your annual withdrawal</h3>
                   </div>
                   <output id="withdrawalRateValue" htmlFor="f-withdrawalRate">
@@ -170,8 +166,7 @@ export const FreedomPage = memo(function FreedomPage() {
                   <span>6% · Higher withdrawals</span>
                 </div>
                 <p id="withdrawalHelp" className="helper">
-                  Annual percentage of your projected corpus, paid monthly.
-                  Default: 3%.
+                  A share of your projected savings, paid monthly.
                 </p>
                 <div
                   id="withdrawalPreview"
@@ -204,8 +199,7 @@ export const FreedomPage = memo(function FreedomPage() {
                   </label>
                 </div>
                 <p className="helper">
-                  Include your expected living costs. We adjust this amount for
-                  inflation.
+                  Include living costs. We adjust for inflation.
                 </p>
                 <div
                   id="spendingRatePreview"
@@ -214,7 +208,7 @@ export const FreedomPage = memo(function FreedomPage() {
                 />
               </div>
               <section className="freedom-simple-assumptions">
-                <h3>Play with just three assumptions</h3>
+                <h3>Your assumptions</h3>
                 <div className="fields">
                   <label htmlFor="f-investmentGrowth">
                     Yearly investment step-up (%)
@@ -227,8 +221,7 @@ export const FreedomPage = memo(function FreedomPage() {
                       required
                     />
                     <span className="helper">
-                      Yearly increase to your monthly investment. 0% keeps it
-                      fixed.
+                      Increase your investment each year. 0% keeps it fixed.
                     </span>
                   </label>
                   <label htmlFor="f-inflation">
@@ -273,14 +266,11 @@ export const FreedomPage = memo(function FreedomPage() {
                   monthly interest payments.
                 </FieldInfo>
               </section>
-              <section
-                className="investment-schedule"
-                aria-labelledby="investmentScheduleTitle"
-              >
+              <details className="investment-schedule planner-explanation">
+                <summary id="investmentScheduleTitle">
+                  See your investment schedule
+                </summary>
                 <div className="investment-schedule-heading">
-                  <h3 id="investmentScheduleTitle">
-                    Your monthly investment over time
-                  </h3>
                   <div
                     className="investment-view"
                     role="group"
@@ -325,13 +315,12 @@ export const FreedomPage = memo(function FreedomPage() {
                   </table>
                 </div>
                 <p id="investmentScheduleTotal" className="helper"></p>
-              </section>
+              </details>
               <details className="freedom-assumptions">
                 <summary>Optional budget check and extra settings</summary>
                 <p className="helper">
-                  Salary and expenses check today’s affordability only. The
-                  projection uses your entered SIP and step-up, assuming future
-                  contributions are funded; it does not forecast your salary.
+                  Check whether today’s income covers your investment. Future
+                  salary is not forecast; you must fund the planned step-ups.
                 </p>
                 <div className="fields">
                   <label htmlFor="f-salary">
@@ -399,8 +388,7 @@ export const FreedomPage = memo(function FreedomPage() {
                       defaultValue="0"
                     />
                     <small id="bufferHint" className="helper">
-                      Adds extra savings to your calculated target. Keep 0% for
-                      no extra cushion; 10% adds 10% to the target.
+                      0% adds no cushion; 10% raises your target by 10%.
                     </small>
                   </label>
                 </div>
@@ -430,7 +418,6 @@ export const FreedomPage = memo(function FreedomPage() {
             className="card freedom-result"
             aria-labelledby="freedomResultTitle"
           >
-            <p className="eyebrow">03 / YOUR POSSIBLE NEXT CHAPTER</p>
             <h2 id="freedomResultTitle">Your financial freedom estimate</h2>
             <div id="freedomOutput" aria-live="polite"></div>
             <details className="freedom-extra">
@@ -449,26 +436,27 @@ export const FreedomPage = memo(function FreedomPage() {
         </div>
         <section id="freedomEvents"></section>
         <section className="card">
-          <p className="eyebrow">04 / YOUR PATH TO FREEDOM</p>
           <h2>Your investments and monthly-income goal</h2>
           <div id="freedomChart"></div>
         </section>
         <section className="card">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">05 / SEE THE NUMBERS</p>
               <h2>Year-by-year plan</h2>
             </div>
             <button id="freedomCsv" type="button">
               Download monthly CSV
             </button>
           </div>
-          <p className="helper">
-            New investments stop after the estimated freedom month; withdrawals
-            for living costs begin the following month. If freedom is not
-            reached, the planned investments continue through the search
-            horizon. Mixed years can contain both working and retired months.
-          </p>
+          <details className="planner-explanation">
+            <summary>How to read this table</summary>
+            <p>
+              Investments stop after your estimated freedom month. Living-cost
+              withdrawals start the next month. If freedom is not reached,
+              investments continue to the search end age. A transition year can
+              include both working and retired months.
+            </p>
+          </details>
           <div
             className="table-wrap"
             tabIndex={0}
