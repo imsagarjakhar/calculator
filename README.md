@@ -24,10 +24,12 @@ GitHub-hosted Ubuntu. If more runners receive the same labels, any matching
 runner can receive these jobs.
 
 Keep the runner online while a workflow runs. Its service account needs Git for
-Windows, Bash and GNU tar on `PATH`, and network access to GitHub, npm and the
+Windows and network access to GitHub, npm and the
 Playwright browser downloads. The workflow installs Node 22 and Chromium, then
 runs the existing tests and production build before uploading `dist/`. The
-Windows preparation step puts GNU tar first on `PATH` for the Pages archive.
+Windows preparation step locates Git through its executable and standard install
+directories, then puts its paired Bash and GNU tar first on `PATH` for the Pages
+archive. Git's `usr\bin` does not have to be on the service account's initial PATH.
 Restart the runner service after changing its environment, and keep the Actions
 runner software updated for the pinned actions.
 
