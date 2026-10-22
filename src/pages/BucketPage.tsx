@@ -489,10 +489,7 @@ export const BucketPage = memo(function BucketPage() {
             >
               <div className="refill-visual-header">
                 <div>
-                  <p className="eyebrow">HOW YOUR REFILL WORKS</p>
-                  <h3 id="refillVisualTitle">
-                    One source. Two topped-up buckets.
-                  </h3>
+                  <h3 id="refillVisualTitle">How your next refill works.</h3>
                 </div>
                 <button
                   id="refillMotion"
@@ -503,6 +500,10 @@ export const BucketPage = memo(function BucketPage() {
                   Ⅱ Pause animation
                 </button>
               </div>
+              <p className="refill-intro">
+                Your long-term bucket tops up living costs and your emergency
+                reserve at each scheduled review.
+              </p>
               <div className="refill-visual-meta">
                 <span id="refillRule" className="pill"></span>
                 <span className="pill">Fixed schedule</span>
@@ -835,8 +836,8 @@ export const BucketPage = memo(function BucketPage() {
           </p>
         </details>
         <footer>
-          Financial AI Planner retirement lab · Independent prototype · No changes to
-          your other plans
+          Financial AI Planner retirement lab · Independent prototype · No
+          changes to your other plans
         </footer>
       </main>
     </div>
