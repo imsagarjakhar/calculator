@@ -41,6 +41,43 @@ apply. The separate optional Cloudflare vlog API workflow remains on Ubuntu.
 
 The homepage also supports runtime vlogs stored as files in `imsagarjakhar/vlog`. A separate Cloudflare Worker authenticates the publisher and writes posts using server-side secrets. **Never embed a GitHub token in the website build.** Follow the [one-time runtime vlog setup](MIGRATION.md#runtime-vlogs-one-time-setup); posts require no website deployment after setup.
 
+### Private blog repository migration
+
+Keep `imsagarjakhar/vlog` public until both deployments below are verified.
+
+1. Verify the existing `GH_VLOG_TOKEN` has **Contents: Read and write** access to
+   that repository, including access after it becomes private. It stays in the
+   GitHub Actions/Worker secrets; never put it in a `VITE_*` variable.
+2. In the calculator repository's **Settings → Secrets and variables → Actions**,
+   verify `VLOG_API_ENABLED=true`, `VLOG_API_ORIGIN` is the existing Worker HTTPS
+   origin, and `PAGES_DEPLOY_BRANCH` selects the branch containing this change
+   (default: `main`). Preserve the existing Cloudflare and publisher secrets.
+3. Push these changes to the deployment branch. Run **Deploy vlog publishing API**
+   and wait for success. Its new read routes are `GET /public/posts` and
+   `GET /public/posts/<id>`; mutation routes still require a publisher session.
+4. After the Worker succeeds, run **Test and deploy planners** on the same branch.
+   The site workflow checks the live Worker's health and public feed before
+   uploading the new site. If the Worker is not ready, it stops the website
+   deployment; run the site workflow again after the Worker succeeds. `VLOG_API_ORIGIN`
+   becomes `VITE_VLOG_API_ORIGIN` during the site build.
+5. On the live website, log out and open the blog in an incognito window. In the
+   browser Network panel, confirm the feed and article requests go to the Worker's
+   `/public/posts` routes, return 200, and no blog reads go to `api.github.com` or
+   `raw.githubusercontent.com`. Check publishing, editing and deletion while
+   logged in, using a temporary test article.
+6. Only after those checks, open **imsagarjakhar/vlog → Settings → General →
+   Danger Zone → Change repository visibility → Private**. This changes the
+   content repository, not the calculator website repository.
+7. Repeat the logged-out reading and publisher checks. The website's published
+   articles remain public; direct unauthenticated repository access does not.
+
+The Worker reads the index and each article from one Git commit, exposes only
+articles listed in `vlogs/index.json`, and returns validated article fields.
+It does not expose arbitrary files, history or the repository token. The site
+does not fall back to public GitHub when a configured Worker fails. Builds with
+no API origin retain the original public-repository reader for local previews;
+such builds must not be deployed after the repository becomes private.
+
 ## Repository layout
 
 The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It compares highest-interest-first, smallest-balance-first, investing and a configurable split, with a shared monthly commitment and horizon. It supports multiple fixed-rate loans, prepayment fees/lock-ins, explicit tax assumptions, return sensitivity, salary-budget import and an exportable/restorable plan. Method references and assumptions are linked in the page. Run `npm run test:loans` for the model tests.

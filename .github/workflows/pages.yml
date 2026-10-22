@@ -41,6 +41,9 @@ jobs:
         if: runner.os == 'Windows'
         run: npx playwright install chromium --no-shell
       - run: npm run test:e2e
+      - name: Verify private blog reader is deployed
+        if: env.VITE_VLOG_API_ORIGIN != '' && github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', vars.PAGES_DEPLOY_BRANCH || 'main')
+        run: node scripts/check-blog-api.cjs
       - name: Upload production site
         if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', vars.PAGES_DEPLOY_BRANCH || 'main')
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

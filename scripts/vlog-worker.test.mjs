@@ -83,15 +83,24 @@ function githubFixture({ conflict = false, loseReply = false } = {}) {
   const fetch = async (input, options) => {
     // Workerd rejects this browser-only RequestInit property before sending HTTP.
     if (Object.hasOwn(options, "credentials"))
-      throw new Error("The 'credentials' field on 'RequestInitializerDict' is not implemented.");
+      throw new Error(
+        "The 'credentials' field on 'RequestInitializerDict' is not implemented.",
+      );
     if (options.redirect !== "follow" && options.redirect !== "manual")
-      throw new TypeError('Invalid redirect value, must be one of "follow" or "manual"');
+      throw new TypeError(
+        'Invalid redirect value, must be one of "follow" or "manual"',
+      );
     const url = new URL(input);
     assert.equal(url.origin, "https://api.github.com");
     assert.equal(options.headers.Authorization, "Bearer " + githubToken);
     const path = url.pathname.replace("/repos/imsagarjakhar/vlog", "");
     const body = options.body ? JSON.parse(options.body) : null;
-    requests.push({ path, method: options.method, body });
+    requests.push({
+      path,
+      method: options.method,
+      body,
+      ref: url.searchParams.get("ref"),
+    });
     if (path === "/git/ref/heads/main") return reply({ object: { sha: head } });
     if (path.startsWith("/git/commits/") && options.method === "GET")
       return reply({ tree: { sha: "b".repeat(40) } });
@@ -132,6 +141,114 @@ function githubFixture({ conflict = false, loseReply = false } = {}) {
   };
   return { requests, fetch, files: () => files };
 }
+
+test("private repository readers expose only indexed published content without credentials", async () => {
+  const github = githubFixture();
+  const post = {
+    ...draft,
+    id: postId,
+    author: "imsagarjakhar",
+    createdAt: "2026-10-21T10:00:00.000Z",
+    updatedAt: "2026-10-21T10:00:00.000Z",
+  };
+  const { body, ...summary } = post;
+  github.files().set(
+    "vlogs/index.json",
+    JSON.stringify({
+      version: 1,
+      posts: [{ ...summary, internalSecret: "never-send-this" }],
+    }),
+  );
+  github.files().set(
+    `vlogs/posts/${postId}.json`,
+    JSON.stringify({
+      ...post,
+      internalSecret: "never-send-this",
+    }),
+  );
+  const hiddenId = "22222222-2222-4222-8222-222222222222";
+  github.files().set(
+    `vlogs/posts/${hiddenId}.json`,
+    JSON.stringify({
+      ...post,
+      id: hiddenId,
+      body: "unlisted repository file",
+    }),
+  );
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = github.fetch;
+  try {
+    const response = await call("/public/posts", env());
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), origin);
+    assert.deepEqual(await response.json(), { version: 1, posts: [summary] });
+    const article = await call(`/public/posts/${postId}`, env());
+    assert.equal(article.status, 200);
+    const text = await article.text();
+    assert.deepEqual(JSON.parse(text), post);
+    for (const secret of [githubToken, password, "never-send-this"]) {
+      assert.equal(text.includes(secret), false);
+      assert.equal(
+        JSON.stringify([...article.headers]).includes(secret),
+        false,
+      );
+    }
+    assert.equal((await call(`/public/posts/${hiddenId}`, env())).status, 404);
+    assert.equal(
+      github.requests.some((r) => r.path.includes(hiddenId)),
+      false,
+    );
+    for (const path of [
+      "/public/posts/not-an-id",
+      "/public/files/README.md",
+      "/public/posts/../secrets",
+    ]) {
+      assert.equal((await call(path, env())).status, 404);
+    }
+    assert.equal((await call("/public/posts", env(), { draft })).status, 401);
+    assert.equal((await call(`/posts/${postId}`, env())).status, 401);
+    assert.equal(
+      (
+        await call(
+          "/public/posts",
+          env(),
+          undefined,
+          undefined,
+          "GET",
+          "https://other.example",
+        )
+      ).status,
+      403,
+    );
+    assert.ok(github.requests.every((r) => r.method === "GET"));
+    assert.ok(
+      github.requests
+        .filter((r) => r.path.startsWith("/contents/"))
+        .every((r) => r.ref === "a".repeat(40)),
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("public readers fail visibly without leaking private repository details or tokens", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response("private repository detail", { status: 403 });
+  try {
+    const response = await call("/public/posts", env());
+    assert.equal(response.status, 502);
+    assert.deepEqual(await response.json(), {
+      error: "Blog content is unavailable right now. Please try again later.",
+    });
+    assert.equal(
+      (await call("/public/posts", { ...env(), GH_VLOG_TOKEN: "" })).status,
+      503,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
 
 test("publisher rejects unknown origins, unauthenticated writes and incomplete secrets", async () => {
   const bindings = env();
@@ -305,7 +422,10 @@ test("publisher rejects GitHub redirects without forwarding credentials or writi
         session.token,
       );
       assert.equal(response.status, 502);
-      assert.match((await response.json()).error, /redirected.*draft is still here/);
+      assert.match(
+        (await response.json()).error,
+        /redirected.*draft is still here/,
+      );
       assert.equal(requests.length, 1);
       assert.equal(new URL(requests[0].input).origin, "https://api.github.com");
       assert.equal(requests[0].options.method, "GET");
@@ -402,4 +522,48 @@ test("publisher bounds input and rejects unsafe video URLs before writing", asyn
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("deployment gate accepts working public reads and rejects old or inaccessible Workers", async () => {
+  const { createRequire } = await import("node:module");
+  const { checkBlogApi } = createRequire(import.meta.url)(
+    "./check-blog-api.cjs",
+  );
+  const responses =
+    (ready, feedStatus = 200) =>
+    async (url, options) => {
+      assert.equal(options.headers.Origin, origin);
+      assert.equal(options.headers.Authorization, undefined);
+      return url.endsWith("/health")
+        ? new Response(JSON.stringify(ready), { status: 200 })
+        : new Response(JSON.stringify({ version: 1, posts: [] }), {
+            status: feedStatus,
+          });
+    };
+  const api = "https://test.example";
+  await checkBlogApi(api, {
+    attempts: 1,
+    fetch: responses({ ready: true, publicRead: true }),
+  });
+  await assert.rejects(
+    checkBlogApi(api, { attempts: 1, fetch: responses({ ready: true }) }),
+    /not ready/,
+  );
+  await assert.rejects(
+    checkBlogApi(api, {
+      attempts: 1,
+      fetch: responses({ ready: true, publicRead: true }, 502),
+    }),
+    /not ready/,
+  );
+  let calls = 0;
+  await checkBlogApi(api, {
+    attempts: 2,
+    wait: async () => {},
+    fetch: async (...args) => {
+      if (++calls === 1) throw new Error("Worker still deploying");
+      return responses({ ready: true, publicRead: true })(...args);
+    },
+  });
+  assert.equal(calls, 3);
 });

@@ -1,12 +1,13 @@
 import {
   loadVlog as readPublicVlog,
+  loadFeed as readPublicFeed,
   parseVlog,
   parseFeed,
   type Vlog,
   type VlogDraft,
   type VlogSummary,
 } from "./repository";
-export { loadFeed, repository } from "./repository";
+export { repository } from "./repository";
 export type { Vlog, VlogDraft, VlogSummary } from "./repository";
 export type EditorSession = {
   username: string;
@@ -15,6 +16,11 @@ export type EditorSession = {
 };
 const origin = import.meta.env.VITE_VLOG_API_ORIGIN || "";
 export const publisherConfigured = Boolean(origin);
+
+export async function loadFeed(fresh = false) {
+  if (!origin) return readPublicFeed(fresh);
+  return parseFeed(await request("/public/posts", "GET"));
+}
 
 async function request(
   path: string,
@@ -41,7 +47,9 @@ async function request(
     });
   } catch {
     throw new Error(
-      "Could not reach the publishing service. Your draft is still in this tab; try again.",
+      path.startsWith("/public/")
+        ? "Could not load the blogs. Check your connection and try again."
+        : "Could not reach the publishing service. Your draft is still in this tab; try again.",
     );
   }
   const result = await response.json().catch(() => ({}));
@@ -77,9 +85,13 @@ export async function loadVlog(
   post: VlogSummary,
   session?: EditorSession,
 ): Promise<Vlog> {
-  if (!session) return readPublicVlog(post);
+  if (!session && !origin) return readPublicVlog(post);
   return parseVlog(
-    await request(`/posts/${encodeURIComponent(post.id)}`, "GET", session),
+    await request(
+      `${session ? "" : "/public"}/posts/${encodeURIComponent(post.id)}`,
+      "GET",
+      session,
+    ),
     post.id,
   );
 }

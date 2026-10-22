@@ -273,6 +273,25 @@ async function snapshot(session: EditorSession) {
     data: feed(await content(indexFile, head, session, true)),
   };
 }
+// Server-only readers: the index is the allow-list of published articles.
+// Pin index and article reads to the same commit so edits cannot race them.
+export async function loadPublishedFeed(
+  session: EditorSession,
+): Promise<VlogFeed> {
+  return (await snapshot(session)).data;
+}
+export async function loadPublishedVlog(
+  id: string,
+  session: EditorSession,
+): Promise<Vlog | null> {
+  if (!idPattern.test(id)) return null;
+  const state = await snapshot(session);
+  if (!state.data.posts.some((post) => post.id === id)) return null;
+  return parseVlog(
+    await content(`vlogs/posts/${id}.json`, state.head, session),
+    id,
+  );
+}
 async function commitChanges(
   session: EditorSession,
   state: Awaited<ReturnType<typeof snapshot>>,

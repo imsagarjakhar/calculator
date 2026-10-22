@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./test";
 import { readFile } from "node:fs/promises";
 const base = process.env.VITE_BASE_PATH || "/";
 for (const item of [

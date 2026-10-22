@@ -56,15 +56,16 @@ for (const page of [
     "growth/index.html",
     "survival/index.html",
   ].includes(page);
+  const blogOrigin = vlogApiOrigin();
   const connections = hasVlogs
-    ? [
-        "'self'",
-        "https://api.github.com",
-        "https://raw.githubusercontent.com",
-        vlogApiOrigin(),
-      ]
-        .filter(Boolean)
-        .join(" ")
+    ? (blogOrigin
+        ? ["'self'", blogOrigin]
+        : [
+            "'self'",
+            "https://api.github.com",
+            "https://raw.githubusercontent.com",
+          ]
+      ).join(" ")
     : "'none'";
   const policy =
     "default-src 'none'; script-src 'self' " +

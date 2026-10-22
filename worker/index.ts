@@ -1,5 +1,7 @@
 import {
   deleteVlog,
+  loadPublishedFeed,
+  loadPublishedVlog,
   loadVlog,
   publishVlog,
   type EditorSession,
@@ -186,7 +188,33 @@ export default {
     try {
       const path = new URL(request.url).pathname;
       if (request.method === "GET" && path === "/health")
-        return respond({ ready: true });
+        return respond({ ready: true, publicRead: true });
+      if (request.method === "GET" && path.startsWith("/public/")) {
+        const reader = {
+          username: env.ADMIN_USERNAME,
+          token: env.GH_VLOG_TOKEN,
+        };
+        try {
+          if (path === "/public/posts")
+            return respond(await loadPublishedFeed(reader));
+          const article = path.match(/^\/public\/posts\/([a-f0-9-]{36})$/);
+          if (article) {
+            const post = await loadPublishedVlog(article[1], reader);
+            return post
+              ? respond(post)
+              : respond({ error: "This blog is no longer available." }, 404);
+          }
+          return respond({ error: "This endpoint does not exist." }, 404);
+        } catch {
+          return respond(
+            {
+              error:
+                "Blog content is unavailable right now. Please try again later.",
+            },
+            502,
+          );
+        }
+      }
       if (request.method === "POST" && path === "/login") {
         const limited = await env.LOGIN_LIMITER.limit({
           key:

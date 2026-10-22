@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./test";
 const base = process.env.VITE_BASE_PATH || "/";
 test("all pages use neutral branding while the domain remains unchanged", async ({
   page,
@@ -84,7 +84,9 @@ test("all calculator headers share branding, typography, colours and page spacin
     await expect(
       page.locator(".planner-navigation:visible .planner-site-name"),
     ).toHaveText("Financial AI Planner");
-    await expect(page.locator(".planner-navigation:visible .planner-site-name")).toBeVisible();
+    await expect(
+      page.locator(".planner-navigation:visible .planner-site-name"),
+    ).toBeVisible();
     const appearance = await header.evaluate((el) => {
       const css = (selector: string, properties: string[]) => {
         const style = getComputedStyle(el.querySelector(selector)!);

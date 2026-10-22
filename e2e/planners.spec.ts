@@ -1,4 +1,4 @@
-import { test as base, expect, type Page } from "@playwright/test";
+import { test as base, expect, type Page } from "./test";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 
@@ -616,7 +616,9 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     );
     expect(html).toContain(
       path === "/index.html"
-        ? "connect-src 'self' https://api.github.com https://raw.githubusercontent.com"
+        ? process.env.VITE_VLOG_API_ORIGIN
+          ? `connect-src 'self' ${process.env.VITE_VLOG_API_ORIGIN}`
+          : "connect-src 'self' https://api.github.com https://raw.githubusercontent.com"
         : "connect-src 'none'",
     );
     expect(html).not.toContain("'unsafe-eval'");

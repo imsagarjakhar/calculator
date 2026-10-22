@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./test";
 const base = process.env.VITE_BASE_PATH || "/";
 test("salary planner opens from homepage, saves a budget and projects twelve deposits", async ({
   page,

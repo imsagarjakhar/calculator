@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./test";
 import type { Vlog } from "../src/vlogs/repository";
 const app = process.env.VITE_BASE_PATH || "/";
 const apiOrigin = process.env.VITE_VLOG_API_ORIGIN || "";
@@ -68,6 +68,19 @@ test("blogs are loaded at runtime, searchable and readable without login", async
       },
     }),
   );
+  if (apiOrigin) {
+    await context.route(apiOrigin + "/public/**", (route) => {
+      expect(route.request().headers().authorization).toBeUndefined();
+      const path = new URL(route.request().url()).pathname;
+      return route.fulfill({
+        headers: { "Access-Control-Allow-Origin": "*" },
+        json:
+          path === "/public/posts"
+            ? { version: 1, posts: posts.map(metadata) }
+            : posts.find((post) => path.endsWith(post.id)),
+      });
+    });
+  }
   await page.goto(app);
   await expect(
     page.getByRole("button", { name: "Login", exact: false }),
@@ -154,18 +167,31 @@ test("mailbox ignores stale article responses and lets readers retry a failed lo
   });
   let first = true;
   let fail = false;
-  await context.route(raw + "**", async (route) => {
-    const post = posts.find((p) => route.request().url().includes(p.id));
-    if (post?.id === posts[1].id && first) {
-      first = false;
-      began();
-      await blocked;
-    }
-    return route.fulfill({
-      status: fail && post?.id === posts[1].id ? 503 : 200,
-      json: post,
-    });
-  });
+  await context.route(
+    apiOrigin ? apiOrigin + "/public/**" : raw + "**",
+    async (route) => {
+      if (
+        apiOrigin &&
+        new URL(route.request().url()).pathname === "/public/posts"
+      ) {
+        return route.fulfill({
+          headers: { "Access-Control-Allow-Origin": "*" },
+          json: { version: 1, posts: posts.map(metadata) },
+        });
+      }
+      const post = posts.find((p) => route.request().url().includes(p.id));
+      if (post?.id === posts[1].id && first) {
+        first = false;
+        began();
+        await blocked;
+      }
+      return route.fulfill({
+        headers: { "Access-Control-Allow-Origin": "*" },
+        status: fail && post?.id === posts[1].id ? 503 : 200,
+        json: post,
+      });
+    },
+  );
   await context.route(github + "**", (route) => {
     const isIndex = route.request().url().includes("index.json");
     const value = isIndex
@@ -191,7 +217,8 @@ test("mailbox ignores stale article responses and lets readers retry a failed lo
     );
     const slowResponse = page.waitForResponse(
       (response) =>
-        response.url().startsWith(raw) && response.url().includes(posts[1].id),
+        response.url().startsWith(apiOrigin ? apiOrigin + "/public/" : raw) &&
+        response.url().includes(posts[1].id),
     );
     release();
     await (await slowResponse).finished();
@@ -281,6 +308,16 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
           token: session,
           expiresAt: Date.now() + 900000,
         },
+      });
+    }
+    if (request.method() === "GET" && path.startsWith("/public/")) {
+      expect(request.headers().authorization).toBeUndefined();
+      return route.fulfill({
+        headers,
+        json:
+          path === "/public/posts"
+            ? { version: 1, posts: posts.map(metadata) }
+            : posts.find((post) => path.endsWith(post.id)),
       });
     }
     expect(request.headers().authorization).toBe("Bearer " + session);
@@ -378,4 +415,48 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   await page.getByRole("button", { name: "Log out", exact: true }).click();
   await expect(page.getByRole("button", { name: /Login/ })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("configured readers use the Worker without GitHub requests or credential exposure", async ({
+  page,
+  context,
+}) => {
+  test.skip(!apiOrigin, "Requires a website built with VITE_VLOG_API_ORIGIN.");
+  const post = sample(1);
+  let githubRequests = 0;
+  let fail = false;
+  for (const pattern of [raw + "**", github + "**"]) {
+    await context.route(pattern, (route) => {
+      githubRequests++;
+      return route.abort();
+    });
+  }
+  await context.route(apiOrigin + "/public/**", (route) => {
+    expect(route.request().headers().authorization).toBeUndefined();
+    const index = new URL(route.request().url()).pathname === "/public/posts";
+    return route.fulfill({
+      headers: { "Access-Control-Allow-Origin": "*" },
+      status: fail ? 502 : 200,
+      json: fail
+        ? {
+            error:
+              "Blog content is unavailable right now. Please try again later.",
+          }
+        : index
+          ? { version: 1, posts: [metadata(post)] }
+          : post,
+    });
+  });
+  await page.goto(app + "#vlogs");
+  await expect(page.locator(".vlog-reader-body")).toHaveText(post.body);
+  expect(githubRequests).toBe(0);
+  fail = true;
+  await page.getByRole("button", { name: "Refresh blogs" }).click();
+  await expect(page.locator("#vlogs")).toContainText(
+    "Blog content is unavailable",
+  );
+  expect(githubRequests).toBe(0);
+  fail = false;
+  await page.getByRole("button", { name: "Refresh blogs" }).click();
+  await expect(page.locator(".vlog-message")).toHaveCount(1);
 });
