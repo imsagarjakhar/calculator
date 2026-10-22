@@ -2,11 +2,36 @@ import { PlannerDirectory } from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { currencies, selectCurrency, useCurrency } from "../runtime/currency";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
 export function HomeContent({ active = true }: { active?: boolean }) {
   const currency = useCurrency();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    headerRef.current
+      ?.querySelector<HTMLAnchorElement>("#home-main-navigation a")
+      ?.focus();
+    const outside = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node))
+        setMenuOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [menuOpen]);
   const [vlogsOpen, setVlogsOpen] = useState(
     () => typeof window !== "undefined" && window.location.hash === "#vlogs",
   );
@@ -34,7 +59,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         aria-labelledby="welcomeTitle"
         hidden={vlogsOpen}
       >
-        <div className="welcome-topbar">
+        <div className="welcome-topbar home-header" ref={headerRef}>
           <a
             className="home-wordmark"
             href={plannerHref("home")}
@@ -56,7 +81,13 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </svg>
             Financial AI Planner
           </a>
-          <nav className="home-nav" aria-label="Main navigation">
+          <nav
+            id="home-main-navigation"
+            className="home-nav"
+            aria-label="Main navigation"
+            data-open={menuOpen}
+            onClick={() => setMenuOpen(false)}
+          >
             <a href="#planners">The planners</a>
             <a href="#financial-planning">Planning guide</a>
             <a href={plannerHref("learn")}>Learn finance</a>
@@ -81,7 +112,65 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </select>
           </label>
           <VlogAccountButton />
+          <button
+            className="home-menu-toggle"
+            type="button"
+            ref={menuButtonRef}
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={menuOpen}
+            aria-controls="home-main-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path
+                d={
+                  menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"
+                }
+              />
+            </svg>
+          </button>
         </div>
+        <aside
+          className="home-data-notice"
+          aria-label="Calculator data and backups"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" />
+            <path d="m8 12 3 3 5-6" />
+          </svg>
+          <div>
+            <strong>Your financial plan stays in your browser.</strong>
+            <p>
+              We don’t store your calculator entries on our servers. Your plan
+              may be saved in this browser only. <b>Download report</b> to keep
+              your own copy, then use <b>Import report</b> to continue
+              later—even on another device.
+            </p>
+            <small>
+              Clearing browser data can remove your saved plan. Keep the
+              original report file as your backup.
+            </small>
+          </div>
+        </aside>
         <div className="welcome-hero">
           <div className="welcome-intro">
             <h1 id="welcomeTitle" tabIndex={-1}>
