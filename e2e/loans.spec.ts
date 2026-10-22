@@ -106,7 +106,12 @@ test("salary import excludes its EMI category and asks for actual loans", async 
   await page.addInitScript(
     (p) =>
       localStorage.setItem("intimetec-salary-budget-v1", JSON.stringify(p)),
-    initialBudget,
+    {
+      ...initialBudget,
+      goalAmount: 1000000,
+      goalMonths: 40,
+      investment: 20000,
+    },
   );
   await page.goto(base + "loan-payoff/");
   await page

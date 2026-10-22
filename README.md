@@ -1,5 +1,14 @@
 # Financial AI Planner — React migration
 
+The salary planner invests the balance after living expenses, bill reserves,
+emergency saving and cash set aside. Its goal check evaluates that same investment,
+with a 12% editable return assumption, years plus months, a contribution/growth
+chart and annual step-up scenarios. A goal recommendation is not another monthly
+expense. Older saved plans retain their goal and expense inputs; the redesigned
+forecast starts at 12%, and the previous custom investment is available by turning
+off “Invest the full available amount”. Reports include the actual investment,
+goal projection and step-up assumption.
+
 The calculators have React layouts, shared TypeScript components and a Vite multi-page build, without a database. Existing financial engines and form/result controllers are reused through compatibility modules, preserving calculations, browser storage and report formats. The new standalone Monthly Salary & Budget Planner is available at `/salary-budget/`, with its own TypeScript calculation model. See [MIGRATION.md](MIGRATION.md) for the architecture, local testing, GitHub Pages setup, branch review and rollback steps.
 
 Use Node.js **22.12+** (Node 22 or 24 LTS):
@@ -30,6 +39,10 @@ runs the existing tests and production build before uploading `dist/`. The
 Windows preparation step locates Git through its executable and standard install
 directories, then puts its paired Bash and GNU tar first on `PATH` for the Pages
 archive. Git's `usr\bin` does not have to be on the service account's initial PATH.
+The Windows job reuses npm's persistent local cache without transferring it to
+GitHub Actions cache storage. Hosted Linux checks still use the npm cache action.
+This avoids the long `setup-node` restore and post-job archive steps observed on
+the Windows runner; all build, browser and deployment checks remain enabled.
 Restart the runner service after changing its environment, and keep the Actions
 runner software updated for the pinned actions.
 

@@ -11,6 +11,8 @@ export type Bill = {
   amount: number;
   reserved: number;
   months: number;
+  /** Months between payments; 0 or absent means a one-time bill. */
+  intervalMonths?: number;
 };
 export type Budget = {
   version: 1;
@@ -28,6 +30,10 @@ export type Budget = {
   goalAmount: number;
   goalSaved: number;
   goalMonths: number;
+  goalAnnualReturn?: number;
+  investmentMode?: "available" | "custom";
+  goalStepUp?: number;
+  goalPlannerVersion?: 1;
   buffer: number;
 };
 export const initialBudget: Budget = {
@@ -114,10 +120,11 @@ export const initialBudget: Budget = {
       amount: 36000,
       reserved: 0,
       months: 12,
+      intervalMonths: 12,
     },
   ],
   investment: 6000,
-  annualReturn: 10,
+  annualReturn: 12,
   emergencySaved: 25000,
   emergencyMonthly: 4000,
   emergencyMonths: 6,
@@ -125,10 +132,85 @@ export const initialBudget: Budget = {
   goalAmount: 0,
   goalSaved: 0,
   goalMonths: 12,
+  goalAnnualReturn: 0,
+  investmentMode: "available",
+  goalStepUp: 0,
+  goalPlannerVersion: 1,
   buffer: 2000,
 };
 export function monthlyReserve(amount: number, saved: number, months: number) {
   return Math.max(0, amount - saved) / months;
+}
+// Existing balance grows from today; equal new contributions arrive at month end.
+export function monthlyGoalSaving(
+  amount: number,
+  saved: number,
+  months: number,
+  annualReturn = 0,
+) {
+  if (annualReturn === 0) return monthlyReserve(amount, saved, months);
+  const monthlyRate = Math.expm1(Math.log1p(annualReturn / 100) / 12);
+  if (monthlyRate === 0) return monthlyReserve(amount, saved, months);
+  const growth = Math.expm1(months * Math.log1p(monthlyRate));
+  return Math.max(0, (amount - saved * (1 + growth)) / (growth / monthlyRate));
+}
+/** Upgrade the old two-allocation goal UI without discarding the saved inputs. */
+export function upgradeBudget(plan: Budget): Budget {
+  return plan.goalPlannerVersion === 1
+    ? plan
+    : {
+        ...plan,
+        annualReturn: 12,
+        investmentMode: "available",
+        goalStepUp: 0,
+        goalPlannerVersion: 1,
+      };
+}
+export function projectSavings(
+  monthly: number,
+  saved: number,
+  months: number,
+  annualReturn: number,
+  stepUp = 0,
+) {
+  const rate = Math.expm1(Math.log1p(annualReturn / 100) / 12);
+  let corpus = saved;
+  let invested = saved;
+  const rows = [{ month: 0, contribution: 0, invested, corpus, gain: 0 }];
+  for (let month = 1; month <= months; month++) {
+    const contribution =
+      monthly * Math.pow(1 + stepUp / 100, Math.floor((month - 1) / 12));
+    corpus = corpus * (1 + rate) + contribution;
+    invested += contribution;
+    rows.push({
+      month,
+      contribution,
+      invested,
+      corpus,
+      gain: corpus - invested,
+    });
+  }
+  return rows;
+}
+export function requiredAnnualStepUp(
+  target: number,
+  monthly: number,
+  saved: number,
+  months: number,
+  annualReturn: number,
+) {
+  const value = (step: number) =>
+    projectSavings(monthly, saved, months, annualReturn, step).at(-1)!.corpus;
+  if (value(0) >= target) return 0;
+  if (monthly <= 0 || months <= 12 || value(100) < target) return null;
+  let low = 0,
+    high = 100;
+  for (let i = 0; i < 45; i++) {
+    const mid = (low + high) / 2;
+    if (value(mid) >= target) high = mid;
+    else low = mid;
+  }
+  return high;
 }
 export function calculateBudget(plan: Budget) {
   const income = plan.salary + plan.otherIncome;
@@ -142,8 +224,17 @@ export function calculateBudget(plan: Budget) {
     (s, b) => s + monthlyReserve(b.amount, b.reserved, b.months),
     0,
   );
-  const goal = monthlyReserve(plan.goalAmount, plan.goalSaved, plan.goalMonths);
-  const future = plan.investment + plan.emergencyMonthly + goal;
+  const goal = monthlyGoalSaving(
+    plan.goalAmount,
+    plan.goalSaved,
+    plan.goalMonths,
+    plan.annualReturn,
+  );
+  const available =
+    income - needs - wants - bills - plan.emergencyMonthly - plan.buffer;
+  const monthlyInvestment =
+    plan.investmentMode === "custom" ? plan.investment : Math.max(0, available);
+  const future = monthlyInvestment + plan.emergencyMonthly;
   const allocated = needs + wants + bills + future + plan.buffer;
   const difference = income - allocated;
   const remainder = Math.abs(difference) < 1e-7 ? 0 : difference;
@@ -158,19 +249,53 @@ export function calculateBudget(plan: Budget) {
   const projection = Array.from({ length: 12 }, (_, index) => {
     const opening = corpus;
     const growth = opening * rate;
-    corpus = opening + growth + plan.investment;
-    const invested = plan.investment * (index + 1);
+    corpus = opening + growth + monthlyInvestment;
+    const invested = monthlyInvestment * (index + 1);
     return {
       month: index + 1,
       opening,
-      contribution: plan.investment,
+      contribution: monthlyInvestment,
       growth,
       invested,
       corpus,
       gain: corpus - invested,
     };
   });
+  const goalProjection = projectSavings(
+    monthlyInvestment,
+    plan.goalSaved,
+    plan.goalMonths,
+    plan.annualReturn,
+    plan.goalStepUp ?? 0,
+  );
+  const flatGoalProjection = projectSavings(
+    monthlyInvestment,
+    plan.goalSaved,
+    plan.goalMonths,
+    plan.annualReturn,
+  );
+  const goalEnd = goalProjection.at(-1)!;
+  const goalStepUpNeeded = requiredAnnualStepUp(
+    plan.goalAmount,
+    monthlyInvestment,
+    plan.goalSaved,
+    plan.goalMonths,
+    plan.annualReturn,
+  );
   return {
+    available,
+    monthlyInvestment,
+    goalProjection,
+    flatGoalProjection,
+    goalEnd,
+    goalStepUpNeeded,
+    goalExtraMonthly: Math.max(0, goal - monthlyInvestment),
+    goalGap: Math.max(0, plan.goalAmount - goalEnd.corpus),
+    goalReachedMonth:
+      plan.goalAmount > 0
+        ? (goalProjection.find((row) => row.corpus >= plan.goalAmount)?.month ??
+          null)
+        : null,
     income,
     needs,
     wants,
@@ -218,8 +343,24 @@ export function validBudget(value: unknown): value is Budget {
     Number.isFinite(p.annualReturn) &&
     p.annualReturn >= -99 &&
     p.annualReturn <= 100 &&
+    (p.investmentMode === undefined ||
+      p.investmentMode === "available" ||
+      p.investmentMode === "custom") &&
+    (p.goalPlannerVersion === undefined || p.goalPlannerVersion === 1) &&
+    (p.goalStepUp === undefined ||
+      (typeof p.goalStepUp === "number" &&
+        Number.isFinite(p.goalStepUp) &&
+        p.goalStepUp >= 0 &&
+        p.goalStepUp <= 100)) &&
     months(p.emergencyMonths) &&
-    months(p.goalMonths) &&
+    Number.isInteger(p.goalMonths) &&
+    p.goalMonths >= 1 &&
+    p.goalMonths <= 600 &&
+    (p.goalAnnualReturn === undefined ||
+      (typeof p.goalAnnualReturn === "number" &&
+        Number.isFinite(p.goalAnnualReturn) &&
+        p.goalAnnualReturn >= -99 &&
+        p.goalAnnualReturn <= 100)) &&
     name(p.goalName) &&
     Array.isArray(p.expenses) &&
     p.expenses.length <= 30 &&
@@ -244,7 +385,11 @@ export function validBudget(value: unknown): value is Budget {
         name(b.name) &&
         amount(b.amount) &&
         amount(b.reserved) &&
-        months(b.months),
+        months(b.months) &&
+        (b.intervalMonths === undefined ||
+          (Number.isInteger(b.intervalMonths) &&
+            b.intervalMonths >= 0 &&
+            b.intervalMonths <= 12)),
     )
   );
 }

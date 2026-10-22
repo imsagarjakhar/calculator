@@ -177,12 +177,12 @@ export function LoanPage() {
         ...p,
         currency: source.currency,
         salary: r.income,
-        expenses: r.needs + r.wants + r.bills + r.goal - emiCategory,
+        expenses: r.needs + r.wants + r.bills - emiCategory,
         reserve: source.emergencyMonthly,
         buffer: source.buffer,
         emergency: source.emergencySaved,
         coverMonths: Math.min(24, source.emergencyMonths),
-        extra: source.investment + Math.max(0, r.remainder),
+        extra: r.monthlyInvestment + Math.max(0, r.remainder),
         loans: [],
       }));
       setNotice(

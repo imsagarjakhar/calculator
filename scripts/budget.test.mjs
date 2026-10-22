@@ -4,9 +4,54 @@ import {
   initialBudget,
   calculateBudget,
   monthlyReserve,
+  monthlyGoalSaving,
+  projectSavings,
+  requiredAnnualStepUp,
+  upgradeBudget,
   validBudget,
 } from "../src/budget/model.ts";
 const plan = () => structuredClone(initialBudget);
+test("goal contributions reach the target with existing savings and month-end growth", () => {
+  assert.equal(monthlyGoalSaving(1000000, 5000, 40, 0), 24875);
+  for (const annual of [12, -20, 0.00000001]) {
+    const monthly = monthlyGoalSaving(1000000, 5000, 40, annual);
+    let balance = 5000;
+    const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
+    for (let month = 0; month < 40; month++)
+      balance = balance * (1 + rate) + monthly;
+    assert.ok(Math.abs(balance - 1000000) < 0.001);
+    if (annual === 12) assert.ok(monthly < 24875);
+    if (annual < 0) assert.ok(monthly > 24875);
+  }
+  assert.equal(monthlyGoalSaving(100000, 100000, 12, 12), 0);
+  assert.equal(monthlyGoalSaving(0, 0, 12, 12), 0);
+  const p = plan();
+  p.goalAmount = 1000000;
+  p.goalSaved = 5000;
+  p.goalMonths = 40;
+  p.goalAnnualReturn = 12;
+  assert.equal(
+    calculateBudget(p).goal,
+    monthlyGoalSaving(1000000, 5000, 40, 12),
+  );
+  assert.equal(
+    calculateBudget(p).end.corpus,
+    calculateBudget(plan()).end.corpus,
+  );
+  delete p.goalAnnualReturn;
+  assert.ok(validBudget(p));
+  p.annualReturn = 0;
+  assert.equal(calculateBudget(p).goal, 24875);
+  p.goalMonths = 600;
+  assert.ok(validBudget(p));
+  p.goalMonths = 601;
+  assert.equal(validBudget(p), false);
+  p.goalMonths = 40;
+  for (const invalid of [-100, 101, Infinity, "12", null]) {
+    p.goalAnnualReturn = invalid;
+    assert.equal(validBudget(p), false);
+  }
+});
 test("salary is allocated once across spending, reserves, saving and buffer", () => {
   const r = calculateBudget(plan());
   assert.equal(r.income, 50000);
@@ -18,7 +63,8 @@ test("salary is allocated once across spending, reserves, saving and buffer", ()
   assert.equal(r.remainder, 0);
   const p = plan();
   p.salary = 40000;
-  assert.equal(calculateBudget(p).remainder, -10000);
+  assert.equal(calculateBudget(p).remainder, -4000);
+  assert.equal(calculateBudget(p).monthlyInvestment, 0);
 });
 test("bill and goal contributions use remaining amount and actual months to deadline", () => {
   assert.equal(monthlyReserve(36000, 6000, 6), 5000);
@@ -27,12 +73,15 @@ test("bill and goal contributions use remaining amount and actual months to dead
   p.goalAmount = 60000;
   p.goalSaved = 12000;
   p.goalMonths = 6;
+  p.annualReturn = 0;
   assert.equal(calculateBudget(p).goal, 8000);
-  assert.equal(calculateBudget(p).remainder, -8000);
+  assert.equal(calculateBudget(p).remainder, 0);
+  assert.equal(calculateBudget(p).monthlyInvestment, 6000);
 });
 test("twelve month-end contributions earn no return on the final deposit", () => {
   const p = plan();
   p.investment = 1000;
+  p.investmentMode = "custom";
   p.annualReturn = 0;
   let r = calculateBudget(p);
   assert.equal(r.end.corpus, 12000);
@@ -51,6 +100,64 @@ test("twelve month-end contributions earn no return on the final deposit", () =>
   assert.ok(r.end.corpus < 12000 && r.end.gain < 0);
   p.investment = 0;
   assert.equal(calculateBudget(p).end.corpus, 0);
+});
+
+test("available money is invested once and goal changes do not add an expense", () => {
+  const p = plan();
+  p.salary = 60000;
+  let r = calculateBudget(p);
+  assert.equal(r.available, 16000);
+  assert.equal(r.monthlyInvestment, 16000);
+  assert.equal(r.future, 20000);
+  assert.equal(r.allocated, 60000);
+  p.goalAmount = 1000000;
+  p.goalSaved = 5000;
+  p.goalMonths = 40;
+  r = calculateBudget(p);
+  assert.equal(r.allocated, 60000);
+  assert.equal(r.remainder, 0);
+  assert.ok(r.goalExtraMonthly > 4500 && r.goalExtraMonthly < 4600);
+  assert.ok(r.goalGap > 0);
+  assert.ok(r.goalStepUpNeeded > 0 && r.goalStepUpNeeded < 100);
+  p.goalStepUp = Math.ceil(r.goalStepUpNeeded * 10) / 10;
+  r = calculateBudget(p);
+  assert.equal(r.goalGap, 0);
+  assert.equal(r.monthlyInvestment, 16000);
+  assert.equal(r.allocated, 60000);
+  p.investmentMode = "custom";
+  p.investment = 10000;
+  assert.equal(calculateBudget(p).remainder, 6000);
+  const old = { ...p, annualReturn: 100, goalPlannerVersion: undefined };
+  assert.equal(upgradeBudget(old).annualReturn, 12);
+  assert.equal(upgradeBudget(old).goalSaved, 5000);
+  assert.equal(upgradeBudget(old).goalMonths, 40);
+  assert.equal(upgradeBudget(old).investment, 10000);
+  assert.equal(upgradeBudget(p).annualReturn, p.annualReturn);
+});
+
+test("growth uses month-end deposits, annual step-ups and valid edge cases", () => {
+  const rows = projectSavings(1000, 5000, 13, 0, 10);
+  assert.equal(rows[0].corpus, 5000);
+  assert.equal(rows[12].corpus, 17000);
+  assert.equal(rows[13].contribution, 1100);
+  assert.equal(rows[13].corpus, 18100);
+  assert.equal(rows[13].gain, 0);
+  assert.equal(requiredAnnualStepUp(10000, 1000, 0, 12, 0), 0);
+  assert.equal(requiredAnnualStepUp(20000, 1000, 0, 12, 0), null);
+  assert.equal(requiredAnnualStepUp(20000, 0, 0, 40, 12), null);
+  assert.equal(requiredAnnualStepUp(1e9, 1, 0, 24, 0), null);
+  const step = requiredAnnualStepUp(30000, 1000, 0, 24, 0);
+  assert.ok(Math.abs(step - 50) < 1e-7);
+  const negative = projectSavings(1000, 5000, 40, -20);
+  assert.ok(negative.at(-1).gain < 0);
+  assert.equal(projectSavings(0, 0, 600, -99).at(-1).corpus, 0);
+  assert.equal(
+    projectSavings(0, 100000, 12, 12).at(-1).corpus.toFixed(2),
+    "112000.00",
+  );
+  const p = plan();
+  for (const bad of [-1, 101, NaN, "10", null])
+    assert.equal(validBudget({ ...p, goalStepUp: bad }), false);
 });
 test("emergency savings and recorded actual spending stay separate from the plan", () => {
   const p = plan();
@@ -85,4 +192,19 @@ test("stored plans are validated before use", () => {
   assert.equal(validBudget(null), false);
   assert.equal(validBudget({ ...plan(), expenses: [null] }), false);
   assert.equal(validBudget({ ...plan(), bills: [null] }), false);
+});
+
+test("bill frequency preserves older plans and validates payment intervals", () => {
+  const p = plan();
+  delete p.bills[0].intervalMonths;
+  assert.ok(validBudget(p));
+  assert.equal(calculateBudget(p).bills, 3000);
+  for (const interval of [0, 1, 3, 12]) {
+    p.bills[0].intervalMonths = interval;
+    assert.ok(validBudget(p));
+  }
+  for (const interval of [-1, 13, 1.5, "3", null]) {
+    p.bills[0].intervalMonths = interval;
+    assert.equal(validBudget(p), false);
+  }
 });

@@ -22,3 +22,14 @@ preserved.
 
 Verification: desktop at 1440px and mobile at 390px and 320px; run `npm run check`
 for models, security, production build and desktop/mobile browser coverage.
+
+The salary planner follows income → expenses → bill reserves → emergency reserve →
+available investment → goal check. An explicit remaining-money banner precedes a
+single return assumption, starting at 12%. Goal inputs evaluate that investment;
+they never add a second monthly allocation. The snapshot lists emergency saving
+and monthly investment separately. An SVG chart distinguishes contributed money,
+projected balance, the goal and an optional annual step-up, with an accessible
+month slider. Extra monthly funding and yearly step-ups are alternatives, not
+automatic salary deductions. The old independent goal-return field is superseded;
+saved inputs and custom investment amounts remain recoverable when switching
+off automatic investment of the available balance.
