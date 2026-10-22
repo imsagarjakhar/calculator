@@ -74,7 +74,7 @@ async function jsonRequest(
     return JSON.parse(text);
   } catch {
     throw new Error(
-      "The vlog content could not be read. Please try again later.",
+      "The blog content could not be read. Please try again later.",
     );
   }
 }
@@ -108,7 +108,7 @@ function plain(value: unknown, max: number, required = true): string {
     value.length > max ||
     (required && !value.trim())
   )
-    throw new Error("A vlog has missing or invalid content.");
+    throw new Error("A blog has missing or invalid content.");
   return value.trim();
 }
 export function videoLink(value: string): string {
@@ -131,14 +131,14 @@ export function videoLink(value: string): string {
 }
 function summary(value: any): VlogSummary {
   if (!value || typeof value !== "object" || !idPattern.test(value.id))
-    throw new Error("A vlog has an invalid identifier.");
+    throw new Error("A blog has an invalid identifier.");
   const createdAt = plain(value.createdAt, 30);
   const updatedAt = plain(value.updatedAt, 30);
   if (
     !Number.isFinite(Date.parse(createdAt)) ||
     !Number.isFinite(Date.parse(updatedAt))
   )
-    throw new Error("A vlog has an invalid date.");
+    throw new Error("A blog has an invalid date.");
   return {
     id: value.id,
     title: plain(value.title, 120),
@@ -158,10 +158,10 @@ function feed(value: any): VlogFeed {
     !Array.isArray(value.posts) ||
     value.posts.length > maxPosts
   )
-    throw new Error("The vlog index has an unsupported format.");
+    throw new Error("The blog index has an unsupported format.");
   const posts = value.posts.map(summary);
   if (new Set(posts.map((post: VlogSummary) => post.id)).size !== posts.length)
-    throw new Error("The vlog index contains duplicate posts.");
+    throw new Error("The blog index contains duplicate posts.");
   return {
     version: 1,
     posts: posts.sort((a: VlogSummary, b: VlogSummary) =>
@@ -189,7 +189,7 @@ function decodeFile(value: any) {
       ),
     );
   } catch {
-    throw new Error("The stored vlog file could not be read.");
+    throw new Error("The stored blog file could not be read.");
   }
 }
 async function content(
@@ -222,7 +222,7 @@ export async function loadVlog(
   post: VlogSummary,
   session?: EditorSession,
 ): Promise<Vlog> {
-  if (!idPattern.test(post.id)) throw new Error("Invalid vlog identifier.");
+  if (!idPattern.test(post.id)) throw new Error("Invalid blog identifier.");
   const path = `vlogs/posts/${post.id}.json`;
   if (session)
     return parseVlog(await content(path, repository.branch, session), post.id);
@@ -244,7 +244,7 @@ export async function loadVlog(
 export function parseVlog(result: unknown, expectedId?: string): Vlog {
   const parsed = summary(result);
   if (expectedId && parsed.id !== expectedId)
-    throw new Error("The requested vlog did not match the stored file.");
+    throw new Error("The requested blog did not match the stored file.");
   return { ...parsed, body: plain((result as Vlog).body, 20000) };
 }
 async function snapshot(session: EditorSession) {
@@ -285,7 +285,7 @@ async function commitChanges(
     500000
   )
     throw new Error(
-      "The vlog index is full. Archive older posts before publishing more.",
+      "The blog index is full. Archive older posts before publishing more.",
     );
   const tree = await api("/git/trees", session, "POST", {
     base_tree: state.tree,
@@ -347,7 +347,7 @@ export async function publishVlog(
     );
   if (!original && state.data.posts.length >= maxPosts)
     throw new Error(
-      "The vlog index is full. Archive older posts before publishing more.",
+      "The blog index is full. Archive older posts before publishing more.",
     );
   const now = new Date().toISOString();
   const post: Vlog = {

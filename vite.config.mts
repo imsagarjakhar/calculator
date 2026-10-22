@@ -33,7 +33,7 @@ function searchMetadata(): Plugin {
         ["name", "robots", "index, follow, max-image-preview:large"],
         ["property", "og:type", "website"],
         ["property", "og:locale", "en_US"],
-        ["property", "og:site_name", "Money Planner"],
+        ["property", "og:site_name", "Financial AI Planner"],
         ["property", "og:title", info.title],
         ["property", "og:description", info.description],
         ["property", "og:url", canonicalUrl(page)],

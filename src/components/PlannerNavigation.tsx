@@ -24,7 +24,7 @@ export function PlannerNavigation({
       >
         ← All planners
       </a>
-      <span className="planner-site-name">Money Planner</span>
+      <span className="planner-site-name">Financial AI Planner</span>
       {children}
     </nav>
   );

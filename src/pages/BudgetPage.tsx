@@ -938,7 +938,7 @@ export function BudgetPage() {
         <a href="#budget-snapshot">View breakdown ↑</a>
       </div>
       <footer className="budget-foot">
-        <span>Money Planner / MAKE ROOM FOR YOUR FUTURE</span>
+        <span>Financial AI Planner / MAKE ROOM FOR YOUR FUTURE</span>
         <p>
           A planning illustration using your inputs. No account or bank
           connection. Your plan is stored in this browser when available;

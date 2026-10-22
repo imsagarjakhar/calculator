@@ -7,7 +7,6 @@ export function FinancialPlanningGuide() {
       className="planning-guide"
       aria-labelledby="financialPlanningTitle"
     >
-      <p className="eyebrow">START WITH YOUR EVERYDAY MONEY</p>
       <h2 id="financialPlanningTitle">
         How to do financial planning, step by step
       </h2>

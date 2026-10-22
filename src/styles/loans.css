@@ -16,25 +16,25 @@
   margin-bottom: 18px;
 }
 .loan-hero h1 em {
-  color: #9ddfc7;
+  color: #246f50;
   font-style: normal;
 }
 .loan-hero > div:first-child > p:last-child {
   max-width: 540px;
-  color: #a6bfc8;
+  color: #405e68;
   font-size: 15px;
   line-height: 1.9;
   margin: 0;
 }
 .loan-hero-stat {
   padding: 28px 32px;
-  background: linear-gradient(125deg, #203b3f, #16303d);
-  border: 1px solid #44625d;
+  background: linear-gradient(125deg, #f5f6f3, #f5f6f3);
+  border: 1px solid #ced9d3;
   border-radius: 18px;
   min-width: 300px;
 }
 .loan-hero-stat > span {
-  color: #b2c9ba;
+  color: #456357;
   letter-spacing: 1.8px;
   font-size: 9px;
 }
@@ -46,39 +46,39 @@
 }
 .loan-hero-stat p {
   font-size: 12px;
-  color: #b2c9cb;
+  color: #446264;
   margin: 0 0 10px;
 }
 .loan-hero-stat small {
   font-size: 10px;
-  color: #8faeb8;
+  color: #415e67;
 }
 .loan-app .budget-tools {
   flex-wrap: wrap;
 }
 .loan-app .budget-tools button {
-  border: 1px solid #35515b;
+  border: 1px solid #ced9d3;
   padding: 10px;
-  color: #dbecee;
+  color: #2f5f64;
 }
 .loan-file {
   display: inline-flex;
   align-items: center;
   padding: 10px;
-  border: 1px solid #35515b;
+  border: 1px solid #ced9d3;
   border-radius: 9px;
   cursor: pointer;
   font-size: 11px;
   min-height: 44px;
 }
 .loan-file:focus-within {
-  outline: 2px solid #a2f2da;
+  outline: 2px solid #94ad9f;
   outline-offset: 3px;
 }
 .loan-notice {
-  background: #143b3b;
-  color: #b9e6da;
-  border: 1px solid #3e6b60;
+  background: #f5f6f3;
+  color: #276d50;
+  border: 1px solid #ced9d3;
   border-radius: 12px;
   padding: 16px 20px;
   font-size: 12px;
@@ -101,30 +101,30 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  border: 1px solid #365a50;
-  background: #16372f;
+  border: 1px solid #ced9d3;
+  background: #f5f6f3;
   padding: 13px 16px;
   border-radius: 10px;
   font-size: 11px;
-  color: #bad7ca;
+  color: #3e6b58;
   margin: 20px 0;
 }
 .loan-emi strong {
-  color: #b4edd3;
+  color: #1d7752;
   font-size: 21px;
 }
 .loan-emi small {
   flex-basis: 100%;
   font-size: 10px;
-  color: #92b6ab;
+  color: #446557;
 }
 .loan-terms {
-  border-top: 1px solid #304b55;
+  border-top: 1px solid #ced9d3;
   padding-top: 16px;
 }
 .loan-terms summary {
   cursor: pointer;
-  color: #b6cdd2;
+  color: #406168;
   font-size: 11px;
 }
 .loan-terms > p {
@@ -133,10 +133,10 @@
 .loan-errors,
 .loan-warning {
   padding: 24px;
-  border: 1px solid #9a6b60;
+  border: 1px solid #ad9994;
   border-radius: 16px;
-  background: #3d292b;
-  color: #efc3b5;
+  background: #f5f6f3;
+  color: #78321c;
 }
 .loan-errors h2 {
   font-size: 20px;
@@ -153,9 +153,9 @@
 }
 .loan-insight {
   padding: 28px 30px;
-  border: 1px solid #496d5e;
+  border: 1px solid #ced9d3;
   border-radius: 18px;
-  background: linear-gradient(125deg, #21483e, #17323c);
+  background: linear-gradient(125deg, #f5f6f3, #f5f6f3);
 }
 .loan-insight h2 {
   font-size: clamp(23px, 2.5vw, 30px);
@@ -165,12 +165,12 @@
 }
 .loan-insight p {
   font-size: 13px;
-  color: #bcd5ce;
+  color: #416757;
   line-height: 1.8;
 }
 .loan-insight > span {
   font-size: 11px;
-  color: #d5d5b5;
+  color: #6b6b3d;
 }
 .loan-strategy-grid {
   display: grid;
@@ -182,20 +182,20 @@
   flex-direction: column;
   text-align: left;
   padding: 24px;
-  background: #102a36;
-  border: 1px solid #314f5c;
+  background: #f5f6f3;
+  border: 1px solid #ced9d3;
   border-radius: 17px;
   min-width: 0;
 }
 .loan-app .loan-strategy.is-selected {
-  background: linear-gradient(140deg, #193c3d, #122d39);
-  border-color: #80d8bd;
+  background: linear-gradient(140deg, #f5f6f3, #f5f6f3);
+  border-color: #94ad9f;
   box-shadow: inset 0 0 0 1px #80d8bd;
 }
 .loan-strategy-label {
   font-size: 8px;
   letter-spacing: 1.4px;
-  color: #95cbb8;
+  color: #31634e;
 }
 .loan-strategy h3 {
   font-size: 19px;
@@ -203,7 +203,7 @@
   letter-spacing: -0.4px;
 }
 .loan-strategy > p {
-  color: #9cb6c1;
+  color: #415c67;
   font-size: 11px;
   line-height: 1.7;
   min-height: 40px;
@@ -216,7 +216,7 @@
 }
 .loan-strategy > small {
   font-size: 9px;
-  color: #9bb6c0;
+  color: #415d67;
   margin: 3px 0 17px;
 }
 .loan-strategy dl {
@@ -227,13 +227,13 @@
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  border-top: 1px solid #2c4954;
+  border-top: 1px solid #ced9d3;
   padding: 10px 0;
   align-items: baseline;
 }
 .loan-strategy dt {
   font-size: 9px;
-  color: #97b1bc;
+  color: #425c66;
 }
 .loan-strategy dd {
   margin: 0;
@@ -241,7 +241,7 @@
   text-align: right;
 }
 .loan-card-action {
-  color: #9ce9ce;
+  color: #1c7852;
   font-size: 10px;
   padding-top: 14px;
 }
@@ -260,18 +260,18 @@
   gap: 10px;
   margin-top: 14px;
   font-size: 9px;
-  color: #a5bfc7;
+  color: #415f68;
 }
 .loan-trend-legend i {
   display: inline-block;
   width: 7px;
   height: 7px;
-  background: #e6b78c;
+  background: #734821;
   border-radius: 2px;
   margin: 0 5px 0 10px;
 }
 .loan-trend-legend i:last-of-type {
-  background: #82dfc4;
+  background: #21735b;
 }
 .loan-table {
   border-collapse: collapse;
@@ -281,7 +281,7 @@
 }
 .loan-table caption {
   text-align: left;
-  color: #8fb4b2;
+  color: #446557;
   font-size: 10px;
   padding: 12px 0;
 }
@@ -289,23 +289,23 @@
 .loan-table td {
   padding: 13px 10px;
   text-align: right;
-  border-bottom: 1px solid #2e4854;
+  border-bottom: 1px solid #ced9d3;
 }
 .loan-table th:first-child {
   text-align: left;
 }
 .loan-table thead th {
   font-size: 9px;
-  color: #9fbfc5;
+  color: #3f6269;
   font-weight: 400;
 }
 .loan-table tbody th {
   font-weight: 400;
-  color: #d4e4e7;
+  color: #3c646c;
 }
 .loan-crossover {
-  border: 1px solid #3c5852;
-  background: #18332f;
+  border: 1px solid #ced9d3;
+  background: #f5f6f3;
   padding: 22px;
   margin-top: 25px;
   border-radius: 13px;
@@ -315,10 +315,10 @@
 }
 .loan-crossover strong {
   font-size: 21px;
-  color: #9cdec4;
+  color: #256f50;
 }
 .loan-crossover p {
-  color: #a1bcb6;
+  color: #466257;
   font-size: 11px;
   line-height: 1.8;
   margin: 12px 0 0;
@@ -339,9 +339,9 @@
   position: absolute;
   left: 0;
   top: 0;
-  color: #a3ddc5;
-  border: 1px solid #436a5c;
-  background: #1c3f36;
+  color: #286c50;
+  border: 1px solid #ced9d3;
+  background: #f5f6f3;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -356,7 +356,7 @@
 }
 .loan-checklist span {
   font-size: 12px;
-  color: #a6bec7;
+  color: #415d67;
   line-height: 1.9;
   display: block;
 }
@@ -369,9 +369,9 @@
 }
 .loan-milestones > div {
   padding: 16px 18px;
-  border: 1px solid #34504d;
+  border: 1px solid #ced9d3;
   border-radius: 11px;
-  background: #15322e;
+  background: #f5f6f3;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 5px 12px;
@@ -381,15 +381,15 @@
 }
 .loan-milestones strong {
   font-size: 13px;
-  color: #b1e4ca;
+  color: #266e50;
 }
 .loan-milestones small {
   grid-column: 1 / -1;
-  color: #92b5ae;
+  color: #446457;
   font-size: 10px;
 }
 .loan-schedule > details {
-  border: 1px solid #36515e;
+  border: 1px solid #ced9d3;
   border-radius: 11px;
   margin-bottom: 11px;
   padding: 15px;
@@ -400,26 +400,26 @@
   gap: 10px 18px;
   justify-content: space-between;
   cursor: pointer;
-  color: #bdd5da;
+  color: #3c646c;
   font-size: 10px;
   min-height: 20px;
 }
 .loan-schedule summary::before {
   content: "+";
-  color: #9de1c6;
+  color: #237150;
 }
 .loan-schedule details[open] > summary::before {
   content: "−";
 }
 .loan-schedule > details > p {
   font-size: 10px;
-  color: #9bb7c0;
+  color: #415e67;
   margin: 15px 0 0;
   line-height: 1.8;
 }
 .loan-reading {
   margin-top: 42px;
-  border-top: 1px solid #2e4751;
+  border-top: 1px solid #ced9d3;
   padding-top: 30px;
 }
 .loan-reading h2 {
@@ -432,7 +432,7 @@
   gap: 22px;
 }
 .loan-reading article {
-  border-left: 2px solid #365f52;
+  border-left: 2px solid #ced9d3;
   padding: 0 20px;
 }
 .loan-reading h3 {
@@ -441,11 +441,11 @@
 }
 .loan-reading p {
   font-size: 11px;
-  color: #98b2be;
+  color: #415b67;
   line-height: 1.8;
 }
 .loan-reading a {
-  color: #a6dec9;
+  color: #286c50;
   display: block;
   font-size: 10px;
   margin-top: 10px;

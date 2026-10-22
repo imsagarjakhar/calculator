@@ -47,7 +47,7 @@ test("all pages use neutral branding while the domain remains unchanged", async 
   }
   await page.goto(base + "#vlogs");
   await expect(page.locator("#vlogsTitle")).toHaveText(
-    "The Money Planner Blog",
+    "The Financial AI Planner Blog",
   );
   await expect(page.locator("#vlogs")).not.toContainText(/intimetec/i);
 });
@@ -70,7 +70,7 @@ test("all calculator headers share branding, typography, colours and page spacin
     const header = page.locator(".planner-header:visible");
     await expect(header).toHaveCount(1);
     await expect(header.locator(".eyebrow")).toHaveText(
-      `Money Planner / ${label}`,
+      `Financial AI Planner / ${label}`,
     );
     await expect(
       header.getByRole("button", { name: "Import report", exact: true }),
@@ -83,7 +83,7 @@ test("all calculator headers share branding, typography, colours and page spacin
     ).toBeVisible();
     await expect(
       page.locator(".planner-navigation:visible .planner-site-name"),
-    ).toHaveText("Money Planner");
+    ).toHaveText("Financial AI Planner");
     await expect(page.locator(".planner-navigation:visible .planner-site-name")).toBeVisible();
     const appearance = await header.evaluate((el) => {
       const css = (selector: string, properties: string[]) => {

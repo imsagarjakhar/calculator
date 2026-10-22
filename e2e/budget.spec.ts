@@ -12,6 +12,21 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     "A place for every rupee",
   );
   await expect(page.getByTestId("budget-remainder")).toHaveText("₹0");
+  for (const [currency, name] of [
+    ["USD", "dollar"],
+    ["SAR", "Saudi riyal"],
+    ["AED", "UAE dirham"],
+    ["EUR", "euro"],
+    ["GBP", "pound"],
+    ["INR", "rupee"],
+  ]) {
+    await page
+      .getByRole("combobox", { name: "Plan currency", exact: true })
+      .selectOption(currency);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      `A place for every ${name}. A plan for what’s next.`,
+    );
+  }
   await page.screenshot({
     path: info.outputPath("salary-budget.png"),
     fullPage: true,

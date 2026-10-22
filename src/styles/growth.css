@@ -1,13 +1,13 @@
 :root {
-  --bg: #071a26;
-  --card: #0d2b3d;
-  --line: #24485c;
-  --ink: #f1f7fa;
-  --muted: #b0c3cf;
-  --accent: #2bdbb0;
-  --gold: #ffce63;
-  --danger: #ffaaaa;
-  --soft: #102f42;
+  --bg: #f9faf8;
+  --card: #f5f6f3;
+  --line: #ced9d3;
+  --ink: #27566d;
+  --muted: #405969;
+  --accent: #176b52;
+  --gold: #785b1c;
+  --danger: #781c1c;
+  --soft: #f5f6f3;
   --radius: 18px;
 }
 * {
@@ -106,7 +106,7 @@ button {
 }
 button:hover {
   border-color: var(--accent);
-  background: #163d50;
+  background: #f5f6f3;
 }
 button:focus-visible,
 summary:focus-visible {
@@ -188,7 +188,7 @@ select {
   margin-top: 6px;
   background: var(--bg);
   color: var(--ink);
-  border: 1px solid #315366;
+  border: 1px solid #ced9d3;
   border-radius: 8px;
   padding: 10px 11px;
   outline: none;
@@ -210,7 +210,7 @@ input[aria-invalid="true"] {
   border-color: var(--danger);
 }
 input::placeholder {
-  color: #7893a4;
+  color: #445865;
   font-size: 14px;
   font-weight: 400;
 }
@@ -234,7 +234,7 @@ input::placeholder {
   font-variant-numeric: tabular-nums;
 }
 .result-panel {
-  background: linear-gradient(140deg, #123a48 0%, #0d2b3d 66%);
+  background: linear-gradient(140deg, #f5f6f3 0%, #f5f6f3 66%);
 }
 .result-top {
   display: flex;
@@ -275,7 +275,7 @@ input::placeholder {
   gap: 10px;
 }
 .stat {
-  background: rgba(7, 26, 38, 0.78);
+  background: rgba(235, 241, 231, 0.78);
   border-radius: 10px;
   padding: 11px 13px;
 }
@@ -326,8 +326,8 @@ input::placeholder {
 .alert {
   padding: 13px 15px;
   margin-bottom: 17px;
-  background: #421f2a;
-  border: 1px solid #8d4f5a;
+  background: #f5f6f3;
+  border: 1px solid #d9ced0;
   border-radius: 10px;
 }
 .alert[hidden] {
@@ -377,7 +377,7 @@ input::placeholder {
   grid-column: 1/-1;
 }
 .empty {
-  border: 1px dashed #315366;
+  border: 1px dashed #ced9d3;
   padding: 21px 16px;
   border-radius: 10px;
   text-align: center;
@@ -539,13 +539,13 @@ input::placeholder {
   color: var(--ink);
 }
 .cmp[data-scenario="FD"] {
-  border-top: 2px solid #56b8f5;
+  border-top: 2px solid #94ad9f;
 }
 .cmp[data-scenario="Gold"] {
-  border-top: 2px solid #ffce63;
+  border-top: 2px solid #ada594;
 }
 .cmp[data-scenario="MF"] {
-  border-top: 2px solid #2bdbb0;
+  border-top: 2px solid #94ad9f;
 }
 #risk {
   margin-top: 13px;
@@ -626,7 +626,7 @@ input::placeholder {
   gap: 15px;
   border-top: 1px solid var(--line);
   padding: 14px 24px;
-  background: rgba(7, 26, 38, 0.4);
+  background: rgba(235, 241, 231, 0.4);
 }
 .filters {
   display: flex;
@@ -650,7 +650,7 @@ input::placeholder {
   overflow: auto;
   max-height: 690px;
   overscroll-behavior: contain;
-  scrollbar-color: #315366 var(--bg);
+  scrollbar-color: #ced9d3 var(--bg);
 }
 table {
   border-collapse: separate;
@@ -669,7 +669,7 @@ td {
 thead th {
   position: sticky;
   top: 0;
-  background: #123348;
+  background: #f5f6f3;
   font-size: 11px;
   font-weight: 700;
   color: var(--muted);
@@ -685,17 +685,17 @@ th span {
   display: block;
   font-size: 10px;
   font-weight: 400;
-  color: #90aabb;
+  color: #405868;
 }
 tbody td:last-child {
   font-weight: 700;
   color: var(--accent);
 }
 tbody tr:nth-child(even) {
-  background: rgba(7, 26, 38, 0.28);
+  background: rgba(235, 241, 231, 0.28);
 }
 tbody tr:hover {
-  background: #133b50;
+  background: #f5f6f3;
 }
 tbody tr.has-extra {
   background: rgba(255, 206, 99, 0.055);
@@ -730,7 +730,7 @@ tbody tr.is-step th:first-child {
   padding: 5px 9px;
   font-size: 12px;
   min-width: 55px;
-  border-color: #51604e;
+  border-color: #ced9d3;
   color: var(--gold);
   background: transparent;
 }
@@ -743,7 +743,7 @@ tbody tr.is-step th:first-child {
   color: var(--danger) !important;
 }
 tfoot td {
-  background: #123348;
+  background: #f5f6f3;
   font-size: 12px;
   font-weight: 700;
   border-top: 1px solid var(--line);
@@ -1077,7 +1077,7 @@ footer {
   }
   .panel {
     background: white;
-    border: 1px solid #bbb;
+    border: 1px solid #ad9494;
     margin-bottom: 12px;
     break-inside: avoid;
   }
@@ -1328,38 +1328,38 @@ header {
   line-height: 1.3;
 }
 .loan-choice {
-  background: linear-gradient(135deg, #303a42, #142e3d);
+  background: linear-gradient(135deg, #f5f6f3, #f5f6f3);
 }
 .loan-choice .choice-icon {
-  color: #efc294;
-  background: #4a3e35;
+  color: #784a1c;
+  background: #f5f6f3;
 }
 .loan-choice > .eyebrow,
 .loan-choice > .choice-link {
-  color: #efc294;
+  color: #784a1c;
 }
 .retirement-choice {
-  background: linear-gradient(125deg, #163e3e, #1d3048);
+  background: linear-gradient(125deg, #f5f6f3, #f5f6f3);
 }
 .retirement-choice .choice-icon {
-  color: #70e2c9;
-  background: #1c514a;
+  color: #1c7852;
+  background: #f5f6f3;
 }
 .retirement-choice > .eyebrow,
 .retirement-choice > .choice-link {
-  color: #70e2c9;
+  color: #1c7852;
 }
 .planner-choices .salary-choice {
-  background: linear-gradient(125deg, #293e39, #193848);
-  border-color: #49665c;
+  background: linear-gradient(125deg, #f5f6f3, #f5f6f3);
+  border-color: #ced9d3;
 }
 .salary-choice .choice-icon {
-  color: #e1ce9b;
-  background: #3c4e3e;
+  color: #725c22;
+  background: #f5f6f3;
 }
 .salary-choice > .eyebrow,
 .salary-choice > .choice-link {
-  color: #d8d7ab;
+  color: #65642f;
 }
 .planner-choices .choice {
   color: var(--ink);
@@ -1388,15 +1388,15 @@ header {
 }
 .welcome-benefits span {
   padding: 8px 13px;
-  border: 1px solid #2bdbb033;
+  border: 1px solid #94ad9f33;
   border-radius: 30px;
-  background: #2bdbb00a;
+  background: #21735f0a;
   color: var(--muted);
   font-size: 12px;
 }
 .welcome-benefits span:before {
   content: "✦";
-  color: #2bdbb0;
+  color: #176b52;
   margin-right: 7px;
 }
 .welcome-actions {

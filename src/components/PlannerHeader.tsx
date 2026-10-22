@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { headerConfig, type PlannerKind } from "./headerConfig";
+import { budgetHeading, headerConfig, type PlannerKind } from "./headerConfig";
 
 const currencies = [
   ["INR", "₹"],
@@ -65,6 +65,8 @@ export function PlannerHeader({
               <br />
               <em>Three purposeful buckets.</em>
             </>
+          ) : kind === "budget" ? (
+            budgetHeading(controls?.currency)
           ) : (
             config.title
           )}

@@ -835,7 +835,7 @@ export const BucketPage = memo(function BucketPage() {
           </p>
         </details>
         <footer>
-          Money Planner retirement lab · Independent prototype · No changes to
+          Financial AI Planner retirement lab · Independent prototype · No changes to
           your other plans
         </footer>
       </main>

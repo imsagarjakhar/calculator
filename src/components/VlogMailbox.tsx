@@ -47,7 +47,7 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
           setReadError(
             error instanceof Error
               ? error.message
-              : "This vlog could not be loaded. Please try again.",
+              : "This blog could not be loaded. Please try again.",
           );
       })
       .finally(() => {
@@ -81,7 +81,7 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
         <div>
           <p className="eyebrow">THE READING ROOM</p>
           <h2 id="vlogsTitle" tabIndex={-1}>
-            The Money Planner Blog
+            The Financial AI Planner Blog
           </h2>
           <p>Ideas for your money. A little space to think.</p>
         </div>
@@ -91,7 +91,7 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
           disabled={hub.loading || hub.busy}
         >
           <span aria-hidden="true">↻</span>
-          {hub.loading ? "Refreshing…" : "Refresh vlogs"}
+          {hub.loading ? "Refreshing…" : "Refresh blogs"}
         </button>
       </div>
       {hub.notice && (
@@ -105,28 +105,28 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
         </p>
       )}
       <div className={`vlog-mailbox${readerOpen ? " is-reading" : ""}`}>
-        <aside className="vlog-index" aria-label="All vlogs" ref={list}>
+        <aside className="vlog-index" aria-label="All blogs" ref={list}>
           <div className="vlog-index-heading">
             <div>
-              <h3>All vlogs</h3>
+              <h3>All blogs</h3>
               <span>
                 {count} {count === 1 ? "story" : "stories"}
               </span>
             </div>
             <label className="vlog-search">
-              <span className="vlog-visually-hidden">Find a vlog</span>
+              <span className="vlog-visually-hidden">Find a blog</span>
               <span aria-hidden="true">⌕</span>
               <input
                 type="search"
                 value={query}
-                placeholder="Search vlogs…"
+                placeholder="Search blogs…"
                 onChange={(e) => setQuery(e.target.value)}
               />
             </label>
           </div>
           <nav
             className="vlog-message-list"
-            aria-label="Choose a vlog"
+            aria-label="Choose a blog"
             onKeyDown={(e) => {
               if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key))
                 return;
@@ -185,12 +185,12 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
             {!filtered.length && (
               <div className="vlog-list-empty" role="status">
                 {hub.loading
-                  ? "Loading the latest vlogs…"
+                  ? "Loading the latest blogs…"
                   : query.trim()
-                    ? "No matching vlogs. Try another search."
+                    ? "No matching blogs. Try another search."
                     : hub.error
-                      ? "The list could not be loaded. Try Refresh vlogs."
-                      : "Our first vlog is on the way."}
+                      ? "The list could not be loaded. Try Refresh blogs."
+                      : "Our first blog is on the way."}
                 {query.trim() && (
                   <button onClick={() => setQuery("")}>Clear search</button>
                 )}
@@ -206,14 +206,14 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
         <div
           className="vlog-reading-pane"
           ref={reader}
-          aria-label="Vlog reading pane"
+          aria-label="Blog reading pane"
           aria-busy={loading}
         >
           <div className="vlog-reading-toolbar">
             <button className="vlog-back-to-list" onClick={back}>
-              ← All vlogs
+              ← All blogs
             </button>
-            <span className="vlog-reading-label">Money Planner / JOURNAL</span>
+            <span className="vlog-reading-label">Financial AI Planner / JOURNAL</span>
             {hub.session && selected && (
               <div className="vlog-owner-actions">
                 <button disabled={hub.busy} onClick={() => hub.edit(selected)}>
@@ -306,11 +306,11 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
               <p>
                 {hub.loading
                   ? "We’re bringing in the latest stories."
-                  : "When a vlog is published, you can open it here."}
+                  : "When a blog is published, you can open it here."}
               </p>
               {hub.session && (
                 <button className="primary" onClick={hub.create}>
-                  Write the first vlog
+                  Write the first blog
                 </button>
               )}
             </div>

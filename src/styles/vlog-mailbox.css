@@ -13,7 +13,7 @@
   margin-bottom: 26px;
 }
 .vlog-section-heading .eyebrow {
-  color: #70d6bf;
+  color: #217351;
   font-size: 9px;
   letter-spacing: 2.2px;
   margin: 0 0 10px;
@@ -28,7 +28,7 @@
   outline: none;
 }
 .vlog-section-heading p:not(.eyebrow) {
-  color: #9eb8c4;
+  color: #405c69;
   font-size: 12px;
   line-height: 1.7;
   margin: 10px 0 0;
@@ -40,13 +40,13 @@
   padding: 10px 13px;
   min-height: 42px;
   font-size: 11px;
-  color: #b4cccf;
+  color: #426367;
   background: transparent;
-  border-color: #2b4b59;
+  border-color: #ced9d3;
 }
 .vlog-refresh > span {
   font-size: 19px;
-  color: #83ddc5;
+  color: #207451;
 }
 .vlog-mailbox {
   display: grid;
@@ -54,9 +54,9 @@
   height: min(800px, calc(100dvh - 185px));
   min-height: 560px;
   overflow: hidden;
-  border: 1px solid #2e4b59;
+  border: 1px solid #ced9d3;
   border-radius: 18px;
-  background: #0c2431;
+  background: #f9faf8;
   box-shadow: 0 16px 45px #00000015;
 }
 .vlog-index {
@@ -64,12 +64,12 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  border-right: 1px solid #2b4653;
-  background: #0b202c;
+  border-right: 1px solid #ced9d3;
+  background: #f9faf8;
 }
 .vlog-index-heading {
   padding: 23px 21px 19px;
-  border-bottom: 1px solid #2b4552;
+  border-bottom: 1px solid #ced9d3;
 }
 .vlog-index-heading > div {
   display: flex;
@@ -85,9 +85,9 @@
   letter-spacing: -0.2px;
 }
 .vlog-index-heading > div > span {
-  color: #91b1bc;
-  background: #18333f;
-  border: 1px solid #2b4854;
+  color: #405e69;
+  background: #f5f6f3;
+  border: 1px solid #ced9d3;
   border-radius: 20px;
   font-size: 10px;
   padding: 4px 9px;
@@ -106,7 +106,7 @@
   left: 12px;
   top: 10px;
   font-size: 22px;
-  color: #82a3b0;
+  color: #415c67;
   pointer-events: none;
 }
 .vlog-mailbox .vlog-search input {
@@ -115,17 +115,17 @@
   min-height: 42px;
   margin: 0;
   padding: 11px 12px 11px 35px;
-  border: 1px solid #2d4b59;
+  border: 1px solid #ced9d3;
   border-radius: 8px;
-  background: #0e2936;
-  color: #ecf5f7;
+  background: #f5f6f3;
+  color: #2c5d68;
   font:
     400 13px/1.5 Arial,
     Helvetica,
     sans-serif;
 }
 .vlog-search input::placeholder {
-  color: #8da9b5;
+  color: #425b66;
 }
 .vlog-message-list {
   overflow-y: auto;
@@ -133,7 +133,7 @@
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: #345764 transparent;
+  scrollbar-color: #ced9d3 transparent;
 }
 .vlog-mailbox .vlog-message {
   width: 100%;
@@ -144,21 +144,21 @@
   min-width: 0;
   border: 0;
   border-left: 3px solid transparent;
-  border-bottom: 1px solid #223e4b;
+  border-bottom: 1px solid #ced9d3;
   border-radius: 0;
   padding: 21px 20px 17px 18px;
   background: transparent;
   text-align: left;
-  color: #d4e3e9;
+  color: #325462;
   font-weight: 400;
   cursor: pointer;
 }
 .vlog-mailbox .vlog-message:hover {
-  background: #14323f;
+  background: #f5f6f3;
 }
 .vlog-mailbox .vlog-message.is-selected {
-  background: #173a43;
-  border-left-color: #7bddbf;
+  background: #f5f6f3;
+  border-left-color: #94ad9f;
 }
 .vlog-message-meta {
   display: flex;
@@ -169,13 +169,13 @@
   margin-bottom: 10px;
 }
 .vlog-message-meta > span {
-  color: #8ec2ba;
+  color: #3b6d58;
   font-size: 8px;
   letter-spacing: 1.5px;
   font-weight: 700;
 }
 .vlog-message-meta time {
-  color: #8ba7b4;
+  color: #425b66;
   font-size: 9px;
 }
 .vlog-message > strong {
@@ -196,7 +196,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
-  color: #93aeba;
+  color: #425b67;
   font-size: 11px;
   line-height: 1.8;
 }
@@ -205,24 +205,24 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
-  color: #7db7ad;
+  color: #3c6c58;
   font-size: 9px;
 }
 .vlog-message-open > span {
   font-size: 13px;
 }
 .is-selected .vlog-message-open {
-  color: #a0e4d0;
+  color: #217351;
 }
 .vlog-index-foot {
-  border-top: 1px solid #2c4552;
+  border-top: 1px solid #ced9d3;
   padding: 13px 21px;
-  color: #7897a5;
+  color: #435b65;
   font-size: 9px;
   line-height: 1.6;
 }
 .vlog-list-empty {
-  color: #a5bec9;
+  color: #3f5c69;
   font-size: 12px;
   line-height: 1.8;
   padding: 30px 24px;
@@ -236,11 +236,11 @@
   min-width: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: #102936;
+  background: #f5f6f3;
   padding: 0 42px 35px;
   scroll-margin-top: 15px;
   scrollbar-width: thin;
-  scrollbar-color: #345764 transparent;
+  scrollbar-color: #ced9d3 transparent;
 }
 .vlog-reading-toolbar {
   display: flex;
@@ -248,11 +248,11 @@
   justify-content: space-between;
   gap: 15px;
   min-height: 66px;
-  border-bottom: 1px solid #2a4653;
+  border-bottom: 1px solid #ced9d3;
   margin-bottom: 33px;
 }
 .vlog-reading-label {
-  color: #7398a5;
+  color: #425d66;
   font-size: 8px;
   letter-spacing: 2px;
 }
@@ -267,10 +267,10 @@
   min-height: 34px;
   font-size: 10px;
   background: transparent;
-  border-color: #365260;
+  border-color: #ced9d3;
 }
 .vlog-owner-actions button:last-child {
-  color: #d9a6a0;
+  color: #6a312a;
 }
 .vlog-reading-toolbar .vlog-back-to-list {
   display: none;
@@ -284,24 +284,24 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  color: #8eacb8;
+  color: #415c67;
   font-size: 10px;
   line-height: 1.7;
   margin-bottom: 20px;
 }
 .vlog-kind {
-  color: #97dfc9;
+  color: #237150;
   font-size: 8px;
   letter-spacing: 1.4px;
   padding: 5px 8px;
-  border: 1px solid #366359;
-  background: #1b3c38;
+  border: 1px solid #ced9d3;
+  background: #f5f6f3;
   border-radius: 5px;
   font-weight: 700;
 }
 .vlog-inline-article h3 {
   margin: 0;
-  color: #edf5f7;
+  color: #2e5b66;
   font-size: clamp(26px, 2.8vw, 37px);
   line-height: 1.25;
   letter-spacing: -1px;
@@ -311,24 +311,24 @@
   outline: none;
 }
 .vlog-reader-summary {
-  color: #b5cbd3;
+  color: #3f5e6a;
   font-size: 16px;
   line-height: 1.85;
   margin: 22px 0 26px;
   overflow-wrap: anywhere;
 }
 .vlog-reader-body {
-  color: #c4d4dd;
+  color: #3e5a6b;
   font-size: 15px;
   line-height: 2;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  border-top: 1px solid #294653;
+  border-top: 1px solid #ced9d3;
   padding-top: 25px;
 }
 .vlog-article-updated {
   font-size: 10px;
-  color: #88a5b1;
+  color: #435b66;
   margin: -10px 0 20px;
 }
 .vlog-video {
@@ -336,26 +336,26 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: #183b3a;
-  border: 1px solid #3e6c5d;
+  background: #f5f6f3;
+  border: 1px solid #ced9d3;
   border-radius: 8px;
-  color: #a5e9d1;
+  color: #1d7751;
   text-decoration: none;
   padding: 11px 15px;
   font-size: 11px;
   margin-bottom: 26px;
 }
 .vlog-video:hover {
-  background: #21493f;
+  background: #f5f6f3;
 }
 .vlog-article-end {
   display: flex;
   align-items: center;
   gap: 16px;
-  border-top: 1px solid #294653;
+  border-top: 1px solid #ced9d3;
   margin-top: 40px;
   padding-top: 24px;
-  color: #9bc9be;
+  color: #3b6d58;
 }
 .vlog-article-end > span {
   font-size: 20px;
@@ -366,7 +366,7 @@
   line-height: 1.9;
 }
 .vlog-article-end p > span {
-  color: #789aa8;
+  color: #425c66;
   font-size: 10px;
 }
 .vlog-reader-empty {
@@ -377,15 +377,15 @@
   min-height: 350px;
   text-align: center;
   padding: 35px 0;
-  color: #9db6c2;
+  color: #415b68;
 }
 .vlog-reader-empty > span {
-  color: #77b7a8;
+  color: #33614e;
   font-size: 35px;
   margin-bottom: 24px;
 }
 .vlog-reader-empty h3 {
-  color: #d4e5ea;
+  color: #315863;
   font-size: 23px;
   letter-spacing: -0.5px;
 }
@@ -404,7 +404,7 @@
   display: block;
   height: 10px;
   border-radius: 4px;
-  background: #1b3a48;
+  background: #f5f6f3;
   margin: 14px 0;
 }
 .vlog-reading-loading > span:nth-child(2) {
@@ -414,7 +414,7 @@
   width: 65%;
 }
 .vlog-reading-loading p {
-  color: #94b5bf;
+  color: #3f5f69;
   font-size: 11px;
   margin-top: 25px;
 }
@@ -430,7 +430,7 @@
   border: 0;
 }
 .vlog-mailbox :is(button, input, a):focus-visible {
-  outline: 2px solid #93e6cc;
+  outline: 2px solid #94ad9f;
   outline-offset: -3px;
 }
 @media (max-width: 1050px) {
@@ -511,7 +511,7 @@
   }
   .vlog-reading-toolbar .vlog-back-to-list {
     display: block;
-    color: #a5dec9;
+    color: #286c50;
     font-size: 11px;
     background: transparent;
     border: 0;

@@ -31,43 +31,97 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         hidden={vlogsOpen}
       >
         <div className="welcome-topbar">
-          <div className="eyebrow">
-            Money Planner / SMART FINANCIAL PLANNING
-          </div>
+          <a
+            className="home-wordmark"
+            href={plannerHref("home")}
+            aria-label="Financial AI Planner home"
+          >
+            <svg
+              viewBox="0 0 32 32"
+              width="30"
+              height="30"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M4 25V15l8 5V7l8 5V4l8 5v16H4Z"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Financial AI Planner
+          </a>
+          <nav className="home-nav" aria-label="Main navigation">
+            <a href="#planners">The planners</a>
+            <a href="#financial-planning">Planning guide</a>
+            <a href="#vlogs">Blog</a>
+          </nav>
           <VlogAccountButton />
         </div>
-        <div className="welcome-intro">
-          <span className="welcome-kicker">Money Planner</span>
-          <h1 id="welcomeTitle" tabIndex={-1}>
-            Financial planning.
-            <br />A clearer future.
-          </h1>
-          <p>
-            Make a monthly budget, compare paying off loans with investing, and
-            plan for retirement. Use free financial planning calculators to see
-            how your choices and assumptions could shape your future.
-          </p>
-          <div className="welcome-benefits" aria-label="Planner features">
-            <span>Instant insights</span>
-            <span>Interactive scenarios</span>
-            <span>Private by design</span>
+        <div className="welcome-hero">
+          <div className="welcome-intro">
+            <h1 id="welcomeTitle" tabIndex={-1}>
+              Financial planning.
+              <br />
+              <em>A clearer future.</em>
+            </h1>
+            <p>
+              A little clarity goes a long way. Bring your budget, investments
+              and retirement into focus with free calculators that put your
+              assumptions in your hands.
+            </p>
+            <div className="welcome-actions">
+              <a
+                href={plannerHref("growth")}
+                className="primary"
+                data-screen="growth"
+              >
+                Explore my future <span aria-hidden="true">→</span>
+              </a>
+              <a href="#planners">
+                Find your planner <span aria-hidden="true">↓</span>
+              </a>
+            </div>
+            <p className="welcome-privacy">
+              Calculations stay in your browser. No account needed.
+            </p>
           </div>
-          <div className="welcome-actions">
-            <a
-              href={plannerHref("growth")}
-              className="primary"
-              data-screen="growth"
-            >
-              Explore my future <span aria-hidden="true">↗</span>
+          <aside
+            className="starting-point"
+            aria-labelledby="startingPointTitle"
+          >
+            <h2 id="startingPointTitle">What’s on your mind?</h2>
+            <p>Start with the question you have today.</p>
+            <a href={plannerHref("salary-budget")}>
+              <span>
+                Make room in my budget
+                <small>Income, spending &amp; savings</small>
+              </span>
+              <span aria-hidden="true">→</span>
             </a>
-            <a href={plannerHref("custom-plan")}>
-              Build my monthly plan <span aria-hidden="true">→</span>
+            <a href={plannerHref("loan-payoff")}>
+              <span>
+                Get ahead of my loans
+                <small>Repay debt or invest the extra</small>
+              </span>
+              <span aria-hidden="true">→</span>
             </a>
-          </div>
-          <small className="welcome-assumption">
-            Your inputs set the direction. Financial formulas calculate the
-            possibilities.
-          </small>
+            <a href={plannerHref("freedom")}>
+              <span>
+                Work towards more freedom
+                <small>Explore when work could be a choice</small>
+              </span>
+              <span aria-hidden="true">→</span>
+            </a>
+            <div className="starting-point-note">
+              Your numbers. Your assumptions. Your next step.
+            </div>
+          </aside>
+        </div>
+        <div className="planner-directory-heading" id="planners">
+          <h2>A tool for every chapter.</h2>
+          <p>Choose a question. Explore the possibilities.</p>
         </div>
         <div className="planner-choices has-custom has-freedom">
           <a
@@ -75,10 +129,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             className="choice growth-choice"
             data-screen="growth"
           >
-            <span className="choice-icon" aria-hidden="true">
-              ↗
-            </span>
-            <span className="eyebrow">01 / BUILD YOUR WEALTH</span>
             <strong>Check Growth</strong>
             <span className="choice-copy">
               See where your SIP can take you, with annual step-ups and extra
@@ -93,10 +143,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             className="choice survival-choice"
             data-screen="survival"
           >
-            <span className="choice-icon" aria-hidden="true">
-              ◷
-            </span>
-            <span className="eyebrow">02 / MAKE IT LAST</span>
             <strong>Check Survival</strong>
             <span className="choice-copy">
               Start with your current corpus. See how withdrawals, inflation and
@@ -107,10 +153,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </span>
           </a>
           <a className="choice custom-choice" href={plannerHref("custom-plan")}>
-            <span className="choice-icon" aria-hidden="true">
-              ✎
-            </span>
-            <span className="eyebrow">03 / YOUR PLAN, YOUR WAY</span>
             <strong>Custom Plan</strong>
             <span className="choice-copy">
               Adjust any month's SIP, invest a bonus, or pay a loan sooner. Save
@@ -121,10 +163,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </span>
           </a>
           <a className="choice freedom-choice" href={plannerHref("freedom")}>
-            <span className="choice-icon" aria-hidden="true">
-              ◎
-            </span>
-            <span className="eyebrow">04 / MAKE WORK A CHOICE</span>
             <strong>Financial Freedom</strong>
             <span className="choice-copy">
               Set your monthly SIP and desired monthly income. Adjust step-up,
@@ -138,23 +176,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             className="choice retirement-choice"
             href={plannerHref("bucket-plan")}
           >
-            <span className="choice-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 48 48"
-                width="34"
-                height="34"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M13 17C13 2 35 2 35 17M9 17l5 24q10 5 20 0l5-24"></path>
-                <ellipse cx="24" cy="17" rx="15" ry="4"></ellipse>
-                <path d="M13 30q11 5 22 0"></path>
-              </svg>
-            </span>
-            <span className="eyebrow">05 / PLAN YOUR RETIREMENT</span>
             <strong>Retirement Bucket Planner</strong>
             <span className="choice-copy">
               Plan living costs, emergencies and long-term growth with three
@@ -168,10 +189,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             className="choice salary-choice"
             href={plannerHref("salary-budget")}
           >
-            <span className="choice-icon" aria-hidden="true">
-              ▤
-            </span>
-            <span className="eyebrow">06 / PLAN YOUR PAYDAY</span>
             <strong>Monthly Salary &amp; Budget Planner</strong>
             <span className="choice-copy">
               Balance your salary, bills and savings. See what a year of
@@ -182,10 +199,6 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </span>
           </a>
           <a className="choice loan-choice" href={plannerHref("loan-payoff")}>
-            <span className="choice-icon" aria-hidden="true">
-              ⇄
-            </span>
-            <span className="eyebrow">07 / LESS DEBT, MORE DIRECTION</span>
             <strong>Loan Payoff &amp; Investment Planner</strong>
             <span className="choice-copy">
               Pay loans faster or invest the extra? Compare your options and
@@ -196,28 +209,23 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </span>
           </a>
           <a className="choice vlog-choice" href="#vlogs">
-            <span className="choice-icon" aria-hidden="true">
-              ▷
-            </span>
-            <span className="eyebrow">08 / IDEAS &amp; PERSPECTIVE</span>
-            <strong>Vlogs</strong>
+            <strong>Blog</strong>
             <span className="choice-copy">
               Money conversations, practical ideas and the latest updates, all
               in one place.
             </span>
             <span className="choice-link">
-              View all vlogs <span aria-hidden="true">↗</span>
+              View all blogs <span aria-hidden="true">↗</span>
             </span>
           </a>
         </div>
         <FinancialPlanningGuide />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
-          <div className="eyebrow">UNDERSTAND YOUR INSIGHTS</div>
-          <h2 id="planningQuestions">Smart planning, explained.</h2>
+          <h2 id="planningQuestions">A few things worth knowing.</h2>
           <details>
             <summary>Is this an AI financial planner?</summary>
             <p>
-              Money Planner uses financial formulas and the assumptions you
+              Financial AI Planner uses financial formulas and the assumptions you
               enter. These tools do not use generative AI or predict market
               prices. Your results are calculated scenarios, with methods and
               detailed schedules you can review.
@@ -246,7 +254,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         </p>
       </section>
       {vlogsOpen && (
-        <section className="welcome vlog-directory" aria-label="Vlogs">
+        <section className="welcome vlog-directory" aria-label="Blog">
           <div className="welcome-topbar">
             <a className="vlog-back" href="#">
               ← All planners

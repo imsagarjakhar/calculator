@@ -36,10 +36,10 @@ test("publisher does not accept credentials before its API is configured", async
   await expect(
     page.getByRole("dialog").locator('input[type="password"]'),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Close vlog window" }).click();
+  await page.getByRole("button", { name: "Close blog window" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
-test("vlogs are loaded at runtime, searchable and readable without login", async ({
+test("blogs are loaded at runtime, searchable and readable without login", async ({
   page,
   context,
 }, info) => {
@@ -76,7 +76,7 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await page
     .locator(".vlog-choice")
     .screenshot({ path: info.outputPath("vlog-entry.png") });
-  await page.getByRole("link", { name: /View all vlogs/ }).click();
+  await page.getByRole("link", { name: /View all blogs/ }).click();
   await expect(page).toHaveURL(/#vlogs$/);
   await expect(page.locator("#homeScreen")).toBeHidden();
   await expect(page.locator(".vlog-message")).toHaveCount(7);
@@ -84,7 +84,7 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
   await page
     .locator("#vlogs")
     .screenshot({ path: info.outputPath("vlog-feed.png") });
-  await page.getByLabel("Find a vlog").fill("story 3");
+  await page.getByLabel("Find a blog").fill("story 3");
   await expect(page.locator(".vlog-message")).toHaveCount(1);
   await page
     .getByRole("button", { name: "Read Money story 3", exact: true })
@@ -108,15 +108,15 @@ test("vlogs are loaded at runtime, searchable and readable without login", async
     .screenshot({ path: info.outputPath("vlog-reader.png") });
   if (info.project.name === "mobile")
     await page
-      .getByRole("button", { name: "← All vlogs", exact: true })
+      .getByRole("button", { name: "← All blogs", exact: true })
       .click();
-  await page.getByLabel("Find a vlog").fill("");
+  await page.getByLabel("Find a blog").fill("");
   if (info.project.name === "desktop")
     await page
       .locator(".vlog-mailbox")
       .screenshot({ path: info.outputPath("vlog-mailbox.png") });
   posts = [sample(8), ...posts];
-  await page.getByRole("button", { name: "Refresh vlogs" }).click();
+  await page.getByRole("button", { name: "Refresh blogs" }).click();
   await expect(page.locator(".vlog-message").first()).toContainText(
     "Money story 8",
   );
@@ -205,7 +205,7 @@ test("mailbox ignores stale article responses and lets readers retry a failed lo
     );
     if (info.project.name === "mobile")
       await page
-        .getByRole("button", { name: "← All vlogs", exact: true })
+        .getByRole("button", { name: "← All blogs", exact: true })
         .click();
     fail = true;
     await page
@@ -334,9 +334,9 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   );
   expect(storage).not.toContain(password);
   expect(storage).not.toContain(session);
-  await page.getByRole("link", { name: /View all vlogs/ }).click();
-  await page.getByRole("button", { name: "+ Add vlog", exact: true }).click();
-  await page.getByLabel("Title", { exact: true }).fill("My first finance vlog");
+  await page.getByRole("link", { name: /View all blogs/ }).click();
+  await page.getByRole("button", { name: "+ Add blog", exact: true }).click();
+  await page.getByLabel("Title", { exact: true }).fill("My first finance blog");
   await page
     .getByLabel("Short introduction", { exact: true })
     .fill("A clear monthly investing habit.");
@@ -344,15 +344,15 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
     .getByLabel("Content", { exact: true })
     .fill("Invest ₹20,000 with a plan.\nKeep an emergency reserve.");
   await page.screenshot({ path: info.outputPath("vlog-editor.png") });
-  await page.getByRole("button", { name: "Publish vlog", exact: true }).click();
+  await page.getByRole("button", { name: "Publish blog", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".vlog-message")).toContainText(
-    "My first finance vlog",
+    "My first finance blog",
   );
   const visitor = await context.newPage();
   await visitor.goto(new URL(app + "#vlogs", page.url()).href);
   await expect(visitor.locator(".vlog-message")).toContainText(
-    "My first finance vlog",
+    "My first finance blog",
   );
   await expect(visitor.getByRole("button", { name: /Login/ })).toBeVisible();
   await expect(
@@ -360,17 +360,17 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   ).toHaveCount(0);
   await visitor.close();
   await page
-    .getByRole("button", { name: "Read My first finance vlog", exact: true })
+    .getByRole("button", { name: "Read My first finance blog", exact: true })
     .click();
   await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page
     .getByLabel("Title", { exact: true })
-    .fill("My updated finance vlog");
+    .fill("My updated finance blog");
   await page
     .getByRole("button", { name: "Publish changes", exact: true })
     .click();
   await expect(page.locator(".vlog-message")).toContainText(
-    "My updated finance vlog",
+    "My updated finance blog",
   );
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Remove", exact: true }).click();

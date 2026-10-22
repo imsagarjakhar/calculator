@@ -1,18 +1,18 @@
 .site-footer {
   padding: 32px 24px 48px;
-  color: var(--muted, #abc1cd);
+  color: var(--muted, #3f5a6a);
 }
 .site-footer-inner {
   max-width: 1280px;
   margin: 0 auto;
   text-align: center;
-  border-top: 1px solid var(--line, #284b5d);
+  border-top: 1px solid var(--line, #ced9d3);
   padding-top: 28px;
 }
 .site-footer-brand {
   font-size: 18px;
   font-weight: 700;
-  color: var(--ink, #eff7fc);
+  color: var(--ink, #1c5578);
   text-decoration: none;
 }
 .site-footer p {
@@ -30,7 +30,7 @@
 }
 .site-footer nav a {
   font-size: 13px;
-  color: var(--accent, #2bdbb0);
+  color: var(--accent, #176b52);
   text-underline-offset: 4px;
 }
 .site-footer summary {

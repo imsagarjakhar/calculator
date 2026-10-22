@@ -134,10 +134,12 @@ test("search engines can read content, links and consistent metadata without Jav
     await expect(staticPage.locator("#welcomeTitle")).toContainText(
       "Financial planning",
     );
-    await expect(staticPage.locator("#financialPlanningTitle")).toHaveText("How to do financial planning, step by step");
+    await expect(staticPage.locator("#financialPlanningTitle")).toHaveText(
+      "How to do financial planning, step by step",
+    );
     await expect(staticPage.locator(".planning-steps > li")).toHaveCount(6);
-    await expect(staticPage.locator(".welcome-kicker")).toHaveText(
-      "Money Planner",
+    await expect(staticPage.locator(".home-wordmark")).toHaveText(
+      "Financial AI Planner",
     );
     await expect(staticPage.locator(".growth-choice")).toHaveAttribute(
       "href",
@@ -166,14 +168,16 @@ test("search engines can read content, links and consistent metadata without Jav
         canonical,
       );
       const title = await staticPage.title();
-      expect(title).toContain("Money Planner");
+      expect(title).toContain("Financial AI Planner");
       const description = staticPage.locator('meta[name="description"]');
       await expect(description).toHaveCount(1);
       const descriptionText = await description.getAttribute("content");
       expect(descriptionText!.length).toBeGreaterThan(60);
       for (const [attribute, name, value] of [
-        ["property", "og:title", title], ["property", "og:description", descriptionText!],
-        ["property", "og:url", canonical], ["name", "twitter:title", title],
+        ["property", "og:title", title],
+        ["property", "og:description", descriptionText!],
+        ["property", "og:url", canonical],
+        ["name", "twitter:title", title],
         ["name", "twitter:description", descriptionText!],
       ]) {
         const tag = staticPage.locator(`meta[${attribute}="${name}"]`);

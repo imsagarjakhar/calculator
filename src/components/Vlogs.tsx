@@ -93,13 +93,13 @@ function Modal({
     >
       <div className="vlog-modal-heading">
         <div>
-          <p className="eyebrow">Money Planner / VLOGS</p>
+          <p className="eyebrow">Financial AI Planner / BLOG</p>
           <h2 id="vlogModalTitle">{title}</h2>
         </div>
         <button
           type="button"
           className="vlog-close"
-          aria-label="Close vlog window"
+          aria-label="Close blog window"
           disabled={busy}
           onClick={close}
         >
@@ -249,7 +249,7 @@ export function VlogProvider({
       setDraft({ ...blank });
       setOriginal(undefined);
       setNotice(
-        "Published. Your vlog is now in the public repository; no website deployment is needed.",
+        "Published. Your blog is now in the public repository; no website deployment is needed.",
       );
       setError("");
     } catch (problem) {
@@ -276,7 +276,7 @@ export function VlogProvider({
       if (mounted.current) {
         revision.current++;
         setPosts(result);
-        setNotice("Vlog removed from the feed.");
+        setNotice("Blog removed from the feed.");
       }
     } catch (problem) {
       if (mounted.current) setError(errorText(problem));
@@ -334,14 +334,14 @@ export function VlogProvider({
             setSession(result);
             setLoginOpen(false);
             setNotice(
-              `Welcome, ${result.username}. You can now add or edit vlogs.`,
+              `Welcome, ${result.username}. You can now add or edit blogs.`,
             );
           }}
         />
       )}
       {editorOpen && session && (
         <Modal
-          title={original ? "Edit vlog" : "Add a vlog"}
+          title={original ? "Edit blog" : "Add a blog"}
           close={closeEditor}
           busy={busy}
           wide
@@ -422,7 +422,7 @@ export function VlogProvider({
                   ? "Publishing…"
                   : original
                     ? "Publish changes"
-                    : "Publish vlog"}
+                    : "Publish blog"}
               </button>
               <button type="button" disabled={busy} onClick={closeEditor}>
                 Cancel
@@ -464,7 +464,7 @@ function LoginModal({
   return (
     <Modal title="Publisher login" close={close} busy={busy}>
       <p className="vlog-helper">
-        For the Money Planner site publisher. Visitors can read every vlog
+        For the Financial AI Planner site publisher. Visitors can read every blog
         without logging in.
       </p>
       {!publisherConfigured ? (
@@ -534,7 +534,7 @@ export function VlogAccountButton() {
             onClick={hub.create}
             disabled={hub.busy}
           >
-            + Add vlog
+            + Add blog
           </button>
           <button
             type="button"

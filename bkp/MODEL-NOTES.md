@@ -4,7 +4,7 @@ These notes describe the original static calculators retained in this folder. Re
 
 ## Search visibility
 
-The production domain in `CNAME` is `intimetec.org`. Both pages include unique titles and descriptions, canonical HTTPS URLs, sharing metadata and JSON-LD page information. The home page also declares the Money Planner site name and includes visible descriptions of the calculators. `robots.txt` permits crawling and points to `sitemap.xml`, which lists the three indexable pages. Growth and Survival are views of the home page, not separate sitemap URLs.
+The production domain in `CNAME` is `intimetec.org`. Both pages include unique titles and descriptions, canonical HTTPS URLs, sharing metadata and JSON-LD page information. The home page also declares the Financial AI Planner site name and includes visible descriptions of the calculators. `robots.txt` permits crawling and points to `sitemap.xml`, which lists the three indexable pages. Growth and Survival are views of the home page, not separate sitemap URLs.
 
 Deploy `robots.txt` and `sitemap.xml` at the domain root along with the production HTML, CSS and JavaScript files. If the production domain changes, update `CNAME`, both pages' canonical/sharing/JSON-LD URLs, and the robots/sitemap URLs together.
 

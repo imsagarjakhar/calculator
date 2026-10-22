@@ -1,6 +1,6 @@
 function reactHeader(kind: string, title: string, description: string) {
   return {
-    eyebrow: `Money Planner / ${kind === "budget" ? "SALARY & BUDGET" : "LOAN PAYOFF"}`,
+    eyebrow: `Financial AI Planner / ${kind === "budget" ? "SALARY & BUDGET" : "LOAN PAYOFF"}`,
 
     title,
     description,
@@ -46,10 +46,22 @@ function reactHeader(kind: string, title: string, description: string) {
   };
 }
 
+export function budgetHeading(currency = "INR") {
+  const names: Record<string, string> = {
+    INR: "rupee",
+    USD: "dollar",
+    SAR: "Saudi riyal",
+    AED: "UAE dirham",
+    EUR: "euro",
+    GBP: "pound",
+  };
+  return `A place for every ${names[currency] ?? "amount"}. A plan for what’s next.`;
+}
+
 export const headerConfig = {
   budget: reactHeader(
     "budget",
-    "A place for every rupee. A plan for what’s next.",
+    budgetHeading(),
     "Give your salary a purpose, make room for life, and see what a year of investing could become.",
   ),
 
@@ -60,7 +72,7 @@ export const headerConfig = {
   ),
 
   growth: {
-    eyebrow: "Money Planner / GROWTH PLANNER",
+    eyebrow: "Financial AI Planner / GROWTH PLANNER",
 
     title: "From your salary to your goal",
 
@@ -133,7 +145,7 @@ export const headerConfig = {
   },
 
   custom: {
-    eyebrow: "Money Planner / CUSTOM PLAN",
+    eyebrow: "Financial AI Planner / CUSTOM PLAN",
 
     title: "Your money, month by month",
 
@@ -214,7 +226,7 @@ export const headerConfig = {
   },
 
   freedom: {
-    eyebrow: "Money Planner / FINANCIAL FREEDOM",
+    eyebrow: "Financial AI Planner / FINANCIAL FREEDOM",
 
     title: "When could you be financially free?",
 
@@ -290,7 +302,7 @@ export const headerConfig = {
   },
 
   bucket: {
-    eyebrow: "Money Planner / RETIREMENT BUCKETS",
+    eyebrow: "Financial AI Planner / RETIREMENT BUCKETS",
 
     title: "One retirement.Three purposeful buckets.",
 
@@ -362,7 +374,7 @@ export const headerConfig = {
   },
 
   survival: {
-    eyebrow: "Money Planner / CORPUS SURVIVAL",
+    eyebrow: "Financial AI Planner / CORPUS SURVIVAL",
 
     title: "How long will your money last?",
 

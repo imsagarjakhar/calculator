@@ -1,6 +1,6 @@
 /* Shared table layout: allow containers to shrink, never split money amounts. */
 main,.card,.panel,.freedom-layout>*,.two-columns>*,.investment-schedule,details,form{min-width:0}
-.table-wrap{width:100%;max-width:100%;min-width:0;overflow:auto;overscroll-behavior-x:contain;border-radius:8px;scrollbar-color:#527589 var(--bg);scrollbar-width:auto}
+.table-wrap{width:100%;max-width:100%;min-width:0;overflow:auto;overscroll-behavior-x:contain;border-radius:8px;scrollbar-color:#ced9d3 var(--bg);scrollbar-width:auto}
 .panel.schedule{padding:0}
 .table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .table-wrap table{width:100%;min-width:0}
@@ -9,7 +9,7 @@ main,.card,.panel,.freedom-layout>*,.two-columns>*,.investment-schedule,details,
 .table-wrap tbody td,.table-wrap tfoot td{white-space:nowrap}
 .table-wrap th:first-child,.table-wrap td:first-child{padding-left:12px}
 .table-wrap tbody th:first-child{white-space:normal;min-width:76px;max-width:150px;overflow-wrap:break-word}
-.table-wrap.is-scrollable thead th:first-child{position:sticky;left:0;z-index:4;background:#123348;box-shadow:1px 0 var(--line)}
+.table-wrap.is-scrollable thead th:first-child{position:sticky;left:0;z-index:4;background:#f5f6f3;box-shadow:1px 0 var(--line)}
 .table-wrap.is-scrollable tbody th:first-child{position:sticky;left:0;z-index:2;background:var(--card);box-shadow:1px 0 var(--line)}
 .table-scroll-hint{font-size:11px;color:var(--muted);margin:8px 0;line-height:1.6}
 .table-scroll-hint[hidden]{display:none}

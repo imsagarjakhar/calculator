@@ -69,7 +69,7 @@ for (const page of [
   const policy =
     "default-src 'none'; script-src 'self' " +
     [...new Set(inline)].join(" ") +
-    "; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src " +
+    "; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; connect-src " +
     connections +
     "; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'none'";
   source = source.replace(

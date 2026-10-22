@@ -1251,7 +1251,7 @@ export function LoanPage() {
         </div>
       </section>
       <footer className="budget-foot">
-        <span>Money Planner / LESS GUESSWORK, MORE DIRECTION</span>
+        <span>Financial AI Planner / LESS GUESSWORK, MORE DIRECTION</span>
         <p>
           An educational scenario model using your inputs. These resources
           inform the methods; the authors do not endorse this tool. No

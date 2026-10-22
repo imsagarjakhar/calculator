@@ -18,46 +18,46 @@
   display: flex;
   gap: 22px;
   align-items: center;
-  background: #102f42;
+  background: #f5f6f3;
 }
 .vlog-user {
   color: var(--muted);
   font-size: 12px;
 }
 .planner-choices .vlog-choice {
-  background: linear-gradient(120deg, #173c40, #1c3047);
+  background: linear-gradient(120deg, #f5f6f3, #f5f6f3);
 }
 .vlog-choice .choice-icon {
-  color: #2bdbb0;
+  color: #176b52;
 }
 .vlog-back {
-  color: var(--text, #f1f7fa);
+  color: var(--text, #27566d);
   text-decoration: none;
   padding: 12px 0;
 }
 .vlog-back:hover {
-  color: #2bdbb0;
+  color: #176b52;
 }
 .vlog-back:focus-visible {
-  outline: 2px solid #2bdbb0;
+  outline: 2px solid #94ad9f;
   outline-offset: 4px;
 }
 .vlog-error {
   padding: 14px 16px;
-  background: #512c3433;
-  border: 1px solid #80515c;
+  background: #f5f6f333;
+  border: 1px solid #d9ced1;
   border-radius: 10px;
-  color: #ffd5d5;
+  color: #781c1c;
   font-size: 13px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
 .vlog-notice {
   padding: 14px 16px;
-  background: #2bdbb00d;
-  border: 1px solid #2bdbb04d;
+  background: #21735f0d;
+  border: 1px solid #94ad9f4d;
   border-radius: 10px;
-  color: #a7eddc;
+  color: #1c7852;
   font-size: 13px;
 }
 .vlog-modal {
@@ -65,10 +65,10 @@
   max-height: calc(100dvh - 28px);
   overflow: auto;
   padding: 28px;
-  background: #0d2b3d;
-  border: 1px solid #35636c;
+  background: #f5f6f3;
+  border: 1px solid #ced9d3;
   border-radius: 20px;
-  color: #f1f7fa;
+  color: #27566d;
   box-shadow: 0 24px 90px #0009;
   font:
     15px/1.5 Arial,
@@ -79,7 +79,7 @@
   width: min(760px, calc(100vw - 28px));
 }
 .vlog-modal::backdrop {
-  background: #03111cc9;
+  background: #f9faf8c9;
   backdrop-filter: blur(4px);
 }
 .vlog-modal-heading {
@@ -91,7 +91,7 @@
 }
 .vlog-modal-heading .eyebrow {
   font-size: 10px;
-  color: #2bdbb0;
+  color: #176b52;
   margin: 0 0 8px;
 }
 .vlog-modal h2 {
@@ -112,7 +112,7 @@
   margin-top: 22px;
 }
 .vlog-form label {
-  color: #b0c3cf;
+  color: #405969;
   font-size: 12px;
 }
 .vlog-form input,
@@ -121,11 +121,11 @@
   width: 100%;
   display: block;
   margin-top: 7px;
-  border: 1px solid #315366;
+  border: 1px solid #ced9d3;
   border-radius: 9px;
   padding: 12px;
-  background: #071a26;
-  color: #f1f7fa;
+  background: #f9faf8;
+  color: #27566d;
   font:
     16px/1.5 Arial,
     Helvetica,
@@ -136,7 +136,7 @@
 }
 .vlog-form input:focus,
 .vlog-form textarea:focus {
-  outline: 2px solid #2bdbb0;
+  outline: 2px solid #94ad9f;
   outline-offset: 1px;
 }
 .vlog-body-input {
@@ -144,7 +144,7 @@
 }
 .vlog-helper,
 .vlog-byline {
-  color: #b0c3cf;
+  color: #405969;
   font-size: 12px;
   line-height: 1.8;
 }
@@ -155,7 +155,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  border-top: 1px solid #24485c;
+  border-top: 1px solid #ced9d3;
   padding-top: 20px;
 }
 .vlog-form-actions button {
