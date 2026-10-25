@@ -1135,6 +1135,185 @@
     text-align: center;
   }
 }
+.loan-asof {
+  max-width: 350px;
+  margin: 18px 0 24px;
+}
+.loan-time-plot {
+  position: relative;
+}
+.loan-direct-comparison { margin: 24px 0; }
+.loan-scenario-return { margin: 18px 0; }
+.loan-reference-choice { margin-top: 16px; }
+.loan-scenario-return > .budget-field { max-width: 260px; margin: 16px 0 10px; }
+.loan-return-badge {
+  display: inline-block; padding: 8px 14px; border-radius: 24px;
+  background: #e5f0e8; color: #176b52; font-size: 12px; font-weight: 650;
+}
+.loan-decision-lab,
+.loan-advanced-scenarios { min-width: 0; max-width: 100%; }
+.loan-advanced-scenarios select { min-width: 0; width: 100%; }
+.loan-comparison-basis {
+  padding: 12px 16px;
+  border-left: 3px solid #176b52;
+  border-radius: 0 8px 8px 0;
+  background: #eaf2e7;
+  color: #345344;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.loan-summary-assets {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #cbdcd2;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  font-size: 12px;
+  color: #416351;
+}
+.loan-summary-assets strong { overflow-wrap: anywhere; }
+.loan-summary-assets p {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.loan-chart-heading,
+.loan-metric-label {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.loan-metric-label {
+  font-size: 12px;
+  color: #52685e;
+}
+.loan-info-help {
+  display: inline-block;
+  font-weight: 400;
+}
+.loan-info-help summary {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid #adc6b8;
+  border-radius: 50%;
+  color: #176b52;
+  background: #f5faf5;
+  cursor: pointer;
+  font: 600 13px Georgia, serif;
+  list-style: none;
+}
+.loan-info-help summary::-webkit-details-marker { display: none; }
+.loan-info-help summary:focus-visible {
+  outline: 2px solid #176b52;
+  outline-offset: 3px;
+}
+.loan-info-help[open] { flex-basis: 100%; }
+.loan-info-help p {
+  margin: 8px 0 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #eaf2e7;
+  color: #345344;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.loan-baseline-dot {
+  fill: #9b662f;
+  stroke: white;
+  stroke-width: 1.5;
+}
+.loan-scenario-details {
+  margin: 18px 0;
+  padding: 12px 0;
+  border-block: 1px solid #d8e3d9;
+  font-size: 12px;
+  color: #416351;
+}
+.loan-scenario-details summary { cursor: pointer; }
+.loan-time-plot svg {
+  cursor: crosshair;
+}
+.loan-time-tooltip {
+  position: absolute;
+  top: 26px;
+  z-index: 2;
+  width: 250px;
+  max-width: calc(100% - 16px);
+  padding: 14px 16px;
+  border: 1px solid #cbdcd2;
+  border-radius: 12px;
+  background: #fbfdfb;
+  box-shadow: 0 6px 24px #183e2926;
+  color: #234638;
+  font-size: 12px;
+  line-height: 1.6;
+  pointer-events: none;
+}
+.loan-time-tooltip > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #176b52;
+}
+.loan-time-tooltip > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.loan-time-tooltip b {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .loan-time-tooltip { display: none; }
+}
+.loan-input-method {
+  margin: 14px 0 18px;
+}
+.loan-calculated {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
+  margin: 20px 0 10px;
+  background: #eaf2e7;
+  border-radius: 12px;
+}
+.loan-calculated dt {
+  font-size: 12px;
+  color: #416351;
+  line-height: 1.6;
+}
+.loan-calculated dd {
+  margin: 8px 0 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: #176b52;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .loan-editor .loan-month-field {
+    grid-column: 1 / -1;
+  }
+  .loan-calculated {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .loan-calculated > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .loan-calculated dd {
+    margin: 0;
+    text-align: right;
+  }
+}
 @media print {
   .loan-reading,
   .loan-file {

@@ -3,6 +3,7 @@ import { memo, type ReactNode } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
 import mount from "planner:controller:freedom";
+import { InfoTooltip } from "../components/InfoTooltip";
 function FieldInfo({
   name,
   id,
@@ -13,12 +14,7 @@ function FieldInfo({
   children: ReactNode;
 }) {
   return (
-    <details className="freedom-field-info">
-      <summary aria-label={`About ${name}`}>
-        <span aria-hidden="true">i</span>
-      </summary>
-      <div id={id}>{children}</div>
-    </details>
+    <InfoTooltip label={`About ${name}`} id={id}>{children}</InfoTooltip>
   );
 }
 export const FreedomPage = memo(function FreedomPage() {

@@ -1,4 +1,11 @@
+import { originalLoanSchedule, resolveLoanPlan } from "./origination.ts";
+import { additionalRentalFunding, assetValueAt, netRent } from "./assets.ts";
+
 export type Loan = {
+  inputMode?: "original" | "balance";
+  originalAmount?: number;
+  firstEmiMonth?: string;
+  lastEmiMonth?: string;
   id: string;
   name: string;
   balance: number;
@@ -87,7 +94,7 @@ export const initialLoanPlan: LoanPlan = {
   coverMonths: 6,
   extra: 10000,
   horizon: 60,
-  returns: 10,
+  returns: 12,
   investmentFee: 0.5,
   gainsTax: 0,
   split: 50,
@@ -117,13 +124,43 @@ export const initialLoanPlan: LoanPlan = {
   ],
 };
 export function payment(loan: Loan) {
+  if (loan.inputMode === "original")
+    return originalLoanSchedule(loan, loan.firstEmiMonth ?? "").emi;
   if (loan.emi > 0) return loan.emi;
   const r = loan.rate / 1200;
   return r === 0
     ? loan.balance / loan.months
     : (loan.balance * r) / (1 - Math.pow(1 + r, -loan.months));
 }
+
+/** Regular-payment payoff term; null means this EMI does not reduce the loan. */
+export function loanTimelineMonths(loan: Loan): number | null {
+  if (!Number.isFinite(loan.balance) || loan.balance <= 0) return 0;
+  if (loan.inputMode === "original" || loan.emi === 0) return loan.months;
+  const monthlyRate = loan.rate / 1200;
+  if (loan.emi <= loan.balance * monthlyRate) return null;
+  if (monthlyRate === 0) return Math.ceil(loan.balance / loan.emi - 1e-9);
+  return Math.ceil(
+    -Math.log1p((-loan.balance * monthlyRate) / loan.emi) /
+      Math.log1p(monthlyRate) -
+      1e-9,
+  );
+}
+
+/** UI timeline: the latest regular loan ending, with a 600-month model limit. */
+export function loanComparisonHorizon(plan: LoanPlan) {
+  if (!Array.isArray(plan.loans)) return 1;
+  const resolved = resolveLoanPlan(plan);
+  return Math.min(
+    600,
+    Math.max(
+      1,
+      ...resolved.loans.map((loan) => loanTimelineMonths(loan) ?? 600),
+    ),
+  );
+}
 export function cashFlow(p: LoanPlan) {
+  p = resolveLoanPlan(p);
   const emis = p.loans
     .filter((l) => l.balance > 0)
     .reduce((s, l) => s + payment(l), 0);
@@ -139,7 +176,19 @@ export function cashFlow(p: LoanPlan) {
     : p.useAvailable
       ? Math.max(0, capacity)
       : p.extra;
+  const baseBudget =
+    manual && p.repaymentBudget !== undefined
+      ? p.repaymentBudget
+      : emis + extra;
+  const additionalRent = additionalRentalFunding(p.assets ?? []);
+  const totalFunding = baseBudget + additionalRent;
   return {
+    baseBudget,
+    additionalRent,
+    netRent: (p.assets ?? []).reduce((sum, asset) => sum + netRent(asset), 0),
+    totalFunding,
+    availableExtra: Math.max(0, totalFunding - emis),
+    fundingGap: Math.max(0, emis - totalFunding),
     emis,
     capacity: available,
     extra,
@@ -156,7 +205,7 @@ export function withRepaymentBudget(p: LoanPlan): LoanPlan {
     repaymentBudget:
       p.fundingMode === "manual" && p.repaymentBudget !== undefined
         ? p.repaymentBudget
-        : cashFlow(p).commitment,
+        : cashFlow(p).baseBudget,
     useSalaryInvestment: p.useSalaryInvestment ?? false,
   };
 }
@@ -177,7 +226,7 @@ export function validateLoanPlan(value: unknown): string[] {
     ) ||
     !range(p.coverMonths, 1, 24) ||
     !Number.isInteger(p.coverMonths) ||
-    !range(p.horizon, 12, 360) ||
+    !range(p.horizon, 1, 600) ||
     !Number.isInteger(p.horizon) ||
     !range(p.returns, -99, 100) ||
     !range(p.investmentFee, 0, 10) ||
@@ -185,7 +234,7 @@ export function validateLoanPlan(value: unknown): string[] {
     !range(p.split, 0, 100)
   )
     return [
-      "Check the income, dates and scenario assumptions. Amounts must be between 0 and 1 billion; the horizon is 12–360 whole months.",
+      "Check the income, dates and scenario assumptions. Amounts must be between 0 and 1 billion; the model timeline is 1–600 whole months.",
     ];
   if (!Array.isArray(p.loans) || p.loans.length > 20)
     return ["Use a list with no more than 20 loans."];
@@ -215,6 +264,17 @@ export function validateLoanPlan(value: unknown): string[] {
     ];
   if (new Set(p.loans.map((l) => l.id)).size !== p.loans.length)
     return ["Loan identifiers must be unique."];
+  for (const [index, loan] of p.loans.entries()) {
+    if (
+      loan.inputMode !== undefined &&
+      !["original", "balance"].includes(loan.inputMode)
+    )
+      return [`Choose a valid input method for loan ${index + 1}.`];
+    if (loan.inputMode === "original") {
+      const result = originalLoanSchedule(loan, p.start);
+      if (result.error) return [`Loan ${index + 1}: ${result.error}`];
+    }
+  }
   if (
     (p.fundingMode !== undefined &&
       !["manual", "salary"].includes(p.fundingMode)) ||
@@ -275,6 +335,13 @@ export type LoanMonth = {
   closing: number;
 };
 export type Month = {
+  budget: number;
+  rent: number;
+  additionalRent: number;
+  assetValue: number;
+  spareCash: number;
+  shortfall: number;
+  arrears: number;
   month: number;
   interest: number;
   fees: number;
@@ -289,6 +356,11 @@ export type Month = {
   loans: LoanMonth[];
 };
 export type Simulation = {
+  assetValue: number;
+  spareCash: number;
+  rentReceived: number;
+  fundingGap: number;
+  arrears: number;
   strategy: Strategy;
   rows: Month[];
   interest: number;
@@ -307,7 +379,14 @@ export function simulate(
   strategy: Strategy,
   annualReturn = p.returns,
 ): Simulation {
-  const budget = cashFlow(p).commitment;
+  p = resolveLoanPlan(p);
+  const baseBudget = cashFlow(p).baseBudget;
+  const assets = p.assets ?? [];
+  const cashRate = Math.expm1(Math.log1p((p.cashReturn ?? 0) / 100) / 12);
+  let spareCash = p.lumpSum ?? 0,
+    rentReceived = 0,
+    fundingGap = 0,
+    arrears = 0;
   const balances = p.loans.map((l) => l.balance);
   const monthlyReturn =
     Math.pow((1 + annualReturn / 100) * (1 - p.investmentFee / 100), 1 / 12) -
@@ -321,22 +400,38 @@ export function simulate(
   const paidOff: Record<string, number> = Object.create(null);
   const rows: Month[] = [];
   for (let month = 1; month <= p.horizon; month++) {
+    const additionalRent = additionalRentalFunding(assets, month);
+    const budget = baseBudget + additionalRent;
+    const rent = assets.reduce((sum, asset) => sum + netRent(asset, month), 0);
+    rentReceived += rent;
+    spareCash *= 1 + cashRate;
+    arrears += Math.max(0, -budget);
     const growth = portfolio * monthlyReturn;
     portfolio += growth;
-    const details: LoanMonth[] = p.loans.map((l, i) => {
+    const due = p.loans.map((l, i) => {
       const opening = balances[i];
       const charge = (opening * l.rate) / 1200;
       const required = Math.min(
         opening + charge,
         opening > 1e-7 ? payment(l) : 0,
       );
-      balances[i] = Math.max(0, opening + charge - required);
+      return { opening, charge, required };
+    });
+    const totalDue = due.reduce((sum, item) => sum + item.required, 0);
+    const shortfall = Math.max(0, totalDue - budget);
+    fundingGap += shortfall;
+    const factor =
+      totalDue > 0 ? Math.min(1, Math.max(0, budget) / totalDue) : 1;
+    const details: LoanMonth[] = due.map((item, i) => {
+      const l = p.loans[i];
+      const required = item.required * factor;
+      balances[i] = Math.max(0, item.opening + item.charge - required);
       if (balances[i] < 1e-7) balances[i] = 0;
       return {
         id: l.id,
         name: l.name,
-        opening,
-        interest: charge,
+        opening: item.opening,
+        interest: item.charge,
         required,
         extra: 0,
         fee: 0,
@@ -373,7 +468,8 @@ export function simulate(
     const monthFees = details.reduce((s, l) => s + l.fee, 0);
     const monthInterest = details.reduce((s, l) => s + l.interest, 0);
     const credit = details.reduce(
-      (s, l, i) => s + (l.interest * p.loans[i].taxRelief) / 100,
+      (s, l, i) =>
+        s + (Math.min(l.required, l.interest) * p.loans[i].taxRelief) / 100,
       0,
     );
     // Credits are modeled as monthly cash refunds, invested after all debt payments.
@@ -392,6 +488,13 @@ export function simulate(
     if (debt < 1e-7 && debtFree === null) debtFree = month;
     const gainsTax = (Math.max(0, portfolio - contributed) * p.gainsTax) / 100;
     rows.push({
+      budget,
+      rent,
+      additionalRent,
+      assetValue: assetValueAt(assets, month),
+      spareCash,
+      shortfall,
+      arrears,
       month,
       interest: monthInterest,
       fees: monthFees,
@@ -402,12 +505,25 @@ export function simulate(
       taxCredit: credit,
       debt,
       portfolio,
-      net: portfolio - gainsTax + p.emergency + p.reserve * month - debt,
+      net:
+        portfolio -
+        gainsTax +
+        spareCash +
+        assetValueAt(assets, month) +
+        p.emergency +
+        p.reserve * month -
+        debt -
+        arrears,
       loans: details,
     });
   }
   const last = rows[rows.length - 1];
   return {
+    assetValue: last.assetValue,
+    spareCash,
+    rentReceived,
+    fundingGap,
+    arrears,
     strategy,
     rows,
     interest,
@@ -423,6 +539,7 @@ export function simulate(
   };
 }
 export function compare(p: LoanPlan) {
+  p = resolveLoanPlan(p);
   const errors = validateLoanPlan(p);
   if (errors.length) return { errors, results: [] as Simulation[] };
   if (!p.loans.some((l) => l.balance > 0))
@@ -433,13 +550,13 @@ export function compare(p: LoanPlan) {
       results: [] as Simulation[],
     };
   const cash = cashFlow(p);
-  if (cash.capacity < -1e-6)
+  if (cash.capacity + cash.additionalRent < -1e-6)
     errors.push(
       p.fundingMode === "manual"
         ? "The total repayment budget does not cover all required EMIs. Increase it or review the loan payments before comparing."
         : "Income does not cover living costs, reserves, the buffer and required EMIs. Reduce commitments or review the income before comparing strategies.",
     );
-  else if (cash.unassigned < -1e-6)
+  else if (p.fundingMode !== "manual" && cash.unassigned < -1e-6)
     errors.push(
       "The extra monthly amount exceeds your available budget. Lower it or change the income and expense inputs.",
     );

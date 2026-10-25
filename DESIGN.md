@@ -45,24 +45,48 @@ income-entry prompt instead of claiming an empty budget is fully assigned.
 
 The loan planner opens with an empty personal loan list and an optional example.
 Its primary task is a neutral decision comparison: declare extra/total repayment
-money or import a salary snapshot, list loans, then optionally add spare savings
+money, list loans, then optionally add spare savings
 and rental assets. Rank interest rates without labeling debt morally. Cash-only
 debt and net-wealth charts use the same starting wealth and non-rental commitment,
 include lost rent and sale/settlement costs, and keep emergency cash protected.
-The main comparison shows one balance graph per loan and a two-path net-wealth
-graph: repay extra versus invest the surplus while continuing required EMIs.
-The investment return can be adjusted beside the graph; fees and tax remain
-explicit. Extra payments are allocated across loans once, never duplicated per
-loan. These primary graphs use only the declared monthly budget. Spare-savings
-and asset-sale scenarios sit under a separate optional disclosure, along with
-the original four-strategy detail view. Negative funding is visible rather
-than silently financed. Never present a modeled asset sale as a recommendation.
+The main comparison shows a cumulative-payment graph per loan: real calendar
+months on X and money paid on Y. Each loan has its own first/final EMI timeline,
+with principal, total interest and total scheduled payments shown together.
+Original-input loans include the full scheduled history; lender-balance loans
+show payments from the comparison month onward and say earlier payments are
+excluded. Fixed-rate regular payments are assumed, rather than claiming these
+are verified payment records.
 
-Loan funding is a single total budget, covering required EMIs first. One checkbox
-copies the salary planner's saved monthly investment allocation; when unchecked,
-one amount input replaces the read-only source value. No second salary form or
-extra-versus-total selector is shown. Importing changes only this budget/source
-and matching currency, never existing loans, assets or emergency/spare savings.
+A separate investment graph shows money left after regular EMIs invested each
+month, including EMIs released as loans finish and additional asset earnings.
+Plot investment value and total contributions from zero; show the assumed annual
+return beside this graph. Do not include property values in this investment
+corpus. The overall timeline is derived from the latest loan ending, with a
+600-month model limit, rather than a manually entered horizon. Retained asset
+values and spare cash remain in optional wealth comparisons; explicit sale/use
+of savings scenarios remain separate. Negative funding stays visible.
+
+Asset income fields use “Monthly earnings” rather than rent-only language.
+Show gross and net annual income yields using current asset value. Net yield
+deducts vacancy, running costs and entered taxes; neither yield includes price
+appreciation or loan payments. A zero asset value shows no yield instead of an
+infinite percentage. Keep stored rent/rentIncluded fields compatible with reports.
+
+Loan funding is one manually entered total repayment budget, covering required
+EMIs first. Fresh plans start at zero. Do not read the salary planner's saved
+investment amount or show a salary checkbox. Previously salary-linked budgets
+reset to zero on migration while preserving entered loans and assets. Explicit
+report imports restore their stated amounts as manual budgets.
+
+New loans use original principal, annual rate, first EMI month and final EMI
+month. Both endpoint months count toward the original term. Calculate the fixed
+EMI from that term and the balance immediately before the comparison month's
+payment, assuming all earlier scheduled EMIs were paid and no prior prepayments.
+Show estimated EMI, remaining months and outstanding balance beside the inputs.
+Changing the comparison month recalculates every original-input loan. Use the
+current lender balance option when historical rates/payments changed. Preserve
+older balance-based plans and original inputs in reports; never trust imported
+cached EMI/balance values over the original schedule inputs.
 
 The home page has a shared currency selector. The browser remembers this choice
 across routes; planner selectors update the same preference. Home guide examples,

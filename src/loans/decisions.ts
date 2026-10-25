@@ -1,16 +1,15 @@
 import {
   cashFlow,
   payment,
+  simulate,
   validateLoanPlan,
   type LoanPlan,
   type LoanAsset,
 } from "./model.ts";
+import { resolveLoanPlan } from "./origination.ts";
+import { netRent } from "./assets.ts";
+export { netRent } from "./assets.ts";
 
-export const netRent = (asset: LoanAsset, month = 1) =>
-  asset.rent *
-    Math.pow(1 + asset.rentGrowth / 100, (month - 1) / 12) *
-    (1 - asset.vacancy / 100) -
-  asset.costs;
 export type DecisionRow = {
   month: number;
   debt: number;
@@ -25,6 +24,7 @@ export type DecisionRow = {
   arrears: number;
 };
 export type Decision = {
+  investment?: { contributed: number; value: number; tax: number };
   id: string;
   name: string;
   description: string;
@@ -53,10 +53,11 @@ export function decisionScenario(
   soldId?: string,
   extraPayments = true,
 ): Decision {
+  p = resolveLoanPlan(p);
   const assets = p.assets ?? [];
   const sold = assets.find((a) => a.id === soldId);
   const balances = p.loans.map((l) => l.balance);
-  const commitment = cashFlow(p).commitment;
+  const commitment = cashFlow(p).baseBudget;
   const order = p.loans
     .map((loan, index) => ({ loan, index }))
     .sort(
@@ -262,10 +263,15 @@ export function decisionScenario(
   };
 }
 export function compareDecisions(p: LoanPlan) {
+  p = resolveLoanPlan(p);
   if (validateLoanPlan(p).length || !p.loans.some((l) => l.balance > 0))
     return [];
   const cash = cashFlow(p);
-  if (cash.capacity < -1e-6 || cash.unassigned < -1e-6) return [];
+  if (
+    (cash.capacity < -1e-6 && cash.capacity + cash.additionalRent < -1e-6) ||
+    (p.fundingMode !== "manual" && cash.unassigned < -1e-6)
+  )
+    return [];
   const result = [
     decisionScenario(
       p,
@@ -283,6 +289,68 @@ export function compareDecisions(p: LoanPlan) {
       "Keep assets; direct monthly surplus to eligible high-interest loans.",
     ),
   ];
+  // Use the same investment engine as the main repayment-versus-investing view.
+  for (const strategy of ["invest", "avalanche"] as const) {
+    const investment = simulate(p, strategy);
+    let invested = 0;
+    result.push({
+      id: strategy === "invest" ? "invest" : "repay-invest",
+      name:
+        strategy === "invest"
+          ? "Invest the extra money"
+          : "Pay extra toward loans, then invest",
+      description:
+        strategy === "invest"
+          ? "Pay regular EMIs first; invest the surplus and released EMIs instead of making extra loan payments."
+          : "Use surplus to repay eligible highest-interest loans first. Only money left after repayments is invested; once loans finish, invest the released monthly money.",
+      rows: [
+        result[0].rows[0],
+        ...investment.rows.map((row) => {
+          invested += row.invested;
+          return {
+            month: row.month,
+            debt: row.debt,
+            liquid:
+              row.portfolio -
+              (Math.max(0, row.portfolio - invested) * p.gainsTax) / 100 +
+              row.spareCash,
+            assetValue: row.assetValue,
+            net: row.net,
+            interest: row.interest,
+            paid: row.required + row.extra,
+            fees: row.fees,
+            rent: row.rent,
+            shortfall: row.shortfall,
+            arrears: row.arrears,
+          };
+        }),
+      ],
+      interest: investment.interest,
+      fees: investment.fees,
+      debtFree: investment.debtFree,
+      rentReceived: investment.rentReceived,
+      initialPayment: 0,
+      initialFees: 0,
+      saleProceeds: 0,
+      fundingGap: investment.fundingGap,
+      error: null,
+      paidOff: investment.paidOff,
+      remaining: Object.fromEntries(
+        investment.rows.at(-1)!.loans.map((loan) => [loan.id, loan.closing]),
+      ),
+      firstPayments: Object.fromEntries(
+        investment.rows[0].loans.map((loan) => [
+          loan.id,
+          loan.required + loan.extra + loan.fee,
+        ]),
+      ),
+      investment: {
+        contributed: investment.contributed,
+        value: investment.portfolio,
+        tax: investment.investmentTax,
+      },
+    });
+  }
   if ((p.lumpSum ?? 0) > 0)
     result.push(
       decisionScenario(

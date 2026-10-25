@@ -71,7 +71,7 @@ const routes = [
   ["/growth/", "From your salary to your goal"],
   ["/survival/", "How long will your money last?"],
   ["/custom-plan/", "Your money, month by month"],
-  ["/freedom/", "When could you be financially free?"],
+  ["/freedom/", "When could you be financially independent?"],
   ["/bucket-plan/", "Three purposeful buckets."],
 ] as const;
 

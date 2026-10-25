@@ -41,7 +41,7 @@ try {
       <header><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 25V15l8 5V7l8 5V4l8 5v16H4Z"/></svg>Financial AI Planner</header>
       <svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><path d="m5 38 13-15 9 7 15-23M27 7h15v15"/></svg>
       <h1>${escape(title)}</h1><p>${escape(info.description)}</p>
-      <footer><span>${escape(canonicalUrl(page).replace("https://", ""))}</span><span>Free financial planning tools</span></footer>
+      <footer><span>${escape(canonicalUrl(page).replace("https://", ""))}</span><span>Financial planning tools</span></footer>
     </body></html>`);
     await tab.evaluate(() => document.fonts.ready);
     const fits = await tab.evaluate(

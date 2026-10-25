@@ -1,12 +1,20 @@
 import { PlannerNavigation } from "../components/PlannerNavigation";
+import { DateInput } from "../components/DateInput";
+import {
+  originalLoanSchedule,
+  resolveLoanPlan as resolveLoanInputs,
+} from "../loans/origination";
 import { preferredCurrency, usePlanCurrency } from "../runtime/currency";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { LoanDecisionLab } from "../components/LoanDecisionLab";
 import { compareDecisions, netRent } from "../loans/decisions";
+import { assetValueAt, assetIncomeYield } from "../loans/assets";
+import { loanPaymentTimeline } from "../loans/paymentTimeline";
 import { downloadReport, readPortablePlan } from "../runtime/portableReport";
 import { useEffect, useId, useMemo, useState } from "react";
 import {
   cashFlow,
+  loanComparisonHorizon,
   withRepaymentBudget,
   compare,
   breakEven,
@@ -21,22 +29,50 @@ import {
   type Simulation,
   type LoanAsset,
 } from "../loans/model";
-import { calculateBudget, validBudget } from "../budget/model";
 const storageKey = "intimetec-loan-payoff-v1";
+const yieldText = (value: number | null) =>
+  value === null ? "—" : `${value.toFixed(2)}%`;
+function resolveLoanPlan(plan: LoanPlan): LoanPlan {
+  const resolved = resolveLoanInputs(plan);
+  return { ...resolved, horizon: loanComparisonHorizon(resolved) };
+}
 function example() {
   const p = structuredClone(initialLoanPlan);
   const d = new Date();
   p.start = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  return withRepaymentBudget({
-    ...p,
-    fundingMode: "manual",
-    repaymentBudget: 25000,
-  });
+  return resolveLoanPlan(
+    withRepaymentBudget({
+      ...p,
+      fundingMode: "manual",
+      repaymentBudget: 25000,
+      loans: p.loans.map((loan) => {
+        const end = new Date(
+          d.getFullYear(),
+          d.getMonth() + loan.months - 1,
+          1,
+        );
+        return {
+          ...loan,
+          inputMode: "original",
+          originalAmount: loan.balance,
+          firstEmiMonth: p.start,
+          lastEmiMonth: `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}`,
+        };
+      }),
+    }),
+  );
 }
 function load() {
   try {
     const p = JSON.parse(localStorage.getItem(storageKey) || "null");
-    if (!validateLoanPlan(p).length) return withRepaymentBudget(p as LoanPlan);
+    if (!validateLoanPlan(p).length) {
+      const manual = resolveLoanPlan(withRepaymentBudget(p as LoanPlan));
+      return {
+        ...manual,
+        repaymentBudget: p.useSalaryInvestment ? 0 : manual.repaymentBudget,
+        useSalaryInvestment: false,
+      };
+    }
   } catch {}
   return {
     ...example(),
@@ -115,6 +151,12 @@ export function LoanPage() {
   const comparison = useMemo(() => compare(plan), [plan]);
   const valid = validateLoanPlan(plan).length === 0;
   const cash = valid ? cashFlow(plan) : null;
+  const monthlyGap = cash
+    ? Math.max(
+        cash.fundingGap,
+        plan.fundingMode === "manual" ? 0 : -cash.unassigned,
+      )
+    : 0;
   const current = comparison.results.find((r) => r.strategy === selected);
   const base = comparison.results.find((r) => r.strategy === "invest");
   const best = comparison.results.reduce<Simulation | undefined>(
@@ -168,13 +210,15 @@ export function LoanPage() {
     }).format(new Date(y, m + month - 2, 1));
   };
   function update<K extends keyof LoanPlan>(key: K, value: LoanPlan[K]) {
-    setPlan((p) => ({ ...p, [key]: value }));
+    setPlan((p) => resolveLoanPlan({ ...p, [key]: value }));
   }
   function patchLoan(id: string, key: keyof Loan, value: string | number) {
-    setPlan((p) => ({
-      ...p,
-      loans: p.loans.map((l) => (l.id === id ? { ...l, [key]: value } : l)),
-    }));
+    setPlan((p) =>
+      resolveLoanPlan({
+        ...p,
+        loans: p.loans.map((l) => (l.id === id ? { ...l, [key]: value } : l)),
+      }),
+    );
   }
   function patchAsset(
     id: string,
@@ -200,49 +244,6 @@ export function LoanPage() {
       setSaved("Browser saving unavailable · export a copy");
     }
   }, [plan, valid]);
-  function importBudget() {
-    try {
-      const source = JSON.parse(
-        localStorage.getItem("intimetec-salary-budget-v1") || "null",
-      );
-      if (!validBudget(source)) {
-        setNotice(
-          "No saved salary budget found in this browser. Open the Monthly Salary & Budget Planner first.",
-        );
-        return;
-      }
-      if (
-        source.currency !== plan.currency &&
-        (plan.loans.some((loan) => loan.balance > 0) ||
-          (plan.assets ?? []).some((asset) => asset.value > 0) ||
-          (plan.lumpSum ?? 0) > 0 ||
-          plan.emergency > 0)
-      ) {
-        setNotice(
-          `Your salary budget uses ${source.currency}, but this loan plan uses ${plan.currency}. Match the currencies and review the amounts before importing; no currency conversion is performed.`,
-        );
-        return;
-      }
-      const r = calculateBudget(source);
-      setPlan((p) => ({
-        ...p,
-        currency: source.currency,
-        extra: 0,
-        fundingMode: "manual",
-        repaymentBudget: r.monthlyInvestment,
-        useSalaryInvestment: true,
-        useAvailable: false,
-      }));
-      setNotice(
-        "Using the salary planner’s saved monthly investment amount as the total repayment budget. Required EMIs are included, not added again. Your loans and assets stay unchanged.",
-      );
-      setView("setup");
-    } catch {
-      setNotice(
-        "The saved budget could not be read. Enter your income and expenses manually.",
-      );
-    }
-  }
   function exportPlan() {
     const url = URL.createObjectURL(
       new Blob(
@@ -274,7 +275,12 @@ export function LoanPage() {
       const value = await readPortablePlan(file, "loan");
       const errors = validateLoanPlan(value);
       if (errors.length) throw Error(errors[0]);
-      setPlan(withRepaymentBudget(value as LoanPlan));
+      setPlan(
+        resolveLoanPlan({
+          ...withRepaymentBudget(value as LoanPlan),
+          useSalaryInvestment: false,
+        }),
+      );
       setNotice("Your loan plan was restored.");
       setView("setup");
     } catch (e) {
@@ -306,21 +312,28 @@ export function LoanPage() {
             ["Currency", plan.currency],
             ["Emergency saving", money(plan.reserve)],
             ["Protected emergency savings", money(plan.emergency)],
-            [
-              "Funding mode",
-              plan.useSalaryInvestment
-                ? "Salary planner’s saved monthly investment amount"
-                : "Manually entered total repayment budget",
-            ],
-            ["Extra monthly budget", money(cash?.extra ?? plan.extra)],
+            ["Funding mode", "Manually entered total repayment budget"],
+            ["Extra monthly budget", money(cash?.availableExtra ?? plan.extra)],
             [
               "Total monthly repayment budget",
               money(plan.repaymentBudget ?? 0),
             ],
+            [
+              "Additional monthly net earnings",
+              money(cash?.additionalRent ?? 0),
+            ],
+            [
+              "Total monthly money including asset earnings",
+              money(cash?.totalFunding ?? 0),
+            ],
+            [
+              "Retained asset value today",
+              money(assetValueAt(plan.assets ?? [])),
+            ],
             ["Spare savings available for scenario", money(plan.lumpSum ?? 0)],
             ["After-tax annual cash return", `${plan.cashReturn ?? 0}%`],
             ["Starting month", plan.start],
-            ["Comparison horizon", `${plan.horizon} months`],
+            ["Timeline from loan end dates", `${plan.horizon} months`],
             ["Expected return", `${plan.returns}%`],
             ["Investment fee", `${plan.investmentFee}%`],
             ["Tax on gains", `${plan.gainsTax}%`],
@@ -329,7 +342,7 @@ export function LoanPage() {
         },
         {
           title:
-            "Savings and asset scenarios (cash-only; same starting wealth)",
+            "Repayment, investment and asset scenarios (same starting wealth)",
           headers: [
             "Scenario",
             "Interest",
@@ -361,16 +374,18 @@ export function LoanPage() {
           headers: [
             "Asset",
             "Current value",
-            "Gross monthly rent",
+            "Monthly earnings",
             "Monthly costs/taxes",
             "Vacancy",
             "Value growth",
-            "Rent growth",
+            "Earnings growth",
             "Selling cost",
             "Sale tax",
             "Linked loan",
-            "Net rent already in budget",
+            "Net earnings already in budget",
             "Replacement monthly cost if sold",
+            "Annual gross income yield",
+            "Annual net income yield",
           ],
           rows: (plan.assets ?? []).map((a) => [
             a.name,
@@ -385,6 +400,8 @@ export function LoanPage() {
             plan.loans.find((l) => l.id === a.linkedLoanId)?.name ?? "None",
             a.rentIncluded ? "Yes" : "No",
             money(a.replacementCost ?? 0),
+            yieldText(assetIncomeYield(a).gross),
+            yieldText(assetIncomeYield(a).net),
           ]),
         },
         {
@@ -398,21 +415,65 @@ export function LoanPage() {
             "Prepayment fee",
             "Lock months",
             "Interest tax relief",
+            "Original amount",
+            "First EMI month",
+            "Final EMI month",
           ],
           rows: plan.loans.map((l) => [
             l.name,
             money(l.balance),
             `${l.rate}%`,
             money(payment(l)),
-            l.months,
+            l.inputMode === "original"
+              ? originalLoanSchedule(l, plan.start).remainingMonths
+              : l.months,
             `${l.fee}%`,
             l.lock,
             `${l.taxRelief}%`,
+            l.inputMode === "original"
+              ? money(l.originalAmount ?? 0)
+              : "From lender balance",
+            l.inputMode === "original" ? (l.firstEmiMonth ?? "") : "—",
+            l.inputMode === "original" ? (l.lastEmiMonth ?? "") : "—",
           ]),
         },
         {
+          title: "Scheduled loan payments from first EMI to final EMI",
+          headers: [
+            "Loan",
+            "First EMI month",
+            "Payments shown",
+            "Starting principal",
+            "Monthly EMI",
+            "Total interest",
+            "Total paid",
+          ],
+          rows: plan.loans.map((loan) => {
+            const timeline = loanPaymentTimeline(loan, plan.start);
+            return [
+              loan.name,
+              timeline.firstMonth,
+              timeline.points.length - 1,
+              money(timeline.principal),
+              money(timeline.emi),
+              money(timeline.totalInterest),
+              money(timeline.totalPaid),
+            ];
+          }),
+        },
+        {
+          title: "Investment outlook after regular EMIs",
+          headers: ["Setting", "Amount"],
+          rows: [
+            ["First month invested", money(base?.rows[0]?.invested ?? 0)],
+            ["Total money invested", money(base?.contributed ?? 0)],
+            ["Projected investment value", money(base?.portfolio ?? 0)],
+            ["Estimated tax at the finish", money(base?.investmentTax ?? 0)],
+          ],
+        },
+        {
           title:
-            "Salary-funded investment alternatives (exclude separate assets and spare savings)",
+            "Investment and repayment alternatives (assets retained and asset earnings included)",
           headers: [
             "Path",
             "Interest",
@@ -442,6 +503,11 @@ export function LoanPage() {
             "Debt",
             "Portfolio",
             "Net position",
+            "Monthly money including net earnings",
+            "Net asset earnings",
+            "Retained asset value",
+            "Spare cash",
+            "Unfunded payments/costs",
           ],
           rows: r.rows.map((m) => [
             m.month,
@@ -451,10 +517,15 @@ export function LoanPage() {
             money(m.debt),
             money(m.portfolio),
             money(m.net),
+            money(m.budget),
+            money(m.rent),
+            money(m.assetValue),
+            money(m.spareCash),
+            money(m.shortfall),
           ]),
         })),
       ],
-      "Fixed assumptions, not instructions to sell, keep or invest. Cash-only decisions and salary-only investment alternatives are separate comparisons. Asset sales remove their value and rental cash flow, settle the linked loan and deduct entered sale costs/taxes. Emergency savings stay protected; spare savings must exclude them. Retained asset values exclude future liquidation costs/taxes. Imports restore inputs and recalculate.",
+      "Fixed assumptions, not instructions to sell, keep or invest. Main repayment/investment paths include net asset earnings, retained assets and spare cash. Optional cash-only sale decisions are separate comparisons. Asset sales remove their value and rental cash flow, settle the linked loan and deduct entered sale costs/taxes. Emergency savings stay protected; spare savings must exclude them. Retained asset values exclude future liquidation costs/taxes. Imports restore inputs and recalculate.",
     );
   }
   const totalDebt = plan.loans.reduce((s, l) => s + Math.max(0, l.balance), 0);
@@ -531,51 +602,17 @@ export function LoanPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Import your salary planner’s investment amount or enter a
-                  budget. Required EMIs come first; the rest funds extra
+                  Enter the total amount you can pay toward your loans each
+                  month. Required EMIs come first; the rest funds extra
                   payments.
                 </p>
-                <label className="loan-funding-toggle">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(plan.useSalaryInvestment)}
-                    onChange={(e) =>
-                      e.target.checked
-                        ? importBudget()
-                        : setPlan((p) => ({ ...p, useSalaryInvestment: false }))
-                    }
-                  />
-                  Use saved salary budget
-                </label>
-                {plan.useSalaryInvestment ? (
-                  <div className="loan-linked-budget" aria-live="polite">
-                    <span>
-                      Monthly investment amount from your salary planner
-                    </span>
-                    <strong data-testid="loan-linked-budget">
-                      {money(plan.repaymentBudget ?? 0)}
-                    </strong>
-                    <p>
-                      Includes required EMIs. Uncheck to enter another amount;
-                      your salary plan stays unchanged.
-                    </p>
-                    <button
-                      type="button"
-                      className="budget-text-button"
-                      onClick={importBudget}
-                    >
-                      Refresh saved amount
-                    </button>
-                  </div>
-                ) : (
-                  <Numeric
-                    label="Monthly repayment budget"
-                    wholeAmount
-                    value={plan.repaymentBudget ?? 0}
-                    onChange={(n) => update("repaymentBudget", n)}
-                    hint="EMIs plus extra payments, after expenses and protected savings. Exclude rent entered separately below."
-                  />
-                )}
+                <Numeric
+                  label="Monthly repayment budget"
+                  wholeAmount
+                  value={plan.repaymentBudget ?? 0}
+                  onChange={(n) => update("repaymentBudget", n)}
+                  hint="Include your regular EMIs and any extra repayments. Exclude asset earnings entered separately below."
+                />
                 <dl className="loan-funding-summary">
                   <div>
                     <dt>Required EMIs</dt>
@@ -584,14 +621,24 @@ export function LoanPage() {
                   <div>
                     <dt>Extra available to allocate</dt>
                     <dd data-testid="loan-declared-extra">
-                      {cash ? money(cash.extra) : "—"}
+                      {cash ? money(cash.availableExtra) : "—"}
                     </dd>
                   </div>
                   <div>
-                    <dt>Monthly commitment before separate rent</dt>
-                    <dd>{cash ? money(cash.commitment) : "—"}</dd>
+                    <dt>Total monthly money</dt>
+                    <dd data-testid="loan-total-monthly-funding">
+                      {cash ? money(cash.totalFunding) : "—"}
+                    </dd>
                   </div>
                 </dl>
+                {(plan.assets ?? []).length > 0 && (
+                  <p className="budget-help">
+                    Your entered budget plus{" "}
+                    {cash ? money(cash.additionalRent) : "—"} additional net
+                    rent, after running costs and vacancy. Rent marked as
+                    included is counted once.
+                  </p>
+                )}
               </section>
               <section
                 className="budget-panel"
@@ -606,15 +653,29 @@ export function LoanPage() {
                   </span>
                 </div>
                 <p className="budget-help">
-                  Add each loan’s current balance. Uses fixed rates on reducing
-                  balances; changing rates and card minimums are approximate.
+                  Add your loans one at a time. We’ll estimate each EMI and
+                  what’s left to repay.
                 </p>
+                <label className="budget-field loan-asof">
+                  <span>Calculate balances as of</span>
+                  <DateInput
+                    aria-label="Calculate balances as of"
+                    type="month"
+                    min="2000-01"
+                    max="2149-12"
+                    value={plan.start}
+                    onChange={(e) => update("start", e.target.value)}
+                  />
+                  <small>
+                    Before this month’s EMI. Used for every loan below.
+                  </small>
+                </label>
                 {plan.loans.length === 0 && (
                   <div className="loan-empty">
                     <h3>Start with your first loan.</h3>
                     <p>
-                      Enter a balance, rate and EMI or remaining term to see the
-                      cost and payoff date.
+                      Use the original amount, interest rate and first / final
+                      EMI months. We’ll do the calculations.
                     </p>
                     <button
                       type="button"
@@ -629,107 +690,233 @@ export function LoanPage() {
                     </button>
                   </div>
                 )}
-                {plan.loans.map((l, index) => (
-                  <fieldset className="budget-bill loan-editor" key={l.id}>
-                    <legend>Loan {index + 1}</legend>
-                    <div className="loan-editor-heading">
-                      <label className="budget-field">
-                        <span>Loan name</span>
-                        <input
-                          value={l.name}
-                          maxLength={80}
-                          onChange={(e) =>
-                            patchLoan(l.id, "name", e.target.value)
+                {plan.loans.map((l, index) => {
+                  const schedule =
+                    l.inputMode === "original"
+                      ? originalLoanSchedule(l, plan.start)
+                      : null;
+                  return (
+                    <fieldset className="budget-bill loan-editor" key={l.id}>
+                      <legend>Loan {index + 1}</legend>
+                      <div className="loan-editor-heading">
+                        <label className="budget-field">
+                          <span>Loan name</span>
+                          <input
+                            value={l.name}
+                            maxLength={80}
+                            onChange={(e) =>
+                              patchLoan(l.id, "name", e.target.value)
+                            }
+                          />
+                        </label>
+                        <button
+                          className="budget-text-button"
+                          aria-label={`Remove loan ${index + 1}`}
+                          onClick={() =>
+                            update(
+                              "loans",
+                              plan.loans.filter((x) => x.id !== l.id),
+                            )
                           }
-                        />
-                      </label>
-                      <button
-                        className="budget-text-button"
-                        aria-label={`Remove loan ${index + 1}`}
-                        onClick={() =>
-                          update(
-                            "loans",
-                            plan.loans.filter((x) => x.id !== l.id),
-                          )
-                        }
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    <div className="budget-fields">
-                      <Numeric
-                        label="Outstanding balance"
-                        wholeAmount
-                        value={l.balance}
-                        onChange={(n) => patchLoan(l.id, "balance", n)}
-                      />
-                      <Numeric
-                        label="Annual loan interest (%)"
-                        value={l.rate}
-                        max={120}
-                        onChange={(n) => patchLoan(l.id, "rate", n)}
-                      />
-                      <Numeric
-                        label="Remaining term (months)"
-                        value={l.months}
-                        min={1}
-                        max={600}
-                        step="1"
-                        onChange={(n) => patchLoan(l.id, "months", n)}
-                      />
-                      <Numeric
-                        label="Actual monthly EMI (optional)"
-                        wholeAmount
-                        value={l.emi}
-                        onChange={(n) => patchLoan(l.id, "emi", n)}
-                        hint="Leave 0 to calculate from balance, rate and term."
-                      />
-                    </div>
-                    <p className="loan-emi">
-                      Required monthly payment{" "}
-                      <strong>
-                        {valid ? money(payment(l)) : "Complete the inputs"}
-                      </strong>
-                      {l.emi > 0 && (
-                        <small>Actual EMI overrides the remaining term.</small>
-                      )}
-                    </p>
-                    <details className="loan-terms">
-                      <summary>
-                        Prepayment restrictions & tax assumptions
-                      </summary>
-                      <div className="budget-fields">
-                        <Numeric
-                          label="Fee on extra principal (%)"
-                          value={l.fee}
-                          max={20}
-                          onChange={(n) => patchLoan(l.id, "fee", n)}
-                        />
-                        <Numeric
-                          label="No extra payments for (months)"
-                          value={l.lock}
-                          max={360}
-                          step="1"
-                          onChange={(n) => patchLoan(l.id, "lock", n)}
-                        />
-                        <Numeric
-                          label="Effective interest tax relief (%)"
-                          value={l.taxRelief}
-                          max={60}
-                          onChange={(n) => patchLoan(l.id, "taxRelief", n)}
-                          hint="Use 0 unless eligible. Enter effective relief after limits, not your tax bracket."
-                        />
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <p className="budget-help">
-                        Fees apply to extra principal only, including early
-                        closure. Enter any applicable tax/charges in the fee
-                        rate. Lock-in blocks extra payments for the entered
-                        months. Lender caps, fixed fees and special closure
-                        rules are not modeled.
-                      </p>
-                    </details>
-                  </fieldset>
-                ))}
+                      <label className="budget-field loan-input-method">
+                        <span>Loan details available</span>
+                        <select
+                          aria-label="Loan details available"
+                          value={l.inputMode ?? "balance"}
+                          onChange={(e) =>
+                            patchLoan(l.id, "inputMode", e.target.value)
+                          }
+                        >
+                          <option value="original">
+                            Original amount &amp; EMI dates
+                          </option>
+                          <option value="balance">
+                            Current lender balance
+                          </option>
+                        </select>
+                      </label>
+                      <div className="budget-fields">
+                        {l.inputMode === "original" ? (
+                          <Numeric
+                            label="Original loan amount"
+                            wholeAmount
+                            value={l.originalAmount ?? 0}
+                            onChange={(n) =>
+                              patchLoan(l.id, "originalAmount", n)
+                            }
+                          />
+                        ) : (
+                          <Numeric
+                            label="Outstanding balance"
+                            wholeAmount
+                            value={l.balance}
+                            onChange={(n) => patchLoan(l.id, "balance", n)}
+                          />
+                        )}
+                        <Numeric
+                          label="Annual loan interest (%)"
+                          value={l.rate}
+                          max={120}
+                          onChange={(n) => patchLoan(l.id, "rate", n)}
+                        />
+                        {l.inputMode === "original" ? (
+                          <>
+                            <label className="budget-field loan-month-field">
+                              <span>First EMI month</span>
+                              <DateInput
+                                aria-label="First EMI month"
+                                type="month"
+                                min="1900-01"
+                                max={plan.start || "2149-12"}
+                                value={l.firstEmiMonth ?? ""}
+                                onChange={(e) =>
+                                  patchLoan(
+                                    l.id,
+                                    "firstEmiMonth",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </label>
+                            <label className="budget-field loan-month-field">
+                              <span>Final EMI month (loan end)</span>
+                              <DateInput
+                                aria-label="Final EMI month (loan end)"
+                                type="month"
+                                min={l.firstEmiMonth || "1900-01"}
+                                max="2149-12"
+                                value={l.lastEmiMonth ?? ""}
+                                onChange={(e) =>
+                                  patchLoan(
+                                    l.id,
+                                    "lastEmiMonth",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </label>
+                          </>
+                        ) : (
+                          <>
+                            <Numeric
+                              label="Remaining term (months)"
+                              value={l.months}
+                              min={1}
+                              max={600}
+                              step="1"
+                              onChange={(n) => patchLoan(l.id, "months", n)}
+                            />
+                            <Numeric
+                              label="Actual monthly EMI (optional)"
+                              wholeAmount
+                              value={l.emi}
+                              onChange={(n) => patchLoan(l.id, "emi", n)}
+                              hint="Leave 0 to calculate from balance, rate and term."
+                            />
+                          </>
+                        )}
+                      </div>
+                      {schedule ? (
+                        <>
+                          <dl
+                            className="loan-calculated"
+                            aria-label={`Calculated details for loan ${index + 1}`}
+                          >
+                            <div>
+                              <dt>Estimated monthly EMI</dt>
+                              <dd data-testid="loan-calculated-emi">
+                                {schedule.error ? "—" : money(schedule.emi)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Months remaining</dt>
+                              <dd data-testid="loan-calculated-months">
+                                {schedule.error
+                                  ? "—"
+                                  : schedule.remainingMonths}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Estimated outstanding</dt>
+                              <dd data-testid="loan-calculated-balance">
+                                {schedule.error ? "—" : money(schedule.balance)}
+                              </dd>
+                            </div>
+                          </dl>
+                          <p className="budget-help" role="status">
+                            {schedule.error ||
+                              (schedule.remainingMonths === 0
+                                ? "This loan is already complete as of the comparison month."
+                                : `${schedule.paidMonths} of ${schedule.originalMonths} scheduled EMIs assumed paid before the comparison month.`)}
+                          </p>
+                          <details className="loan-terms">
+                            <summary>How is this estimated?</summary>
+                            <p>
+                              First and final EMI months are included in the
+                              original term. We assume one month-end EMI every
+                              month, a fixed rate on a reducing balance, and no
+                              missed payments, extra payments or fees before the
+                              comparison month. Interest is the annual rate
+                              divided by 12. If your repayment history or rate
+                              changed, choose “Current lender balance” and use
+                              your latest statement.
+                            </p>
+                          </details>
+                        </>
+                      ) : (
+                        <p className="loan-emi">
+                          Required monthly payment{" "}
+                          <strong>
+                            {valid ? money(payment(l)) : "Complete the inputs"}
+                          </strong>
+                          {l.emi > 0 && (
+                            <small>
+                              Actual EMI overrides the remaining term.
+                            </small>
+                          )}
+                        </p>
+                      )}
+                      <details className="loan-terms">
+                        <summary>
+                          Prepayment restrictions & tax assumptions
+                        </summary>
+                        <div className="budget-fields">
+                          <Numeric
+                            label="Fee on extra principal (%)"
+                            value={l.fee}
+                            max={20}
+                            onChange={(n) => patchLoan(l.id, "fee", n)}
+                          />
+                          <Numeric
+                            label="No extra payments for (months)"
+                            value={l.lock}
+                            max={360}
+                            step="1"
+                            onChange={(n) => patchLoan(l.id, "lock", n)}
+                          />
+                          <Numeric
+                            label="Effective interest tax relief (%)"
+                            value={l.taxRelief}
+                            max={60}
+                            onChange={(n) => patchLoan(l.id, "taxRelief", n)}
+                            hint="Use 0 unless eligible. Enter effective relief after limits, not your tax bracket."
+                          />
+                        </div>
+                        <p className="budget-help">
+                          Fees apply to extra principal only, including early
+                          closure. Enter any applicable tax/charges in the fee
+                          rate. Lock-in blocks extra payments for the entered
+                          months. Lender caps, fixed fees and special closure
+                          rules are not modeled.
+                        </p>
+                      </details>
+                    </fieldset>
+                  );
+                })}
                 <button
                   className="budget-add"
                   disabled={plan.loans.length >= 20}
@@ -739,9 +926,13 @@ export function LoanPage() {
                       {
                         id: crypto.randomUUID(),
                         name: `Loan ${plan.loans.length + 1}`,
+                        inputMode: "original",
+                        originalAmount: 0,
+                        firstEmiMonth: "",
+                        lastEmiMonth: "",
                         balance: 0,
-                        rate: 10,
-                        months: 36,
+                        rate: 0,
+                        months: 1,
                         emi: 0,
                         fee: 0,
                         lock: 0,
@@ -790,10 +981,10 @@ export function LoanPage() {
                     />
                   )}
                 </div>
-                <h3>Your rental or other assets</h3>
+                <h3>Your income-producing or other assets</h3>
                 <p className="budget-help">
-                  Keep rent separate from your repayment budget, or mark it as
-                  already included to avoid counting it twice.
+                  Keep asset earnings separate from your repayment budget, or
+                  mark them as already included to avoid counting it twice.
                 </p>
                 {(plan.assets ?? []).map((asset, index) => (
                   <fieldset
@@ -819,13 +1010,14 @@ export function LoanPage() {
                         onChange={(n) => patchAsset(asset.id, "value", n)}
                       />
                       <Numeric
-                        label="Gross monthly rent"
+                        label="Monthly earnings"
                         wholeAmount
+                        hint="Before running costs and taxes."
                         value={asset.rent}
                         onChange={(n) => patchAsset(asset.id, "rent", n)}
                       />
                       <Numeric
-                        label="Monthly running costs & rental taxes"
+                        label="Monthly running costs & taxes"
                         wholeAmount
                         value={asset.costs}
                         onChange={(n) => patchAsset(asset.id, "costs", n)}
@@ -857,20 +1049,53 @@ export function LoanPage() {
                           patchAsset(asset.id, "rentIncluded", e.target.checked)
                         }
                       />
-                      This asset’s net rent is already in my monthly income or
-                      repayment budget
+                      This asset’s net earnings are already in my monthly income
+                      or repayment budget
                     </label>
-                    <p className="loan-asset-rent">
-                      Initial net rental cash flow:{" "}
-                      <strong>{money(netRent(asset))} / month</strong>
-                    </p>
+                    <dl
+                      className="loan-calculated loan-asset-yield"
+                      aria-label={`Income and yield for asset ${index + 1}`}
+                    >
+                      <div>
+                        <dt>Net monthly earnings</dt>
+                        <dd>{money(netRent(asset))}</dd>
+                      </div>
+                      <div>
+                        <dt>Annual yield · net</dt>
+                        <dd data-testid="asset-net-yield">
+                          {yieldText(assetIncomeYield(asset).net)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Annual yield · gross</dt>
+                        <dd data-testid="asset-gross-yield">
+                          {yieldText(assetIncomeYield(asset).gross)}
+                        </dd>
+                      </div>
+                    </dl>
+                    {asset.value <= 0 && (
+                      <p className="budget-help">
+                        Enter the asset’s current market value to see annual
+                        yield.
+                      </p>
+                    )}
+                    <details className="loan-terms">
+                      <summary>How is annual yield calculated?</summary>
+                      <p>
+                        Annual income yield = monthly earnings × 12 ÷ current
+                        asset value × 100. Net yield deducts the entered
+                        vacancy, unpaid earnings, running costs and taxes first.
+                        This is income yield, before loan payments; asset price
+                        changes are separate.
+                      </p>
+                    </details>
                     <details className="loan-terms">
                       <summary>
                         Vacancy, value growth & selling assumptions
                       </summary>
                       <div className="budget-fields">
                         <Numeric
-                          label="Vacancy / unpaid rent (%)"
+                          label="Vacancy / unpaid earnings (%)"
                           value={asset.vacancy}
                           max={100}
                           onChange={(n) => patchAsset(asset.id, "vacancy", n)}
@@ -885,7 +1110,7 @@ export function LoanPage() {
                           }
                         />
                         <Numeric
-                          label="Annual rent growth (%)"
+                          label="Annual earnings growth (%)"
                           value={asset.rentGrowth}
                           min={-99}
                           max={100}
@@ -961,65 +1186,7 @@ export function LoanPage() {
                   Add an asset to compare
                 </button>
               </section>
-              <section
-                className="budget-panel"
-                aria-labelledby="loan-assumptions-title"
-              >
-                <h2 id="loan-assumptions-title">Set the same finish line.</h2>
-                <div className="budget-fields">
-                  <label className="budget-field">
-                    <span>First payment month</span>
-                    <input
-                      type="month"
-                      min="2000-01"
-                      max="2149-12"
-                      value={plan.start}
-                      onChange={(e) => update("start", e.target.value)}
-                    />
-                  </label>
-                  <Numeric
-                    label="Comparison horizon (months)"
-                    value={plan.horizon}
-                    min={12}
-                    max={360}
-                    step="1"
-                    onChange={(n) => update("horizon", n)}
-                  />
-                </div>
-                <details className="loan-terms">
-                  <summary>
-                    Investment alternatives: return, fees and split (optional)
-                  </summary>
-                  <div className="budget-fields">
-                    <Numeric
-                      label="Expected annual investment return (%)"
-                      value={plan.returns}
-                      min={-99}
-                      max={100}
-                      onChange={(n) => update("returns", n)}
-                    />
-                    <Numeric
-                      label="Annual investment fee (%)"
-                      value={plan.investmentFee}
-                      max={10}
-                      onChange={(n) => update("investmentFee", n)}
-                    />
-                    <Numeric
-                      label="Tax on investment gains at the end (%)"
-                      value={plan.gainsTax}
-                      max={60}
-                      onChange={(n) => update("gainsTax", n)}
-                      hint="Simplified tax on positive total gains. Enter your effective assumption."
-                    />
-                    <Numeric
-                      label="Split strategy: extra money to loans (%)"
-                      value={plan.split}
-                      max={100}
-                      onChange={(n) => update("split", n)}
-                      hint="The remainder is invested. Released EMIs follow the same split."
-                    />
-                  </div>
-                </details>
+              <div className="loan-compare-action">
                 <button
                   className="budget-primary"
                   onClick={() => {
@@ -1029,7 +1196,7 @@ export function LoanPage() {
                 >
                   Compare my options ↗
                 </button>
-              </section>
+              </div>
             </>
           )}
           {comparison.errors.length > 0 &&
@@ -1063,16 +1230,42 @@ export function LoanPage() {
                 when={when}
                 onReturnChange={(n) => update("returns", n)}
               />
-              <details className="loan-investment-alternatives">
+              <details className="loan-terms">
                 <summary>
-                  Explore four salary-funded investment alternatives
+                  Investment alternatives: return, fees and split (optional)
                 </summary>
+                <div className="budget-fields">
+                  <Numeric
+                    label="Annual investment fee (%)"
+                    value={plan.investmentFee}
+                    max={10}
+                    onChange={(n) => update("investmentFee", n)}
+                  />
+                  <Numeric
+                    label="Tax on investment gains at the end (%)"
+                    value={plan.gainsTax}
+                    max={60}
+                    onChange={(n) => update("gainsTax", n)}
+                    hint="Simplified tax on positive total gains. Enter your effective assumption."
+                  />
+                  <Numeric
+                    label="Split strategy: extra money to loans (%)"
+                    value={plan.split}
+                    max={100}
+                    onChange={(n) => update("split", n)}
+                    hint="The remainder is invested. Released EMIs follow the same split."
+                  />
+                </div>
+              </details>
+              <details className="loan-investment-alternatives">
+                <summary>Explore four repayment and investment paths</summary>
                 <div className="loan-investment-boundary">
                   <h2>Optional: compare investing the monthly extra</h2>
                   <p>
-                    Salary-funded paths only: excludes spare savings, assets and
-                    rent. The monthly budget is the same; the return assumption
-                    differs from the cash-and-asset scenarios above.
+                    These four paths include your entered monthly budget and net
+                    rent. Assets stay owned, and spare savings stay in cash. The
+                    optional sale scenarios above use different asset and rental
+                    cash flows.
                   </p>
                 </div>
                 <section className="loan-insight">
@@ -1144,11 +1337,10 @@ export function LoanPage() {
                   <section className="budget-panel">
                     <h2>Two balances. One honest picture.</h2>
                     <p className="budget-help">
-                      Net position = investments after assumed gains tax +
-                      emergency cash − remaining debt. Property values, other
-                      assets, the cash buffer and unused salary are excluded
-                      equally from every path. Emergency cash at month{" "}
-                      {plan.horizon}:{" "}
+                      Net position = investments after estimated gains tax +
+                      retained assets + spare cash + protected savings −
+                      remaining debt and unpaid operating costs. Protected
+                      savings at month {plan.horizon}:{" "}
                       {money(plan.emergency + plan.reserve * plan.horizon)}, the
                       same in every path.
                     </p>
@@ -1302,8 +1494,8 @@ export function LoanPage() {
               <section className="budget-panel">
                 <h2>Your next payment, made clear.</h2>
                 <p className="budget-help">
-                  For the salary-funded path below. Savings and asset-sale
-                  schedules are in Compare paths.
+                  Includes the monthly budget and net earnings. Savings and
+                  asset-sale schedules are in Compare paths.
                 </p>
                 <label className="budget-field">
                   <span>Choose the path for your guide</span>
@@ -1339,7 +1531,8 @@ export function LoanPage() {
                   </li>
                   <li>
                     <strong>
-                      Give the extra {money(cash?.extra ?? plan.extra)} its job.
+                      Give the extra {money(cash?.availableExtra ?? plan.extra)}{" "}
+                      its job.
                     </strong>
                     <span>
                       {current.rows[0].loans.some((l) => l.extra > 0)
@@ -1471,9 +1664,17 @@ export function LoanPage() {
             <dl className="budget-breakdown">
               {(plan.fundingMode === "manual"
                 ? [
+                    ["Entered monthly budget", cash?.baseBudget ?? 0],
+                    ...((plan.assets ?? []).length
+                      ? [
+                          [
+                            "Additional net earnings",
+                            cash?.additionalRent ?? 0,
+                          ],
+                        ]
+                      : []),
+                    ["Total monthly money", cash?.totalFunding ?? 0],
                     ["Required EMIs", cash?.emis ?? 0],
-                    ["Extra above EMIs", cash?.extra ?? 0],
-                    ["Declared monthly repayment", cash?.commitment ?? 0],
                   ]
                 : [
                     ["Take-home income", plan.salary],
@@ -1481,7 +1682,7 @@ export function LoanPage() {
                     ["Emergency saving", plan.reserve],
                     ["Cash buffer", plan.buffer],
                     ["Required EMIs", cash?.emis ?? 0],
-                    ["Chosen extra", cash?.extra ?? plan.extra],
+                    ["Chosen extra", cash?.availableExtra ?? plan.extra],
                   ]
               ).map(([text, value]) => (
                 <div key={text}>
@@ -1491,58 +1692,44 @@ export function LoanPage() {
               ))}
             </dl>
             <div
-              className={`budget-balance ${cash && cash.unassigned < 0 ? "is-short" : ""}`}
+              className={`budget-balance ${cash && monthlyGap > 0 ? "is-short" : ""}`}
             >
               <span>
                 {!cash
                   ? "COMPLETE YOUR INPUTS"
-                  : cash.unassigned < 0
+                  : monthlyGap > 0
                     ? "MONTHLY SHORTFALL"
                     : plan.fundingMode === "manual"
-                      ? "DECLARED MONTHLY REPAYMENT"
+                      ? "LEFT AFTER EMIs"
                       : "LEFT UNASSIGNED"}
               </span>
               <strong data-testid="loan-monthly-room">
                 {cash
                   ? money(
-                      plan.fundingMode === "manual" && cash.unassigned >= 0
-                        ? cash.commitment
-                        : Math.abs(cash.unassigned),
+                      monthlyGap > 0
+                        ? monthlyGap
+                        : plan.fundingMode === "manual"
+                          ? cash.availableExtra
+                          : cash.unassigned,
                     )
                   : "—"}
               </strong>
               <p>
-                {cash ? money(cash.commitment) : "—"}/month covers debt, fees
-                and investing, even after loans close. Asset scenarios adjust
-                for rent and replacement costs.
+                {plan.fundingMode === "manual"
+                  ? monthlyGap > 0
+                    ? "Your monthly money does not cover all required EMIs."
+                    : "Available for extra loan payments, repayment fees or investing."
+                  : "Your monthly money covers debt, fees and investing."}
               </p>
             </div>
-          </section>
-          {cash && (
-            <section className="budget-cushion">
-              <h3>Keep an emergency cushion.</h3>
-              {plan.fundingMode === "manual" && (
-                <p>
-                  Manual mode uses stored living costs plus EMIs. Check the
-                  target against all your household essentials.
-                </p>
-              )}
-              <div className="budget-cushion-value">
-                <strong>{money(plan.emergency)}</strong>
-                <span>Target {money(cash.emergencyTarget)}</span>
+            {(plan.assets ?? []).length > 0 && (
+              <div className="loan-summary-assets">
+                <span>Assets you own</span>
+                <strong>{money(assetValueAt(plan.assets ?? []))}</strong>
+                <p>Market value, separate from your monthly money.</p>
               </div>
-              <progress
-                aria-label="Loan planner emergency cushion"
-                max={Math.max(1, cash.emergencyTarget)}
-                value={Math.min(plan.emergency, cash.emergencyTarget)}
-              />
-              <p>
-                {plan.emergency < cash.emergencyTarget
-                  ? `${money(cash.emergencyTarget - plan.emergency)} below your chosen ${plan.coverMonths}-month target. The reserve contribution stays outside the loan/investment budget.`
-                  : "Your chosen emergency target is covered."}
-              </p>
-            </section>
-          )}
+            )}
+          </section>
           {nonAmortizing.length > 0 && (
             <p className="loan-warning" role="status">
               Check {nonAmortizing.map((l) => l.name).join(", ")}: the required
@@ -1553,20 +1740,22 @@ export function LoanPage() {
           <details className="budget-guideline">
             <summary>About the investment-only alternatives</summary>
             <p>
-              These notes describe the optional four salary-funded paths. The
-              cash-and-asset comparisons explain their own assumptions beneath
-              the charts.
+              These notes describe the four repayment and investment paths,
+              including retained assets and rental income. Sale scenarios
+              explain their own assumptions beneath their charts.
             </p>
             <p>
-              Same starting loans, salary allocation and horizon. Full EMIs are
-              paid first. Extra payments reduce tenure; scheduled EMIs stay
-              unchanged. Fees come from the same cash budget. Surplus blocked by
-              lock-ins is invested.
+              Same starting loans, monthly budget, assets and horizon. Required
+              EMIs are paid first. Extra payments reduce tenure; scheduled EMIs
+              stay unchanged. Fees come from the same cash budget. Surplus
+              blocked by lock-ins is invested.
             </p>
             <p>
               Loan interest uses annual nominal rate ÷ 12. Investment returns
               are effective annual rates, net of the annual fee, converted to
-              monthly growth. Deposits arrive at month end.
+              monthly growth. Deposits arrive at month end. The overall timeline
+              ends at the latest regular loan payoff, with a 600-month model
+              limit. Each loan graph uses its own regular-payment timeline.
             </p>
             <p>
               Effective loan interest tax relief is treated as a monthly cash
@@ -1585,11 +1774,11 @@ export function LoanPage() {
         </aside>
       </div>
       <div
-        className={`budget-mobile-balance ${cash && cash.unassigned < 0 ? "is-short" : ""}`}
+        className={`budget-mobile-balance ${cash && monthlyGap > 0 ? "is-short" : ""}`}
       >
         <div>
           <span>
-            {cash && cash.unassigned < 0
+            {cash && monthlyGap > 0
               ? "Monthly shortfall"
               : plan.fundingMode === "manual"
                 ? "Monthly repayment money"
@@ -1598,9 +1787,11 @@ export function LoanPage() {
           <strong>
             {cash
               ? money(
-                  plan.fundingMode === "manual" && cash.unassigned >= 0
-                    ? cash.commitment
-                    : Math.abs(cash.unassigned),
+                  monthlyGap > 0
+                    ? monthlyGap
+                    : plan.fundingMode === "manual"
+                      ? cash.totalFunding
+                      : cash.unassigned,
                 )
               : "Check inputs"}
           </strong>

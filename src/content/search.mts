@@ -45,7 +45,7 @@ export const searchPages = {
   home: {
     title: "Financial Planning Calculators | Financial AI Planner",
     description:
-      "Free financial planning calculators for budgets, SIP investing, loan repayment and retirement. Choose your currency and explore your plan privately in your browser.",
+      "Financial planning calculators for budgets, SIP investing, loan repayment and retirement. Choose your currency and explore your plan privately in your browser.",
     name: "Financial AI Planner",
   },
   growth: {
@@ -177,7 +177,7 @@ export function searchGraph(page: SearchPage) {
             {
               "@type": "ItemList",
               "@id": url + "#calculators",
-              name: "Free financial planning calculators",
+              name: "Financial planning calculators",
               itemListElement: (Object.keys(searchPages) as SearchPage[])
                 .filter(
                   (key) =>

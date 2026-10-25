@@ -149,7 +149,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               <em>A clearer future.</em>
             </h1>
             <p>
-              Free calculators for your budget, investments and life after work.
+              Plan your budget, investments and life after work.
             </p>
             <div className="welcome-actions">
               <a

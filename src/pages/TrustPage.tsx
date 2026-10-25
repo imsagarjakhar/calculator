@@ -121,7 +121,7 @@ export function TrustPage({ page }: { page: TrustRoute }) {
               <p>
                 Start with what you earn, own, owe or want to spend. Compare a
                 few realistic assumptions, inspect the chart and monthly
-                schedule, then keep a report. The tools are free to use without
+                schedule, then keep a report. Use the tools without
                 a visitor account.
               </p>
             </section>
@@ -211,11 +211,11 @@ export function TrustPage({ page }: { page: TrustRoute }) {
             <details open>
               <summary>What stays in this browser?</summary>
               <p>
-                We use browser local storage for currency preferences, saved
-                planner values and features such as the salary snapshot used by
-                the loan planner. The salary planner opens at zero on each visit
-                and restores inputs only when you import a report; a previously
-                saved salary snapshot can still be offered to the loan planner.
+                We use browser local storage for currency preferences and saved
+                planner values. The salary planner opens at zero on each visit
+                and restores inputs only when you import a report. The loan
+                planner uses the repayment amount you enter; it does not import
+                your salary budget.
               </p>
               <p>
                 Other planners may restore their saved browser copy. Browser

@@ -229,7 +229,7 @@ export const headerConfig = {
   freedom: {
     eyebrow: "Financial AI Planner / FINANCIAL FREEDOM",
 
-    title: "When could you be financially free?",
+    title: "When could you be financially independent?",
 
     description: "Explore when your savings could support the life you want.",
 

@@ -1,18 +1,34 @@
 # Financial AI Planner — React migration
 
-The loan planner now accepts individually entered loans, one total monthly
-repayment budget or the salary planner's saved monthly investment amount, spare savings outside the
+The loan planner now accepts individually entered loans, a manually entered
+monthly repayment budget, spare savings outside the
 emergency fund, and up to eight assets. Cash-only scenarios compare required
 EMIs, monthly prepayments, an upfront savings payment, and selling one asset at a
 time. They include rent/vacancy/running costs, linked-loan settlement, sale costs
 and entered tax estimates, sale-only replacement costs, and retained asset value.
+The main repayment and investment paths include net rental income, retained asset
+values and spare cash. Net rent marked as included in the entered budget is counted
+once; future rent changes still adjust funding. Property values are not repayment
+cash. Explicit sale scenarios remove the sold asset and its rental income.
 Debt and net-wealth charts, cost bars and monthly schedules explain trade-offs;
 there is no buy/sell recommendation. Investment alternatives use their own stated
 basis. `test:loans` includes ledger and asset-scenario regression checks. New
 fields are optional, so saved plans and exported reports remain restorable.
-One checkbox selects the saved investment amount; unchecking it reveals one
-editable repayment input. Required EMIs come from that total and are not added
-again. Salary import leaves loans, assets and emergency/spare savings untouched.
+The main view plots each loan's cumulative scheduled payments over its own
+calendar timeline, with total principal, interest and payments. A separate graph
+shows remaining monthly money invested after regular EMIs at the selected annual
+return. Contributions rise as EMIs finish. Its timeline ends at the latest loan
+payoff (maximum 600 months), without asking for a separate horizon. Original-input
+loan charts include earlier scheduled EMIs; lender-balance charts start at the
+comparison month. They are projections, not verified payment histories.
+
+The monthly repayment budget is entered manually. Required EMIs come from that
+total and are not added again. New loans ask for original amount, annual rate,
+first EMI month and final EMI month. EMI, remaining months and estimated balance
+are calculated before the comparison month's payment, assuming regular payments
+at a fixed rate. The current lender balance option supports changed repayment
+histories and older plans. Reports preserve original inputs and recompute their
+derived balances on import.
 
 The salary planner invests the balance after living expenses, bill reserves,
 emergency saving and cash set aside. Its goal check evaluates that same investment,
@@ -174,7 +190,7 @@ and examples are maintained in `src/content/financeBasics.ts`. Currency follows
 the shared site preference. The initial guide is prerendered so definitions can
 be read without JavaScript. Run `npm run test:learn` for the example math checks.
 
-The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It compares highest-interest-first, smallest-balance-first, investing and a configurable split, with a shared monthly commitment and horizon. It supports multiple fixed-rate loans, prepayment fees/lock-ins, explicit tax assumptions, return sensitivity, salary-budget import and an exportable/restorable plan. Method references and assumptions are linked in the page. Run `npm run test:loans` for the model tests.
+The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It compares highest-interest-first, smallest-balance-first, investing and a configurable split, with a shared monthly commitment and horizon. It supports multiple fixed-rate loans, prepayment fees/lock-ins, explicit tax assumptions, return sensitivity and an exportable/restorable plan. Method references and assumptions are linked in the page. Run `npm run test:loans` for the model tests.
 
 - `src/` — React pages, shared components and runtime hooks.
 - `web/` — Vite HTML entry points.
