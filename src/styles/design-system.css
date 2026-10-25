@@ -1130,6 +1130,16 @@ svg [stroke="#2a4550"] {
 .planner-header-status:empty {
   display: none;
 }
+.calculator-noscript {
+  max-width: 1240px;
+  margin: 20px auto;
+  padding: 12px 20px;
+  color: #214c3a;
+  background: #edf3e4;
+  border: 1px solid #cad8c9;
+  border-radius: 5px;
+  font: 13px/1.7 var(--font-ui);
+}
 
 /* One header row; compact navigation opens in place when space is limited. */
 .welcome-topbar.home-header {

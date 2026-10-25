@@ -78,7 +78,9 @@ export function BudgetGrowthChart({
         role="img"
         aria-labelledby={`${id}-title ${id}-description`}
       >
-        <title id={`${id}-title`}>Investment growth over {months} months</title>
+        <title
+          id={`${id}-title`}
+        >{`Investment growth over ${months} months`}</title>
         <desc id={`${id}-description`}>
           At month {months}: {money(rows[months].invested)} contributed
           including existing savings, {money(rows[months].corpus)} projected

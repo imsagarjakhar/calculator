@@ -105,6 +105,32 @@ does not fall back to public GitHub when a configured Worker fails. Builds with
 no API origin retain the original public-repository reader for local previews;
 such builds must not be deployed after the repository becomes private.
 
+## Search visibility and release checks
+
+`npm run build` prerenders all nine public pages with readable fields,
+instructions, methods and links before JavaScript runs. Each page has a
+topic-specific title and description, canonical URL and sitemap entry;
+`robots.txt` points to the sitemap. Keep these aligned when adding routes.
+See [Google’s JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics).
+
+After deploying:
+
+1. [Verify the `intimetec.org` Domain property](https://support.google.com/webmasters/answer/9008080)
+   in Google Search Console using its DNS instructions.
+2. [Submit the sitemap](https://support.google.com/webmasters/answer/7451001):
+   `https://intimetec.org/sitemap.xml`.
+3. [Inspect the homepage and main planner URLs](https://support.google.com/webmasters/answer/9012289),
+   check Google’s rendered content and selected canonical, then request indexing
+   where appropriate.
+4. In [Performance](https://support.google.com/webmasters/answer/7576553), filter
+   by page and monitor queries, impressions and clicks. Focus content on useful
+   questions: SIP step-up, monthly salary budget, loan repayment vs investing,
+   SWP, FIRE, retirement buckets and finance terms.
+
+Indexing and rankings are not guaranteed. The blog still uses `#vlogs`;
+individual articles need dedicated, crawlable URLs before treating them as
+separate search landing pages. [Google discourages fragment-based content URLs](https://developers.google.com/search/docs/crawling-indexing/url-structure).
+
 ## Repository layout
 
 The beginner guide at `/learn/` teaches SIP, SWP, returns, inflation and EMI with

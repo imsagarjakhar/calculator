@@ -311,7 +311,9 @@ test("recurring bills reserve for the next payment and retain frequency", async 
     bill.getByLabel("Next Payment after (Months)", { exact: true }),
   ).toHaveValue("12");
   await bill.getByLabel("Payment frequency", { exact: true }).selectOption("0");
-  await expect(bill).toContainText("A one-time bill");
+  await expect(bill).toContainText(
+    "One-time bill: savings cover the next payment only.",
+  );
 });
 test("expense total warns once when spending crosses the salary limit", async ({
   page,

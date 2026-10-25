@@ -149,8 +149,53 @@ test("search engines can read content, links and consistent metadata without Jav
       "href",
       appPath("/survival/"),
     );
+    await expect(
+      staticPage.locator(".home-data-notice [data-nosnippet]"),
+    ).toContainText("Your financial plan stays in your browser.");
     await staticPage.locator(".growth-choice").click();
-    await expect(staticPage.locator("h1")).toContainText("SIP");
+    await expect(staticPage.locator("h1")).toHaveText(
+      "From your salary to your goal",
+    );
+    const calculatorContent: Record<
+      string,
+      { input: RegExp; summary: string; explanation: string }
+    > = {
+      "growth/": {
+        input: /Starting monthly investment/,
+        summary: "How the calculation works, source references & limitations",
+        explanation: "For month m:",
+      },
+      "survival/": {
+        input: /Current corpus/,
+        summary: "Calculation method & assumptions",
+        explanation: "Daily return =",
+      },
+      "custom-plan/": {
+        input: /Default monthly SIP/,
+        summary: "Calculation method & using your plan file",
+        explanation: "Each asset grows monthly",
+      },
+      "freedom/": {
+        input: /Savings & investments today/,
+        summary: "How this estimate works",
+        explanation: "The default is 3%, adjustable from 2–6%.",
+      },
+      "bucket-plan/": {
+        input: /Total retirement savings/,
+        summary: "Understand the model before using the result",
+        explanation: "No extra capital is invented.",
+      },
+      "salary-budget/": {
+        input: /Take-home salary/,
+        summary: "A starting point, not a rule.",
+        explanation: "The 50 / 30 / 20 template splits take-home income",
+      },
+      "loan-payoff/": {
+        input: /Monthly repayment budget/,
+        summary: "About the investment-only alternatives",
+        explanation: "Loan interest uses annual nominal rate ÷ 12.",
+      },
+    };
     for (const route of [
       "",
       "growth/",
@@ -163,6 +208,28 @@ test("search engines can read content, links and consistent metadata without Jav
       "learn/",
     ]) {
       await staticPage.goto(appPath(route));
+      await expect(staticPage.locator("h1")).toHaveCount(1);
+      const calculator = calculatorContent[route];
+      if (calculator) {
+        await expect(staticPage.getByLabel(calculator.input)).toBeVisible();
+        await expect(staticPage.getByLabel(calculator.input)).toHaveAttribute(
+          "type",
+          "number",
+        );
+        const summary = staticPage.getByText(calculator.summary, {
+          exact: true,
+        });
+        await expect(summary).toBeVisible();
+        const method = summary.locator("..");
+        await expect(method).toContainText(calculator.explanation);
+        await summary.click();
+        await expect(method).toHaveAttribute("open", "");
+        await expect(
+          method.locator("p").filter({
+            hasText: calculator.explanation,
+          }),
+        ).toBeVisible();
+      }
       const canonical = "https://intimetec.org/" + route;
       await expect(staticPage.locator('link[rel="canonical"]')).toHaveAttribute(
         "href",

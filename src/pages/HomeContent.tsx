@@ -244,7 +244,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" />
             <path d="m8 12 3 3 5-6" />
           </svg>
-          <div>
+          <div data-nosnippet="">
             <strong>Your financial plan stays in your browser.</strong>
             <p>
               We don’t store your calculator entries on our servers. Use{" "}

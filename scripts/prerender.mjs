@@ -3,8 +3,9 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFile, writeFile } from "node:fs/promises";
 
-// Render the same public homepage component for every visitor, without a server
-// or browser dependency. Interactive calculators still start in the browser.
+// Serve the same useful page content before and after JavaScript loads.
+// Effects/controllers do not run here, so no browser drafts or private inputs
+// can enter the public HTML. Calculations still run locally in the browser.
 const server = await createServer({
   server: { middlewareMode: true, hmr: false },
   appType: "custom",
@@ -25,30 +26,55 @@ try {
     html.replace('<div id="root"></div>', `<div id="root">${content}</div>`),
   );
   const { searchPages } = await server.ssrLoadModule("/src/content/search.mts");
-  for (const [route, info] of Object.entries(searchPages)) {
+  const { PlannerNavigation } = await server.ssrLoadModule(
+    "/src/components/PlannerNavigation.tsx",
+  );
+  const pages = {
+    growth: "GrowthPage",
+    survival: "SurvivalPage",
+    "custom-plan": "CustomPage",
+    freedom: "FreedomPage",
+    "bucket-plan": "BucketPage",
+    "salary-budget": "BudgetPage",
+    "loan-payoff": "LoanPage",
+    learn: "LearnPage",
+  };
+  for (const route of Object.keys(searchPages)) {
     if (route === "home") continue;
     const page = `dist/${route}/index.html`;
     const source = await readFile(page, "utf8");
-    const { LearnPage } =
-      route === "learn"
-        ? await server.ssrLoadModule("/src/pages/LearnPage.tsx")
-        : {};
-    const introduction =
-      route === "learn"
-        ? renderToStaticMarkup(createElement(LearnPage))
-        : renderToStaticMarkup(
+    const name = pages[route];
+    if (!name) throw new Error(`No public renderer for ${route}`);
+    const module = await server.ssrLoadModule(`/src/pages/${name}.tsx`);
+    const element = createElement(module[name]);
+    const pageContent =
+      route === "growth" || route === "survival"
+        ? createElement(
+            "main",
+            { className: "planner-page" },
+            createElement(PlannerNavigation),
+            element,
+          )
+        : element;
+    const introduction = renderToStaticMarkup(
+      createElement(
+        "div",
+        null,
+        route !== "learn" &&
+          createElement(
+            "noscript",
+            null,
             createElement(
-              "main",
-              { className: "static-introduction" },
-              createElement("h1", null, info.name),
-              createElement("p", null, info.description),
-              createElement(
-                "p",
-                null,
-                "Enable JavaScript to enter your assumptions and calculate your plan privately in your browser.",
-              ),
+              "p",
+              { className: "calculator-noscript" },
+              "Enable JavaScript to calculate your plan. You can still read the instructions and calculation methods below.",
             ),
-          );
+          ),
+        pageContent,
+      ),
+    );
+    if (!source.includes('<div id="root"></div>'))
+      throw new Error(`Missing render target for ${route}`);
     await writeFile(
       page,
       source.replace(
@@ -58,7 +84,7 @@ try {
     );
   }
   console.log(
-    "Homepage and calculator introductions pre-rendered with links available without JavaScript.",
+    "All public pages pre-rendered with calculator fields, instructions, methods and crawlable links.",
   );
 } finally {
   await server.close();

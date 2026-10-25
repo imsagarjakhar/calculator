@@ -1,56 +1,55 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
   learn: {
-    title: "Finance Basics: SIP, SWP, Returns & More | Financial AI Planner",
+    title: "Finance Terms Explained: SIP, SWP & EMI | Financial AI Planner",
     description:
       "Learn finance in plain language with interactive examples, illustrated SIP and SWP lessons, quick questions and a searchable glossary of financial terms.",
     name: "Finance basics",
   },
   "loan-payoff": {
-    title: "Loan Payoff & Investment Planner | Financial AI Planner",
+    title: "Loan Repayment vs Investment Calculator | Financial AI Planner",
     description:
       "Compare paying multiple loans faster with investing on the same monthly budget. Explore debt payoff order, fees, tax assumptions and a monthly payment guide.",
     name: "Loan Payoff & Investment Planner",
   },
   "salary-budget": {
-    title: "Monthly Salary & Budget Planner | Financial AI Planner",
+    title: "Salary & Monthly Budget Calculator | Financial AI Planner",
     description:
       "Plan your take-home salary, expenses, upcoming bills, emergency savings and goals. Explore a one-year monthly investment projection using your return assumption.",
     name: "Monthly Salary & Budget Planner",
   },
   home: {
-    title: "Financial Planning Guide & Free Calculators | Financial AI Planner",
+    title: "Free SIP, Loan & Budget Calculators | Financial AI Planner",
     description:
       "Learn how to do financial planning: budget your salary, build emergency savings, compare loan payoff with investing and plan retirement with free calculators.",
     name: "Financial AI Planner",
   },
   growth: {
-    title: "SIP & Investment Growth Calculator | Financial AI Planner",
+    title: "SIP Calculator with Step-Up | Financial AI Planner",
     description:
       "Calculate SIP growth with Financial AI Planner. Compare monthly investments, annual step-ups, one-time deposits, existing assets and loans using your own return assumptions.",
     name: "SIP & Investment Growth Calculator",
   },
   survival: {
-    title: "Retirement & SWP Calculator | Financial AI Planner",
+    title: "SWP & Retirement Calculator | Financial AI Planner",
     description:
       "How long could your savings last? Use Financial AI Planner's retirement and SWP calculator to explore monthly withdrawals, inflation, investment returns and future expenses.",
     name: "Retirement & SWP Calculator",
   },
   "custom-plan": {
-    title:
-      "Monthly Investment Planner & Loan EMI Calculator | Financial AI Planner",
+    title: "Investment & Loan EMI Planner | Financial AI Planner",
     description:
       "Build a monthly plan with Financial AI Planner. Track investment records, calculate loan EMIs and outstanding balances, and project assets, debt and inflation-adjusted net worth.",
     name: "Monthly Investment Planner & Loan EMI Calculator",
   },
   freedom: {
-    title: "Financial Freedom & FIRE Age Calculator | Financial AI Planner",
+    title: "FIRE & Financial Freedom Calculator | Financial AI Planner",
     description:
       "Explore your financial freedom age with Financial AI Planner. Model your current savings, monthly SIP, annual step-up, desired income, expected returns and inflation.",
     name: "Financial Freedom Age Calculator",
   },
   "bucket-plan": {
-    title: "Retirement Bucket Planner | Financial AI Planner",
+    title: "Retirement Bucket Strategy Planner | Financial AI Planner",
     description:
       "Explore a three-bucket retirement strategy with Financial AI Planner: living costs, an emergency reserve and long-term investments. Model withdrawals, inflation and refills.",
     name: "Retirement Bucket Planner",
@@ -83,7 +82,12 @@ export function searchGraph(page: SearchPage) {
         isPartOf: { "@id": siteUrl + "/#website" },
         inLanguage: "en",
         ...(page !== "home"
-          ? { breadcrumb: { "@id": url + "#breadcrumb" } }
+          ? {
+              breadcrumb: { "@id": url + "#breadcrumb" },
+              mainEntity: {
+                "@id": url + (page === "learn" ? "#guide" : "#calculator"),
+              },
+            }
           : { mainEntity: { "@id": url + "#calculators" } }),
       },
       ...(page === "home"
