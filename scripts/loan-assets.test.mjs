@@ -192,8 +192,8 @@ test("50 multi-asset plans reconcile rent, cash, loans and net wealth for all fo
           row.budget +
             row.growth +
             (row.spareCash - previous.spare) +
-            (row.assetValue - previous.assets) +
-            p.reserve -
+            // Manual budgets do not declare additional protected monthly savings.
+            (row.assetValue - previous.assets) -
             row.interest -
             row.fees +
             row.taxCredit -
@@ -212,8 +212,7 @@ test("50 multi-asset plans reconcile rent, cash, loans and net wealth for all fo
           r.investmentTax +
           r.spareCash +
           r.assetValue +
-          p.emergency +
-          p.reserve * p.horizon -
+          p.emergency -
           r.debt -
           r.arrears,
       );

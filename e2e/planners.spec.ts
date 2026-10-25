@@ -194,7 +194,7 @@ test("search engines can read content, links and consistent metadata without Jav
       },
       "loan-payoff/": {
         input: /Monthly repayment budget/,
-        summary: "About the investment-only alternatives",
+        summary: "About these comparisons",
         explanation: "Loan interest uses annual nominal rate ÷ 12.",
       },
     };

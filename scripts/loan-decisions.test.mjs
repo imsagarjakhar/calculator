@@ -5,6 +5,7 @@ import {
   cashFlow,
   validateLoanPlan,
   withRepaymentBudget,
+  simulate,
 } from "../src/loans/model.ts";
 import {
   compareDecisions,
@@ -91,7 +92,10 @@ test("manual totals include EMIs once and salary capacity updates after loans", 
 });
 test("using savings starts with the same wealth and reduces first-month interest", () => {
   const p = plan();
-  const [base, monthly, savings] = compareDecisions(p);
+  const scenarios = compareDecisions(p);
+  const base = scenarios.find((s) => s.id === "minimum"),
+    monthly = scenarios.find((s) => s.id === "monthly"),
+    savings = scenarios.find((s) => s.id === "savings");
   near(base.rows[0].net, monthly.rows[0].net);
   near(base.rows[0].net, savings.rows[0].net);
   near(savings.initialPayment, 4000);
@@ -122,7 +126,10 @@ test("sale removes rent and asset, settles secured debt and deducts exact fees a
   near(sale.rows[0].assetValue, 0);
   near(sale.rows[0].debt, 0);
   near(sale.rows[1].rent, 0);
-  near(sale.rows[1].liquid, 13500);
+  const monthlyReturn =
+    ((1 + p.returns / 100) * (1 - p.investmentFee / 100)) ** (1 / 12) - 1;
+  near(sale.rows[1].liquid, 4000 + 7500 * (1 + monthlyReturn) + 2000);
+  near(sale.investment.contributed, 7500 + 2000 * p.horizon);
   const base = compareDecisions(p)[0];
   near(base.rows[1].rent, 130);
   near(base.rows[0].net - sale.rows[0].net, 2500);
@@ -258,9 +265,16 @@ test("forty mixed scenarios conserve monthly cash, debt and net wealth", () => {
         const now = scenario.rows[month],
           before = scenario.rows[month - 1];
         near(now.debt, before.debt + now.interest - now.paid);
+        // Cash remains idle; investment scenarios grow only the invested balance.
+        const investmentGrowth = scenario.investment
+          ? (before.liquid - p.lumpSum) *
+            (((1 + p.returns / 100) * (1 - p.investmentFee / 100)) ** (1 / 12) -
+              1)
+          : 0;
         near(
           now.liquid,
           before.liquid +
+            investmentGrowth +
             cashFlow(p).commitment +
             rentalChange -
             now.paid -
@@ -269,6 +283,7 @@ test("forty mixed scenarios conserve monthly cash, debt and net wealth", () => {
         near(
           now.net,
           before.net +
+            investmentGrowth +
             cashFlow(p).commitment +
             rentalChange -
             now.interest -
@@ -284,4 +299,67 @@ test("forty mixed scenarios conserve monthly cash, debt and net wealth", () => {
           near(balance, 0);
     }
   }
+});
+
+test("manual budgets do not manufacture monthly savings from legacy salary inputs", () => {
+  const p = {
+    ...plan(),
+    repaymentBudget: 2000,
+    reserve: 777,
+    returns: 0,
+    investmentFee: 0,
+  };
+  p.loans[0].rate = 0;
+  for (const strategy of ["invest", "avalanche"]) {
+    const result = simulate(p, strategy);
+    // 12 deposits of 2000, minus 10000 principal, plus 4000 cash and 3000 protected today.
+    near(result.net, 21000);
+    near(result.net, simulate({ ...p, reserve: 0 }, strategy).net);
+  }
+  for (const scenario of compareDecisions(p)) {
+    const withoutLegacyReserve = compareDecisions({ ...p, reserve: 0 }).find(
+      (s) => s.id === scenario.id,
+    );
+    near(scenario.rows.at(-1).net, withoutLegacyReserve.rows.at(-1).net);
+  }
+});
+
+test("the dated two-loan example distinguishes 10% and 12% returns", () => {
+  const p = {
+    ...plan(),
+    start: "2026-10",
+    horizon: 35,
+    repaymentBudget: 45000,
+    reserve: 4000,
+    emergency: 0,
+    lumpSum: 0,
+    investmentFee: 0.5,
+    gainsTax: 0,
+    loans: [
+      {
+        ...plan().loans[0],
+        id: "car",
+        inputMode: "original",
+        originalAmount: 777000,
+        rate: 8.75,
+        firstEmiMonth: "2023-01",
+        lastEmiMonth: "2027-12",
+      },
+      {
+        ...plan().loans[0],
+        id: "personal",
+        inputMode: "original",
+        originalAmount: 1200000,
+        rate: 10.4,
+        firstEmiMonth: "2024-10",
+        lastEmiMonth: "2029-08",
+      },
+    ],
+  };
+  const at10 = { ...p, returns: 10 },
+    at12 = { ...p, returns: 12 };
+  near(simulate(at10, "invest").net, 460417.59886373143);
+  near(simulate(at10, "avalanche").net, 464117.04076419014);
+  near(simulate(at12, "invest").net, 468655.3516848586);
+  near(simulate(at12, "avalanche").net, 467301.5500948285);
 });

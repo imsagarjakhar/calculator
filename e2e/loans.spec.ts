@@ -36,31 +36,18 @@ test("loan planner compares fair paths, provides a guide and restores exported p
     fullPage: true,
   });
   await page.getByRole("button", { name: /Compare my options/ }).click();
-  await expect(page.locator(".loan-strategy")).toHaveCount(4);
-  await page
-    .getByText("Explore four repayment and investment paths", {
-      exact: true,
-    })
-    .click();
-  await expect(page.locator(".loan-insight")).toContainText(
-    "projected net position",
-  );
+  await expect(page.locator(".loan-choice-card")).toHaveCount(3);
+  await expect(page.locator(".loan-outcome-chart")).toBeVisible();
+  await expect(page.locator(".loan-choice-panel select")).toHaveCount(0);
+  await page.getByRole("button", { name: /Clear loans faster/ }).click();
   await expect(
-    page.getByText("Approximate investment break-even", { exact: true }),
-  ).toBeVisible();
+    page.getByRole("button", { name: /Clear loans faster/ }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({
     path: info.outputPath("loan-comparison.png"),
     fullPage: true,
   });
-  await page.locator(".loan-strategy").nth(2).click();
-  await expect(page.locator(".loan-strategy").nth(2)).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.getByRole("button", { name: /Build my monthly guide/ }).click();
-  await expect(page.getByLabel("Choose the path for your guide")).toHaveValue(
-    "invest",
-  );
+  await page.getByRole("button", { name: /Your payoff guide/ }).click();
   await page
     .getByLabel("Choose the path for your guide")
     .selectOption("avalanche");
@@ -89,7 +76,7 @@ test("loan planner compares fair paths, provides a guide and restores exported p
   await expect(page.locator(".loan-errors")).toContainText(
     "does not cover all required EMIs",
   );
-  await expect(page.locator(".loan-strategy")).toHaveCount(0);
+  await expect(page.locator(".loan-choice-card")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Review my inputs", exact: true })
     .click();
@@ -227,10 +214,10 @@ test("loan planner works with storage unavailable and rejects malformed imports"
     page.getByLabel("Monthly repayment budget", { exact: true }),
   ).toHaveValue("25000");
   await page.getByRole("button", { name: /Compare my options/ }).click();
-  await expect(page.locator(".loan-strategy")).toHaveCount(4);
+  await expect(page.locator(".loan-choice-card")).toHaveCount(3);
 });
 
-test("individual loans, spare savings and a rental sale have separate visual comparisons", async ({
+test("three choices compare investments, faster repayment and asset sale with hover charts", async ({
   page,
 }, info) => {
   const errors: string[] = [];
@@ -283,71 +270,66 @@ test("individual loans, spare savings and a rental sale have separate visual com
     .getByLabel("Loan secured against this asset", { exact: true })
     .selectOption({ label: "Home loan" });
   await page.getByRole("button", { name: /Compare my options/ }).click();
+  await expect(page.locator(".loan-choice-card")).toHaveCount(3);
+  const investmentChart = page.locator(".loan-outcome-chart");
+  const beforeReturnChange = await investmentChart
+    .locator(".loan-outcome-readout")
+    .textContent();
+  await page
+    .getByLabel("Expected annual return (%)", { exact: true })
+    .fill("15");
+  await expect(investmentChart.locator(".loan-outcome-readout")).not.toHaveText(
+    beforeReturnChange!,
+  );
+  await page.locator(".loan-outcome-scrubber input").fill("0");
+  await expect(investmentChart.locator(".loan-outcome-readout")).toContainText(
+    "₹6,70,000",
+  );
+  await page.getByRole("button", { name: /Sell, repay \+ invest/ }).click();
+  await expect(page.locator(".loan-sale-flow")).toContainText("₹4,80,000");
+  await expect(page.locator(".loan-sale-flow")).toContainText("₹4,90,000");
+  await expect(page.locator(".loan-sale-flow")).toContainText("₹8,000 / month");
+  await page.getByRole("button", { name: "Loan balance", exact: true }).click();
+  await expect(investmentChart.locator(".loan-outcome-readout")).toContainText(
+    "₹0",
+  );
+  const chartSvg = investmentChart.locator("svg");
+  await chartSvg.scrollIntoViewIfNeeded();
+  const box = (await chartSvg.boundingBox())!;
+  if (info.project.name === "mobile")
+    await page.touchscreen.tap(
+      box.x + box.width * 0.65,
+      box.y + box.height * 0.5,
+    );
+  else
+    await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.5);
+  await expect(page.locator(".loan-outcome-tooltip")).toContainText(
+    "Sell & invest",
+  );
+  await expect(page.locator(".loan-outcome-tooltip")).toContainText(
+    "Repay faster",
+  );
+  await page
+    .getByText("Monthly numbers · Sell, repay + invest", { exact: true })
+    .click();
+  await expect(
+    page
+      .locator(".loan-choice-details")
+      .filter({
+        has: page.getByText("Monthly numbers · Sell, repay + invest", {
+          exact: true,
+        }),
+      })
+      .locator("tbody tr"),
+  ).toHaveCount(13);
+  await page.getByText("Explore each loan’s payments", { exact: true }).click();
   await expect(page.locator(".loan-individual")).toHaveCount(2);
   await expect(
     page.locator(".loan-individual").first().getByRole("img"),
-  ).toHaveAccessibleName("Personal loan");
+  ).toHaveAccessibleName(/Personal loan/);
   await expect(
     page.locator(".loan-individual").nth(1).getByRole("img"),
-  ).toHaveAccessibleName("Home loan");
-  const investmentChart = page.locator(
-    ".loan-invest-or-repay .loan-decision-chart",
-  );
-  await expect(investmentChart).toBeVisible();
-  const beforeReturnChange = await investmentChart
-    .locator("figcaption")
-    .textContent();
-  await page
-    .getByLabel("Expected annual investment return (%)", { exact: true })
-    .fill("15");
-  await expect(investmentChart.locator("figcaption")).not.toHaveText(
-    beforeReturnChange!,
-  );
-  await page
-    .getByLabel("Explore repayment versus investing month", { exact: true })
-    .fill("0");
-  await expect(investmentChart.locator("figcaption")).toContainText(
-    "₹6,70,000",
-  );
-  await page
-    .getByText("Optional: use spare savings or compare an asset sale", {
-      exact: true,
-    })
-    .click();
-  await expect(page.locator(".loan-rate-ranking li").first()).toContainText(
-    "Personal loan",
-  );
-  await expect(
-    page.locator(".loan-advanced-scenarios .loan-decision-chart"),
-  ).toHaveCount(2);
-  await page
-    .getByLabel("Compare repayment scenario", { exact: true })
-    .selectOption("savings");
-  await expect(page.locator(".loan-decision-note")).toContainText(
-    "₹50,000 applied to principal",
-  );
-  await page
-    .getByLabel("Compare repayment scenario", { exact: true })
-    .selectOption({ label: "Sell Shop" });
-  await expect(page.locator(".loan-decision-note").last()).toContainText(
-    "₹7,90,000",
-  );
-  await expect(page.locator(".loan-decision-note").last()).toContainText(
-    "₹8,000 per month",
-  );
-  await page.getByLabel("Explore debt month", { exact: true }).fill("0");
-  await expect(
-    page
-      .locator(".loan-advanced-scenarios .loan-decision-chart")
-      .first()
-      .locator("figcaption"),
-  ).toContainText("₹0");
-  await page
-    .getByText("View scenario’s monthly numbers", { exact: true })
-    .click();
-  await expect(page.locator(".loan-decision-schedule tbody tr")).toHaveCount(
-    13,
-  );
+  ).toHaveAccessibleName(/Home loan/);
   await page
     .locator(".loan-decision-lab")
     .screenshot({ path: info.outputPath("loan-decisions.png") });
@@ -502,22 +484,22 @@ test("rental assets update monthly funding and the main repayment and wealth gra
     "₹6,000",
   );
   await expect(page.getByTestId("loan-declared-extra")).toHaveText("₹5,000");
-  await expect(page.getByTestId("loan-monthly-room")).toHaveText("₹6,000");
+  await expect(page.getByTestId("loan-monthly-room")).toHaveText("₹5,000");
   await page.getByRole("button", { name: /Compare my options/ }).click();
-  await page
-    .getByLabel("Explore repayment versus investing month", { exact: true })
-    .fill("0");
-  await expect(page.locator(".loan-invest-or-repay figcaption")).toContainText(
+  await page.locator(".loan-outcome-scrubber input").fill("0");
+  await expect(page.locator(".loan-outcome-readout")).toContainText(
     "₹34,88,000",
   );
-  await page
-    .getByLabel("Explore Loan 1 repayment month", { exact: true })
-    .fill("1");
+  await page.getByText("Explore each loan’s payments", { exact: true }).click();
+  await page.getByLabel("Explore Loan 1 by month", { exact: true }).fill("1");
   await expect(page.locator(".loan-individual figcaption")).toContainText(
-    "₹6,000",
+    "₹1,000",
   );
   await expect(page.locator(".loan-individual figcaption")).toContainText(
     "₹11,000",
+  );
+  await expect(page.locator(".loan-individual figcaption")).toContainText(
+    "Installments paid: 1 of 12",
   );
   await page.getByRole("button", { name: /Your money & loans/ }).click();
   await asset.getByRole("checkbox").check();
