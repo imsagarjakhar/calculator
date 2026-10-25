@@ -1422,7 +1422,7 @@ header {
 .welcome-actions a.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #061c24;
+  color: #fff;
 }
 .welcome-actions a {
   border: 1px solid var(--line);

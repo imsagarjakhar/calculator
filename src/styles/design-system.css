@@ -142,7 +142,7 @@ h3 {
 }
 .welcome-actions a.primary {
   background: #217349;
-  color: #102a30;
+  color: #fff;
   border-color: #94ad9f;
 }
 .welcome-actions a:hover {
@@ -583,6 +583,11 @@ button.primary,
 }
 .welcome-actions a.primary:hover {
   background: #11553f;
+}
+.welcome-actions a.primary:any-link,
+.welcome-actions a.primary:focus-visible,
+.welcome-actions a.primary:active {
+  color: #fff;
 }
 .welcome-actions a:not(.primary) {
   color: #365a45;
