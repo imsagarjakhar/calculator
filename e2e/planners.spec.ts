@@ -292,15 +292,15 @@ test("search metadata follows client navigation and browser history", async ({
   await page.goto(appPath("/"));
   const homeTitle = await page.title();
   await page.getByRole("link", { name: "Explore my future" }).click();
-  await expect(page).toHaveTitle(/SIP & Investment Growth Calculator/);
+  await expect(page).toHaveTitle(/SIP Calculator with Step-Up/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     "https://intimetec.org/growth/",
   );
   await page.locator('#plannerNav [data-screen="survival"]').click();
-  await expect(page).toHaveTitle(/Retirement & SWP Calculator/);
+  await expect(page).toHaveTitle(/SWP & Retirement Calculator/);
   await page.goBack();
-  await expect(page).toHaveTitle(/SIP & Investment Growth Calculator/);
+  await expect(page).toHaveTitle(/SIP Calculator with Step-Up/);
   await page.goBack();
   await expect(page).toHaveTitle(homeTitle);
 });
@@ -435,6 +435,68 @@ test("all five calculators load with consistent controls, editable dates and res
       fullPage: false,
     });
   }
+});
+
+test("disabled Growth assets and loans stay out of projections without deleting saved entries", async ({
+  page,
+}) => {
+  const position = {
+    assets: [
+      { name: "Saved investment", amount: 250000, rate: 12, liquid: true },
+    ],
+    loans: [
+      {
+        name: "Saved loan",
+        balance: 100000,
+        rate: 8,
+        totalMonths: 120,
+        remainingMonths: 120,
+        source: "income",
+      },
+    ],
+  };
+  await page.addInitScript((saved) => {
+    localStorage.setItem("growth-position-v1-INR", JSON.stringify(saved));
+  }, position);
+  await page.goto(appPath("/growth/"));
+  for (const name of ["Fixed Deposit", "Gold", "Equity Mutual Fund"]) {
+    await page.getByRole("button", { name, exact: true }).click();
+    await expect(page.locator("#growthHoldings")).toBeHidden();
+    await expect(
+      page.locator("#hold-assets-form, #hold-loans-form"),
+    ).toHaveCount(0);
+  }
+  const inputs = {
+    monthly: 10000,
+    stepup: 5,
+    years: 2,
+    rate: 8,
+    goal: 1000000,
+    inflation: 5,
+  };
+  for (const [key, value] of Object.entries(inputs))
+    await page.locator("#" + key).fill(String(value));
+  const expected = Growth.projectPlan(inputs, [], [], {
+    assets: [],
+    loans: [],
+  });
+  await expect(page.locator("#exactValue")).toContainText(
+    Math.round(expected.balance).toLocaleString("en-IN"),
+  );
+  const report = Report.read(
+    (await downloadText(page, "#growthReport")).text,
+    "growth",
+  );
+  expect(report.position).toEqual({ assets: [], loans: [] });
+  await page.locator("#reset").click();
+  expect(
+    await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("growth-position-v1-INR")!),
+    ),
+  ).toEqual(position);
+  await page.goto(appPath("/custom-plan/"));
+  await expect(page.locator("#assetForm")).toBeVisible();
+  await expect(page.locator("#loanForm")).toBeVisible();
 });
 
 test("Growth matches the existing engine, persists edits, survives navigation, exports and imports", async ({

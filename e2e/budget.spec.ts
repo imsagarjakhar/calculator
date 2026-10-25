@@ -311,9 +311,15 @@ test("recurring bills reserve for the next payment and retain frequency", async 
     bill.getByLabel("Next Payment after (Months)", { exact: true }),
   ).toHaveValue("12");
   await bill.getByLabel("Payment frequency", { exact: true }).selectOption("0");
-  await expect(bill).toContainText(
-    "One-time bill: savings cover the next payment only.",
-  );
+  await expect(
+    bill.getByLabel("Payment frequency", { exact: true }),
+  ).toHaveValue("0");
+  await expect(
+    bill.getByLabel("Next Payment after (Months)", { exact: true }),
+  ).toHaveValue("12");
+  // One payment of 6,000 minus 1,000 reserved, spread over 12 months.
+  await expect(bill.locator(".budget-bill-total strong")).toHaveText("₹417");
+  await expect(bill).toContainText("next payment only");
 });
 test("expense total warns once when spending crosses the salary limit", async ({
   page,

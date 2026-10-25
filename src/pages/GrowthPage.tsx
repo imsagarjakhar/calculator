@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
+import { enableGrowthAssetsAndLoans } from "../runtime/features";
 import mount from "planner:controller:growth";
 export const GrowthPage = memo(function GrowthPage() {
   const ref = usePlanner(mount);
@@ -20,7 +21,10 @@ export const GrowthPage = memo(function GrowthPage() {
           </button>
         </nav>
         <div id="error" className="error alert" role="alert" hidden></div>
-        <section id="growthHoldings"></section>
+        <section
+          id="growthHoldings"
+          hidden={!enableGrowthAssetsAndLoans}
+        ></section>
         <div className="layout">
           <section className="panel" aria-labelledby="heading">
             <div className="section-top">

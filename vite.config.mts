@@ -201,6 +201,7 @@ function compatibilityModules(): Plugin {
       let source = readFileSync(file, "utf8");
       if (kind === "engine") {
         const { name, deps = {} } = engines[key];
+        const holdingsFeature = key === "growth-holdings";
         const imports = Object.entries(deps)
           .map(([api, dep]) => `import ${api} from 'planner:engine:${dep}';`)
           .join("\n");
@@ -208,12 +209,24 @@ function compatibilityModules(): Plugin {
           .map(([api, dep]) => `${JSON.stringify("./" + dep)}:${api}`)
           .join(",");
         return (
+          (holdingsFeature
+            ? `import { enableGrowthAssetsAndLoans } from '/src/runtime/features';\n`
+            : "") +
           `${imports}\nconst root={${Object.keys(deps).join(",")}};const module={exports:{}};const require=name=>{const deps={${requires}};if(!(name in deps))throw Error('Unknown dependency '+name);return deps[name];};\n` +
           source.replace(
             /\}\)\((?:typeof globalThis!=='undefined'\?globalThis:this|globalThis)\);?\s*$/,
             "})(root);",
           ) +
-          `\nexport default ${key === "growth-holdings" ? "root." + name : "module.exports"};`
+          // Disable the data source as well as the UI. Keep stored positions
+          // untouched so they are available when this feature is enabled again.
+          (holdingsFeature
+            ? `\nif (!enableGrowthAssetsAndLoans) root.GrowthHoldings = {
+                load() { return { assets: [], loans: [] }; },
+                save() { return { assets: [], loans: [] }; },
+                mount(host) { host.hidden = true; return { refresh() {}, reset() {} }; }
+              };\n`
+            : "") +
+          `\nexport default ${holdingsFeature ? "root." + name : "module.exports"};`
         );
       }
       if (key === "growth") {
