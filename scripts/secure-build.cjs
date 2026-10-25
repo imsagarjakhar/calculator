@@ -94,7 +94,9 @@ for (const name of ["custom-plan", "freedom", "bucket-plan"]) {
     path.join(output, name + ".html"),
   );
 }
-for (const file of ["CNAME", "robots.txt", "sitemap.xml", "ads.txt"]) {
+// sitemap.xml is generated from the public route registry and checked by the
+// SEO audit. Domain, crawler and publisher records remain immutable copies.
+for (const file of ["CNAME", "robots.txt", "ads.txt"]) {
   if (
     fs.readFileSync(path.join(output, file), "utf8").trim() !==
     fs.readFileSync(path.join("public", file), "utf8").trim()

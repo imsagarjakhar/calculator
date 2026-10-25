@@ -25,7 +25,9 @@ try {
     file,
     html.replace('<div id="root"></div>', `<div id="root">${content}</div>`),
   );
-  const { searchPages } = await server.ssrLoadModule("/src/content/search.mts");
+  const { searchPages, canonicalUrl } = await server.ssrLoadModule(
+    "/src/content/search.mts",
+  );
   const { PlannerNavigation } = await server.ssrLoadModule(
     "/src/components/PlannerNavigation.tsx",
   );
@@ -85,6 +87,14 @@ try {
   }
   console.log(
     "All public pages pre-rendered with calculator fields, instructions, methods and crawlable links.",
+  );
+  // Include every registered public route; do not invent last-modified dates.
+  const urls = Object.keys(searchPages).map(
+    (route) => `  <url><loc>${canonicalUrl(route)}</loc></url>`,
+  );
+  await writeFile(
+    "dist/sitemap.xml",
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`,
   );
 } finally {
   await server.close();

@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "build": "npm run typecheck && vite build && node scripts/prerender.mjs && node scripts/secure-build.cjs",
+    "build": "npm run typecheck && vite build && node scripts/prerender.mjs && node scripts/secure-build.cjs && npm run test:seo",
+    "seo:images": "node --experimental-strip-types scripts/generate-social-images.mjs",
+    "test:seo": "node --experimental-strip-types scripts/seo-audit.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "test": "node scripts/test.cjs && npm run test:vlogs && npm run test:budget && npm run test:loans && npm run test:learn",
     "test:learn": "node --experimental-strip-types --test scripts/finance-basics.test.mjs",

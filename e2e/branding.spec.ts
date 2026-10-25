@@ -3,6 +3,8 @@ const base = process.env.VITE_BASE_PATH || "/";
 test("all pages use neutral branding while the domain remains unchanged", async ({
   page,
 }) => {
+  // This test navigates through the whole site, including the blog view.
+  test.slow();
   await page.route("https://api.github.com/**", (route) =>
     route.fulfill({
       json: {

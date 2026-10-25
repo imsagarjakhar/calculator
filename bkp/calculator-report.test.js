@@ -16,6 +16,12 @@ const a={monthly:5000,stepup:5,years:3,rate:8,goal:1000000,inflation:5},position
 const g=G.projectPlan(a,extras,events,position),gh=R.growth({a,o:g,extras,events,position,currency:'INR',scenario:'Equity Mutual Fund'},now),gs=check(gh,'growth',{...a,currency:'INR'},g);
 assert.deepEqual(gs.position,position);assert.deepEqual(gs.extras,extras);assert.ok(gh.includes('Complete monthly schedule'));assert.ok(gh.includes('Outside horizon'));assert.ok(gh.includes('Bonus &lt;b&gt;private&lt;/b&gt;'));
 assert.equal((gh.split('<h2>Complete monthly schedule</h2>')[1].split('</section>')[0].match(/<tr>/g)||[]).length,37);
+const sipOnly=G.projectPlan(a,extras,events,{assets:[],loans:[]});
+const sipReport=R.growth({a,o:sipOnly,extras,events,currency:'INR',scenario:'Equity Mutual Fund',includePosition:false},now);
+check(sipReport,'growth',{...a,currency:'INR'},sipOnly);
+const sipVisible=sipReport.replace(/<details class="backup">[\s\S]*?<\/details>/g,'').replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'').replace(/<style>[\s\S]*?<\/style>/g,'').replace(/<[^>]*>/g,' ');
+assert.ok(sipVisible.includes('Projected investment value'));
+assert.ok(!/net wealth|existing assets|current loans|remaining debt|EMIs paid|available to withdraw/i.test(sipVisible),'SIP-only reports must not describe the disabled position feature');
 const fInputs={...F.defaults,age:30,corpus:9000000,monthlyInvestment:75000,investmentGrowth:5,retirementExpense:70000,expectedReturn:10,inflation:6,endAge:100,buffer:15},f=F.project(fInputs,events),fh=R.freedom({a:fInputs,o:f,events},now);
 check(fh,'freedom',fInputs,f);assert.ok(fh.includes('Total invested by freedom'));assert.ok(fh.includes('After work'));assert.ok(fh.includes('Working'));
 const losses={...F.defaults,expectedReturn:-2,endAge:40,targetAge:39},unreached=F.project(losses,events),lh=R.freedom({a:losses,o:unreached,events},now);check(lh,'freedom',losses,unreached);assert.ok(lh.includes('No finite target'));assert.equal(raw(lh).results.requiredToday,'Infinity');

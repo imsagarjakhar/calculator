@@ -86,7 +86,7 @@ const html=fs.readFileSync('index.html','utf8');
 const nodes=new Map();
 const el=id=>{if(!nodes.has(id))nodes.set(id,{value:id==='yearFilter'?'all':id==='pageSize'?'12':'',setAttribute(){},innerHTML:'',textContent:''});return nodes.get(id);};
 const a={...base,years:2};const o=projectPlan(a,[{year:1,month:3,amount:1500,note:'Note, with "quotes"'}],[expense(),expense({year:2,month:12})]);
-const context=vm.createContext({current:{a,o},view:'yearly',page:1,el,currency:'INR',selected:'MF',presets:{MF:{name:'Equity Mutual Fund'}},pct:n=>n+'%',amountText:n=>String(Math.round(n))});
+const context=vm.createContext({positionEnabled:true,current:{a,o},view:'yearly',page:1,el,currency:'INR',selected:'MF',presets:{MF:{name:'Equity Mutual Fund'}},pct:n=>n+'%',amountText:n=>String(Math.round(n))});
 vm.runInContext(html.slice(html.indexOf('function yearHeader()'),html.indexOf('function focusExtra(')),context);
 vm.runInContext(html.slice(html.indexOf('function csvCell('),html.indexOf('function downloadCSV(')),context);
 function parseCSV(text){

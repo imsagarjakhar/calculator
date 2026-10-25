@@ -94,7 +94,10 @@ export const GrowthPage = memo(function GrowthPage() {
                 />
               </label>
               <label htmlFor="goal">
-                Net wealth goal (<span className="currency-code">INR</span>)
+                {enableGrowthAssetsAndLoans
+                  ? "Net wealth goal"
+                  : "Investment goal"}{" "}
+                (<span className="currency-code">INR</span>)
                 <input
                   id="goal"
                   type="number"
@@ -132,7 +135,11 @@ export const GrowthPage = memo(function GrowthPage() {
               <div className="result-label" id="resultLabel">
                 ILLUSTRATIVE VALUE AFTER 30 YEARS
               </div>
-              <span className="badge">Assets minus remaining debt</span>
+              <span className="badge">
+                {enableGrowthAssetsAndLoans
+                  ? "Assets minus remaining debt"
+                  : "Investment projection"}
+              </span>
             </div>
             <div id="value" className="amount"></div>
             <div id="exactValue" className="exact-value amount"></div>
@@ -146,7 +153,11 @@ export const GrowthPage = memo(function GrowthPage() {
                 <strong id="extraTotal"></strong>
               </div>
               <div className="stat">
-                <span>Starting asset value + deposits</span>
+                <span>
+                  {enableGrowthAssetsAndLoans
+                    ? "Starting asset value + deposits"
+                    : "Total contributions"}
+                </span>
                 <strong id="invested"></strong>
               </div>
               <div className="stat">
@@ -160,11 +171,19 @@ export const GrowthPage = memo(function GrowthPage() {
                 <strong id="last"></strong>
               </div>
               <div>
-                <span>Net wealth in today's money</span>
+                <span>
+                  {enableGrowthAssetsAndLoans
+                    ? "Net wealth in today's money"
+                    : "Investment value in today's money"}
+                </span>
                 <strong id="real"></strong>
               </div>
             </div>
-            <div id="wealthSummary" className="wealth-summary"></div>
+            <div
+              id="wealthSummary"
+              className="wealth-summary"
+              hidden={!enableGrowthAssetsAndLoans}
+            ></div>
             <div className="goal" id="goalResult"></div>
             <p className="helper" id="goalNote"></p>
           </section>
@@ -274,22 +293,33 @@ export const GrowthPage = memo(function GrowthPage() {
             ></svg>
             <div className="legend">
               <span>
-                <i className="swatch"></i>Assets with extras
+                <i className="swatch"></i>
+                {enableGrowthAssetsAndLoans
+                  ? "Assets with extras"
+                  : "Value with extra deposits"}
               </span>
               <span>
-                <i className="swatch base"></i>Assets without extras
+                <i className="swatch base"></i>
+                {enableGrowthAssetsAndLoans
+                  ? "Assets without extras"
+                  : "Value without extra deposits"}
               </span>
               <span>
-                <i className="swatch deposits"></i>Starting assets + deposits
+                <i className="swatch deposits"></i>
+                {enableGrowthAssetsAndLoans
+                  ? "Starting assets + deposits"
+                  : "Total contributions"}
               </span>
             </div>
             <p className="helper">
-              Tap a point or use arrow keys for amounts. The chart shows assets
-              before debt; the headline shows net wealth. Actual returns will
-              vary.
+              {enableGrowthAssetsAndLoans
+                ? "Tap a point or use arrow keys for amounts. The chart shows assets before debt; the headline shows net wealth. Actual returns will vary."
+                : "Tap a point or use arrow keys to compare investment value with your contributions. Actual returns will vary."}
             </p>
             <h3 style={{ marginTop: "17px" }}>
-              Net wealth at reference SIP rates
+              {enableGrowthAssetsAndLoans
+                ? "Net wealth at reference SIP rates"
+                : "Investment value at reference SIP rates"}
             </h3>
             <div className="compare">
               <div className="cmp" data-scenario="FD">
@@ -308,10 +338,12 @@ export const GrowthPage = memo(function GrowthPage() {
             <details className="planner-explanation">
               <summary>What changes in these comparisons?</summary>
               <p>
-                Only the return on new SIP deposits changes. Existing assets,
-                loans, life expenses and contributions stay the same. These
-                reference rates stay fixed; your selected rate updates the main
-                result, chart and tables.
+                Only the return on new SIP deposits changes.{" "}
+                {enableGrowthAssetsAndLoans
+                  ? "Existing assets, loans, life expenses and contributions"
+                  : "Life expenses and contributions"}{" "}
+                stay the same. These reference rates stay fixed; your selected
+                rate updates the main result, chart and tables.
               </p>
             </details>
             <div id="risk"></div>
@@ -325,7 +357,9 @@ export const GrowthPage = memo(function GrowthPage() {
           <div className="schedule-head">
             <div className="eyebrow">04 / EVERY DEPOSIT, CLEARLY LAID OUT</div>
             <h2 id="scheduleTitle" style={{ marginTop: "7px" }}>
-              Your assets, loans &amp; investment schedule
+              {enableGrowthAssetsAndLoans
+                ? "Your assets, loans & investment schedule"
+                : "Your investment schedule"}
             </h2>
             <p className="subtitle">
               See exactly when the SIP increases and where extra amounts enter
@@ -429,32 +463,50 @@ export const GrowthPage = memo(function GrowthPage() {
               the original file is unchanged. Income must grow to sustain larger
               contributions at the same savings share.
             </p>
-            <p>
-              For month m: payment = starting payment × (1 + step-up) ^ floor((m
-              - 1) / 12). Closing balance before life expenses = previous
-              closing balance × (1 + annual input / 12) + regular payment +
-              extra payment. Life expenses are then deducted, up to the
-              available corpus. Today’s expense costs are inflated by (1 +
-              inflation / 100) ^ (payment month / 12), matching their month-end
-              payment time. Unfunded costs are reported separately; they do not
-              create debt. Growth / loss is investment return only, excluding
-              withdrawals. Pausing an expense removes it from the scenario. Each
-              calculator and currency has its own saved life expenses; the Reset
-              button clears the complete Growth calculator, including assets,
-              loans and life expenses in all its currencies. The PPT example
-              button only restores the example inputs and clears extra deposits.
-              Both payments are added at the end of the selected month; they
-              first earn modelled growth in the following month. Extras are
-              one-time payments and are not increased by the annual SIP step-up.
-              Goal timing is the first closing balance at or above the target,
-              searching up to 100 years. Beyond the selected duration, this
-              search assumes regular SIPs, annual step-ups, existing asset
-              growth and loan repayments continue, with no new extra investments
-              or life expenses. Extras outside the selected duration are
-              excluded from all calculations. The first crossing does not
-              guarantee the balance will stay above the goal. It is not a
-              forecast.
-            </p>
+            {enableGrowthAssetsAndLoans ? (
+              <p>
+                For month m: payment = starting payment × (1 + step-up) ^
+                floor((m - 1) / 12). Closing balance before life expenses =
+                previous closing balance × (1 + annual input / 12) + regular
+                payment + extra payment. Life expenses are then deducted, up to
+                the available corpus. Today’s expense costs are inflated by (1 +
+                inflation / 100) ^ (payment month / 12), matching their
+                month-end payment time. Unfunded costs are reported separately;
+                they do not create debt. Growth / loss is investment return
+                only, excluding withdrawals. Pausing an expense removes it from
+                the scenario. Each calculator and currency has its own saved
+                life expenses; the Reset button clears the complete Growth
+                calculator, including assets, loans and life expenses in all its
+                currencies. The PPT example button only restores the example
+                inputs and clears extra deposits. Both payments are added at the
+                end of the selected month; they first earn modelled growth in
+                the following month. Extras are one-time payments and are not
+                increased by the annual SIP step-up. Goal timing is the first
+                closing balance at or above the target, searching up to 100
+                years. Beyond the selected duration, this search assumes regular
+                SIPs, annual step-ups, existing asset growth and loan repayments
+                continue, with no new extra investments or life expenses. Extras
+                outside the selected duration are excluded from all
+                calculations. The first crossing does not guarantee the balance
+                will stay above the goal. It is not a forecast.
+              </p>
+            ) : (
+              <p>
+                For month m: payment = starting payment × (1 + step-up) ^
+                floor((m - 1) / 12). Closing balance = previous balance × (1 +
+                annual input / 12) + regular payment + extra payment, then
+                funded life expenses are deducted. Deposits enter at month-end
+                and start growing the following month. Expenses entered in
+                today’s money are inflated to the payment month; unfunded costs
+                are reported separately. Paused expenses and extras outside the
+                selected duration are excluded. Goal timing finds the first
+                month at or above your target, searching up to 100 years with
+                continuing SIPs and step-ups, but no new extras or life expenses
+                beyond the selected duration. Reset clears inputs, extras and
+                life expenses. A first crossing is not a guarantee that the goal
+                stays funded.
+              </p>
+            )}
             <p>
               Annual input / 12 is a nominal-rate convention matching the
               workbook. For example, a 12% input compounds at 1% monthly, which
@@ -501,11 +553,12 @@ export const GrowthPage = memo(function GrowthPage() {
               added together. Editing or removing an extra updates all results
               immediately. Shortening the duration keeps later entries for
               editing, but excludes them from projections. An extra is not a
-              recurring SIP increase. The extra-money impact equals final net
-              wealth with extras minus final net wealth without extras, after
-              applying the same life-expense schedule. When expenses are
-              unfunded, extra deposits may fund those costs instead of
-              increasing the final balance.
+              recurring SIP increase. The extra-money impact equals the final{" "}
+              {enableGrowthAssetsAndLoans ? "net wealth" : "investment value"}{" "}
+              with extras minus the value without extras, after applying the
+              same life-expense schedule. When expenses are unfunded, extra
+              deposits may fund those costs instead of increasing the final
+              balance.
             </p>
             <p>
               <strong>Tables:</strong> regular SIP increases at the start of
@@ -533,9 +586,11 @@ export const GrowthPage = memo(function GrowthPage() {
               <strong>No return guarantee:</strong> tax, product costs and
               charges are not deducted. These are illustrative assumptions, not
               current rates or product recommendations. The SIP uses annual rate
-              input / 12; existing assets use their own effective annual return
-              and loans use annual interest / 12; a 12% input implies 12.6825%
-              effective annual growth, not 12% CAGR.
+              input / 12;{" "}
+              {enableGrowthAssetsAndLoans &&
+                "existing assets use their own effective annual return and loans use annual interest / 12; "}
+              a 12% input implies 12.6825% effective annual growth, not 12%
+              CAGR.
             </p>
           </details>
         </div>

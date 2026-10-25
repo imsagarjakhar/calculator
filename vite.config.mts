@@ -7,6 +7,7 @@ import {
   searchPages,
   canonicalUrl,
   searchGraph,
+  searchMetadataTags,
   type SearchPage,
 } from "./src/content/search.mjs";
 
@@ -28,19 +29,7 @@ function searchMetadata(): Plugin {
         `<title>${escape(info.title)}</title>`,
       );
       // Upsert metadata so new entry points receive the same complete SEO tags.
-      const metadata: [string, string, string][] = [
-        ["name", "description", info.description],
-        ["name", "robots", "index, follow, max-image-preview:large"],
-        ["property", "og:type", "website"],
-        ["property", "og:locale", "en_US"],
-        ["property", "og:site_name", "Financial AI Planner"],
-        ["property", "og:title", info.title],
-        ["property", "og:description", info.description],
-        ["property", "og:url", canonicalUrl(page)],
-        ["name", "twitter:card", "summary"],
-        ["name", "twitter:title", info.title],
-        ["name", "twitter:description", info.description],
-      ];
+      const metadata = searchMetadataTags(page);
       for (const [attribute, name, value] of metadata) {
         const tag = `<meta ${attribute}="${name}" content="${escape(value)}" />`;
         const pattern = new RegExp(
@@ -51,10 +40,10 @@ function searchMetadata(): Plugin {
           ? html.replace(pattern, tag)
           : html.replace("</head>", tag + "\n</head>");
       }
-      html = html.replace(
-        /<link rel="canonical"[^>]*>/,
-        `<link rel="canonical" href="${canonicalUrl(page)}" />`,
-      );
+      const canonical = `<link rel="canonical" href="${canonicalUrl(page)}" />`;
+      html = /<link rel="canonical"[^>]*>/.test(html)
+        ? html.replace(/<link rel="canonical"[^>]*>/g, canonical)
+        : html.replace("</head>", canonical + "\n</head>");
       const data = `<script type="application/ld+json">${JSON.stringify(searchGraph(page)).replaceAll("<", "\\u003c")}</script>`;
       html = /<script type="application\/ld\+json">/.test(html)
         ? html.replace(
@@ -253,7 +242,11 @@ function compatibilityModules(): Plugin {
           (dep) => `import ${engines[dep].name} from 'planner:engine:${dep}';`,
         )
         .join("\n");
-      return `${imports}\nexport default function mount(scope){const {document,window,setTimeout,clearTimeout,setInterval,clearInterval,requestAnimationFrame,cancelAnimationFrame}=scope;\n${source}\n}`;
+      const featureImport =
+        key === "growth"
+          ? `import { enableGrowthAssetsAndLoans } from '/src/runtime/features';\n`
+          : "";
+      return `${imports}\n${featureImport}export default function mount(scope){const {document,window,setTimeout,clearTimeout,setInterval,clearInterval,requestAnimationFrame,cancelAnimationFrame}=scope;\n${source}\n}`;
     },
   };
 }

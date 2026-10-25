@@ -19,15 +19,15 @@ export const searchPages = {
     name: "Monthly Salary & Budget Planner",
   },
   home: {
-    title: "Free SIP, Loan & Budget Calculators | Financial AI Planner",
+    title: "Financial Planning Calculators | Financial AI Planner",
     description:
-      "Learn how to do financial planning: budget your salary, build emergency savings, compare loan payoff with investing and plan retirement with free calculators.",
+      "Free financial planning calculators for budgets, SIP investing, loan repayment and retirement. Choose your currency and explore your plan privately in your browser.",
     name: "Financial AI Planner",
   },
   growth: {
     title: "SIP Calculator with Step-Up | Financial AI Planner",
     description:
-      "Calculate SIP growth with Financial AI Planner. Compare monthly investments, annual step-ups, one-time deposits, existing assets and loans using your own return assumptions.",
+      "Calculate SIP growth with annual step-ups and extra deposits. Explore investment goals using your own return and inflation assumptions, in your selected currency.",
     name: "SIP & Investment Growth Calculator",
   },
   survival: {
@@ -59,9 +59,47 @@ export type SearchPage = keyof typeof searchPages;
 export function canonicalUrl(page: SearchPage) {
   return siteUrl + (page === "home" ? "/" : "/" + page + "/");
 }
+export function previewImage(page: SearchPage) {
+  return {
+    url: `${siteUrl}/social/${page}.png`,
+    alt: `${searchPages[page].name} — Financial AI Planner`,
+    width: 1200,
+    height: 630,
+  };
+}
+
+// One source for build-time HTML and metadata after in-app navigation.
+export function searchMetadataTags(
+  page: SearchPage,
+): ["name" | "property", string, string][] {
+  const info = searchPages[page];
+  const image = previewImage(page);
+  return [
+    ["name", "description", info.description],
+    ["name", "robots", "index, follow, max-image-preview:large"],
+    ["property", "og:type", "website"],
+    ["property", "og:locale", "en_US"],
+    ["property", "og:site_name", "Financial AI Planner"],
+    ["property", "og:title", info.title],
+    ["property", "og:description", info.description],
+    ["property", "og:url", canonicalUrl(page)],
+    ["property", "og:image", image.url],
+    ["property", "og:image:secure_url", image.url],
+    ["property", "og:image:type", "image/png"],
+    ["property", "og:image:width", String(image.width)],
+    ["property", "og:image:height", String(image.height)],
+    ["property", "og:image:alt", image.alt],
+    ["name", "twitter:card", "summary_large_image"],
+    ["name", "twitter:title", info.title],
+    ["name", "twitter:description", info.description],
+    ["name", "twitter:image", image.url],
+    ["name", "twitter:image:alt", image.alt],
+  ];
+}
 export function searchGraph(page: SearchPage) {
   const info = searchPages[page];
   const url = canonicalUrl(page);
+  const image = previewImage(page);
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -71,7 +109,17 @@ export function searchGraph(page: SearchPage) {
         name: "Financial AI Planner",
         alternateName: ["intimetec.org"],
         url: siteUrl + "/",
+        description: searchPages.home.description,
         inLanguage: "en",
+      },
+      {
+        "@type": "ImageObject",
+        "@id": url + "#preview",
+        url: image.url,
+        contentUrl: image.url,
+        caption: image.alt,
+        width: image.width,
+        height: image.height,
       },
       {
         "@type": "WebPage",
@@ -81,6 +129,7 @@ export function searchGraph(page: SearchPage) {
         description: info.description,
         isPartOf: { "@id": siteUrl + "/#website" },
         inLanguage: "en",
+        primaryImageOfPage: { "@id": url + "#preview" },
         ...(page !== "home"
           ? {
               breadcrumb: { "@id": url + "#breadcrumb" },
@@ -143,6 +192,8 @@ export function searchGraph(page: SearchPage) {
                       "Requires JavaScript for interactive calculations",
                   }),
               isAccessibleForFree: true,
+              inLanguage: "en",
+              image: { "@id": url + "#preview" },
               isPartOf: { "@id": siteUrl + "/#website" },
             },
           ]),

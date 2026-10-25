@@ -57,7 +57,7 @@ assert.throws(()=>validatePosition({assets:[asset({rate:-100})]}));assert.throws
 // Existing HTML output functions must expose all added values in both CSV views.
 const html=fs.readFileSync('index.html','utf8'),nodes=new Map();
 const el=id=>{if(!nodes.has(id))nodes.set(id,{value:id==='yearFilter'?'all':id==='pageSize'?'12':'',innerHTML:'',setAttribute(){}});return nodes.get(id);};
-const ctx=vm.createContext({current:{a:settings,o},view:'yearly',page:1,el,currency:'INR',selected:'MF',presets:{MF:{name:'MF'}},pct:n=>n+'%',amountText:String});
+const ctx=vm.createContext({positionEnabled:true,current:{a:settings,o},view:'yearly',page:1,el,currency:'INR',selected:'MF',presets:{MF:{name:'MF'}},pct:n=>n+'%',amountText:String});
 vm.runInContext(html.slice(html.indexOf('function yearHeader()'),html.indexOf('function focusExtra(')),ctx);
 vm.runInContext(html.slice(html.indexOf('function csvCell('),html.indexOf('function downloadCSV(')),ctx);
 for(const view of ['yearly','monthly']){ctx.view=view;vm.runInContext('renderTable()',ctx);

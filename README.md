@@ -110,7 +110,20 @@ such builds must not be deployed after the repository becomes private.
 `npm run build` prerenders all nine public pages with readable fields,
 instructions, methods and links before JavaScript runs. Each page has a
 topic-specific title and description, canonical URL and sitemap entry;
-`robots.txt` points to the sitemap. Keep these aligned when adding routes.
+`robots.txt` points to the sitemap. The sitemap is generated from
+`src/content/search.mts`, which also supplies metadata for in-app navigation.
+Each page has a dedicated 1200×630 PNG preview and matching Open Graph, X/Twitter
+and structured-image metadata. This adds no visible copy to the calculators.
+
+Every build runs `npm run test:seo` against the shipped HTML. It rejects missing
+or duplicate tags, incorrect canonical URLs, unregistered pages, incomplete
+prerendered content, broken image assets and sitemap omissions. To refresh the
+committed previews after changing names or descriptions, run `npm run seo:images`
+(requires Playwright Chromium); normal deployments use the committed PNG files.
+
+The site targets English readers internationally. Currency selections are not
+translations; add `hreflang` only when real translated pages exist. Avoid hidden
+keyword blocks, fabricated ratings or unsupported claims about the tools.
 See [Google’s JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics).
 
 After deploying:

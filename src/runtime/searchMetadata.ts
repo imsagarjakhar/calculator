@@ -2,21 +2,23 @@ import {
   canonicalUrl,
   searchPages,
   searchGraph,
+  searchMetadataTags,
   type SearchPage,
 } from "../content/search.mjs";
 
 export function updateSearchMetadata(page: SearchPage) {
   const info = searchPages[page];
   document.title = info.title;
-  for (const [selector, content] of [
-    ['meta[name="description"]', info.description],
-    ['meta[property="og:title"]', info.title],
-    ['meta[property="og:description"]', info.description],
-    ['meta[property="og:url"]', canonicalUrl(page)],
-    ['meta[name="twitter:title"]', info.title],
-    ['meta[name="twitter:description"]', info.description],
-  ])
-    document.querySelector(selector)?.setAttribute("content", content);
+  for (const [attribute, name, content] of searchMetadataTags(page)) {
+    const selector = `meta[${attribute}="${name}"]`;
+    let tag = document.querySelector<HTMLMetaElement>(selector);
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.setAttribute(attribute, name);
+      document.head.append(tag);
+    }
+    tag.content = content;
+  }
   document
     .querySelector('link[rel="canonical"]')
     ?.setAttribute("href", canonicalUrl(page));

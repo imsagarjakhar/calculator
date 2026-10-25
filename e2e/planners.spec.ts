@@ -124,6 +124,8 @@ test("search engines can read content, links and consistent metadata without Jav
   browser,
   request,
 }) => {
+  // This is a nine-page crawl with forms, disclosures and metadata checks.
+  test.slow();
   const context = await browser.newContext({
     javaScriptEnabled: false,
     baseURL: `http://127.0.0.1:${process.env.PREVIEW_PORT || "4173"}`,
@@ -293,16 +295,32 @@ test("search metadata follows client navigation and browser history", async ({
   const homeTitle = await page.title();
   await page.getByRole("link", { name: "Explore my future" }).click();
   await expect(page).toHaveTitle(/SIP Calculator with Step-Up/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://intimetec.org/social/growth.png",
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    "https://intimetec.org/social/growth.png",
+  );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     "https://intimetec.org/growth/",
   );
   await page.locator('#plannerNav [data-screen="survival"]').click();
   await expect(page).toHaveTitle(/SWP & Retirement Calculator/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://intimetec.org/social/survival.png",
+  );
   await page.goBack();
   await expect(page).toHaveTitle(/SIP Calculator with Step-Up/);
   await page.goBack();
   await expect(page).toHaveTitle(homeTitle);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://intimetec.org/social/home.png",
+  );
 });
 
 test("styled calendars select dates and months, respect limits and always dismiss", async ({
@@ -465,6 +483,21 @@ test("disabled Growth assets and loans stay out of projections without deleting 
     await expect(
       page.locator("#hold-assets-form, #hold-loans-form"),
     ).toHaveCount(0);
+    await expect(page.locator("#wealthSummary")).toBeHidden();
+    await expect(page.locator("#goalNote")).not.toContainText(
+      "assets not available",
+    );
+    await expect(page.locator("#tableHead")).not.toContainText(
+      /EMIs|debt|Net wealth|Available to withdraw/i,
+    );
+    await page.locator("#chart").focus();
+    await page.locator("#chart").press("ArrowRight");
+    await expect(page.locator("#growthScreen .chart-tooltip")).toContainText(
+      "Value with extra deposits",
+    );
+    await expect(
+      page.locator("#growthScreen .chart-tooltip"),
+    ).not.toContainText(/assets|debt|loans/i);
   }
   const inputs = {
     monthly: 10000,
@@ -483,11 +516,35 @@ test("disabled Growth assets and loans stay out of projections without deleting 
   await expect(page.locator("#exactValue")).toContainText(
     Math.round(expected.balance).toLocaleString("en-IN"),
   );
-  const report = Report.read(
-    (await downloadText(page, "#growthReport")).text,
-    "growth",
+  await page
+    .getByText("How the calculation works, source references & limitations", {
+      exact: true,
+    })
+    .click();
+  expect(await page.locator("#growthScreen").innerText()).not.toMatch(
+    /net wealth|existing assets|outstanding loans|remaining debt|assets not available/i,
   );
+  const csv = (await downloadText(page, "#exportMonthly")).text;
+  expect(csv).not.toMatch(
+    /net wealth|existing assets|outstanding debt|EMIs|available for withdrawals|Starting assets/i,
+  );
+  expect(csv).toContain("Cumulative contributions");
+  await page.locator("#monthlyView").click();
+  await expect(page.locator("#tableHead tr th")).toHaveCount(9);
+  await expect(
+    page.locator("#tableBody tr").first().locator("th,td"),
+  ).toHaveCount(9);
+  const downloaded = await downloadText(page, "#growthReport");
+  const report = Report.read(downloaded.text, "growth");
   expect(report.position).toEqual({ assets: [], loans: [] });
+  const reportText = downloaded.text
+    .replace(/<details class="backup">[\s\S]*?<\/details>/g, "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "")
+    .replace(/<style>[\s\S]*?<\/style>/g, "")
+    .replace(/<[^>]*>/g, " ");
+  expect(reportText).not.toMatch(
+    /net wealth|existing assets|current loans|remaining debt|EMIs paid|Available to withdraw/i,
+  );
   await page.locator("#reset").click();
   expect(
     await page.evaluate(() =>
