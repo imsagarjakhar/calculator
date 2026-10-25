@@ -1,4 +1,8 @@
 export type PlannerRoute =
+  | "about"
+  | "contact"
+  | "privacy"
+  | "methodology"
   | "home"
   | "learn"
   | "growth"

@@ -268,7 +268,16 @@ test("search engines can read content, links and consistent metadata without Jav
       await expect(
         staticPage.locator('meta[name="robots"]'),
       ).not.toHaveAttribute("content", /noindex/);
-      await expect(staticPage.locator(".site-footer nav a")).toHaveCount(9);
+      await expect(
+        staticPage.locator(
+          '.site-footer nav[aria-label="Calculator directory"] a',
+        ),
+      ).toHaveCount(9);
+      await expect(
+        staticPage.locator(
+          '.site-footer nav[aria-label="Website information"] a',
+        ),
+      ).toHaveCount(4);
     }
     const sitemap = await (await request.get(appPath("sitemap.xml"))).text();
     for (const route of [

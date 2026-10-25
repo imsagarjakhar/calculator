@@ -40,6 +40,10 @@ try {
     "salary-budget": "BudgetPage",
     "loan-payoff": "LoanPage",
     learn: "LearnPage",
+    about: "TrustPage",
+    contact: "TrustPage",
+    privacy: "TrustPage",
+    methodology: "TrustPage",
   };
   for (const route of Object.keys(searchPages)) {
     if (route === "home") continue;
@@ -48,7 +52,10 @@ try {
     const name = pages[route];
     if (!name) throw new Error(`No public renderer for ${route}`);
     const module = await server.ssrLoadModule(`/src/pages/${name}.tsx`);
-    const element = createElement(module[name]);
+    const element = createElement(
+      module[name],
+      name === "TrustPage" ? { page: route } : {},
+    );
     const pageContent =
       route === "growth" || route === "survival"
         ? createElement(
@@ -63,6 +70,7 @@ try {
         "div",
         null,
         route !== "learn" &&
+          name !== "TrustPage" &&
           createElement(
             "noscript",
             null,

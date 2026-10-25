@@ -146,6 +146,28 @@ separate search landing pages. [Google discourages fragment-based content URLs](
 
 ## Repository layout
 
+### Publisher information and AdSense readiness
+
+The `/about/`, `/contact/`, `/privacy/` and `/methodology/` pages are prerendered,
+included in search and the sitemap, and linked from every page footer. Confirmed
+public contact details live in `src/content/publisher.ts`. Do not invent individual
+authors, financial credentials or expert reviews. The privacy policy distinguishes
+local calculator data from hosting requests, public blog reads, email and Google
+advertising cookies. Update it whenever providers or data practices change.
+
+The AdSense account verification meta tag and `ads.txt` record are present. This
+build does **not** install an ad-serving script or consent platform. Before serving
+ads, configure Google's applicable Privacy & messaging/CMP flow and verify the
+actual script/frame/network requirements against the production CSP. Do not simply
+disable CSP to make ads load. Google requires a certified CMP for personalised ads
+in the EEA, UK and Switzerland. This work does not certify legal compliance or
+guarantee AdSense approval. Check the AdSense Sites/Policy centre for the actual
+review outcome, and Search Console for indexed pages and query performance.
+
+These are content/trust improvements, not a claim that all blog articles have
+been reviewed. Runtime blog posts still need individual crawlable article URLs
+and editorial checks before they can act as dependable organic landing pages.
+
 The beginner guide at `/learn/` teaches SIP, SWP, returns, inflation and EMI with
 interactive illustrations, sliders and quick quizzes. Its searchable glossary
 and examples are maintained in `src/content/financeBasics.ts`. Currency follows

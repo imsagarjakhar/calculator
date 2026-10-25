@@ -7,6 +7,7 @@ import {
   previewImage,
   searchMetadataTags,
   siteUrl,
+  isTrustPage,
 } from "../src/content/search.mts";
 
 const decode = (s) =>
@@ -131,7 +132,7 @@ for (const [page, info] of Object.entries(searchPages)) {
     /<details\b/,
     `Missing readable supporting content: ${page}`,
   );
-  if (page !== "home" && page !== "learn")
+  if (page !== "home" && page !== "learn" && !isTrustPage(page))
     assert.match(
       html,
       /<input\b[^>]*type="number"/,
@@ -144,6 +145,17 @@ for (const [page, info] of Object.entries(searchPages)) {
   ];
   assert.equal(graphs.length, 1, `Exactly one JSON-LD graph required: ${page}`);
   const graph = JSON.parse(graphs[0][1])["@graph"];
+  if (isTrustPage(page)) {
+    assert.ok(
+      !graph.some((node) => node["@type"] === "WebApplication"),
+      `Information page incorrectly labelled as calculator: ${page}`,
+    );
+    assert.match(
+      html,
+      /aria-label="Website information"/,
+      `Missing trust links: ${page}`,
+    );
+  }
   const webpage = graph.find((node) => node["@type"] === "WebPage");
   assert.equal(webpage.url, canonicalUrl(page));
   assert.ok(

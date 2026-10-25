@@ -1,5 +1,29 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  contact: {
+    title: "Contact & Calculation Corrections | Financial AI Planner",
+    description:
+      "Contact Financial AI Planner about calculator questions, accessibility, privacy or corrections. Learn which sample details help us check an issue safely.",
+    name: "Contact Financial AI Planner",
+  },
+  about: {
+    title: "About Our Financial Planning Tools | Financial AI Planner",
+    description:
+      "Understand what Financial AI Planner does, how its formula-based tools are checked, and the limits to consider before using a financial projection.",
+    name: "About Financial AI Planner",
+  },
+  privacy: {
+    title: "Privacy Policy & Browser Storage | Financial AI Planner",
+    description:
+      "How calculator entries, browser storage, downloaded reports, public blog requests and Google advertising cookies are handled by Financial AI Planner.",
+    name: "Privacy policy",
+  },
+  methodology: {
+    title: "Calculation Methods & Limitations | Financial AI Planner",
+    description:
+      "Understand SIP compounding, retirement withdrawals, inflation and loan comparisons. Read the assumptions, source references and limits behind your projections.",
+    name: "Calculation methods & limitations",
+  },
   learn: {
     title: "Finance Terms Explained: SIP, SWP & EMI | Financial AI Planner",
     description:
@@ -56,6 +80,9 @@ export const searchPages = {
   },
 } as const;
 export type SearchPage = keyof typeof searchPages;
+export function isTrustPage(page: string) {
+  return ["about", "privacy", "methodology", "contact"].includes(page);
+}
 export function canonicalUrl(page: SearchPage) {
   return siteUrl + (page === "home" ? "/" : "/" + page + "/");
 }
@@ -134,7 +161,13 @@ export function searchGraph(page: SearchPage) {
           ? {
               breadcrumb: { "@id": url + "#breadcrumb" },
               mainEntity: {
-                "@id": url + (page === "learn" ? "#guide" : "#calculator"),
+                "@id":
+                  url +
+                  (isTrustPage(page)
+                    ? "#information"
+                    : page === "learn"
+                      ? "#guide"
+                      : "#calculator"),
               },
             }
           : { mainEntity: { "@id": url + "#calculators" } }),
@@ -146,7 +179,10 @@ export function searchGraph(page: SearchPage) {
               "@id": url + "#calculators",
               name: "Free financial planning calculators",
               itemListElement: (Object.keys(searchPages) as SearchPage[])
-                .filter((key) => key !== "home" && key !== "learn")
+                .filter(
+                  (key) =>
+                    key !== "home" && key !== "learn" && !isTrustPage(key),
+                )
                 .map((key, index) => ({
                   "@type": "ListItem",
                   position: index + 1,
@@ -175,22 +211,34 @@ export function searchGraph(page: SearchPage) {
               ],
             },
             {
-              "@type": page === "learn" ? "LearningResource" : "WebApplication",
-              "@id": url + (page === "learn" ? "#guide" : "#calculator"),
+              "@type": isTrustPage(page)
+                ? "CreativeWork"
+                : page === "learn"
+                  ? "LearningResource"
+                  : "WebApplication",
+              "@id":
+                url +
+                (isTrustPage(page)
+                  ? "#information"
+                  : page === "learn"
+                    ? "#guide"
+                    : "#calculator"),
               name: info.name,
               url,
               description: info.description,
-              ...(page === "learn"
-                ? {
-                    learningResourceType: "Interactive glossary",
-                    educationalUse: "instruction",
-                  }
-                : {
-                    applicationCategory: "FinanceApplication",
-                    operatingSystem: "Any",
-                    browserRequirements:
-                      "Requires JavaScript for interactive calculations",
-                  }),
+              ...(isTrustPage(page)
+                ? {}
+                : page === "learn"
+                  ? {
+                      learningResourceType: "Interactive glossary",
+                      educationalUse: "instruction",
+                    }
+                  : {
+                      applicationCategory: "FinanceApplication",
+                      operatingSystem: "Any",
+                      browserRequirements:
+                        "Requires JavaScript for interactive calculations",
+                    }),
               isAccessibleForFree: true,
               inLanguage: "en",
               image: { "@id": url + "#preview" },

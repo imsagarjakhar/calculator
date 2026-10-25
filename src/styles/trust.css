@@ -1,0 +1,135 @@
+.trust-page {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 24px 64px;
+}
+.trust-page .trust-header {
+  display: block;
+  max-width: 790px;
+  margin: 64px auto 36px;
+}
+.trust-kicker {
+  color: #176b52;
+  font-size: 13px;
+  font-weight: 650;
+}
+.trust-header h1 {
+  font:
+    450 clamp(34px, 5vw, 56px) / 1.1 Newsreader,
+    serif;
+  letter-spacing: -0.025em;
+  margin: 14px 0 18px;
+  color: #203b32;
+}
+.trust-header > p:last-of-type {
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 680px;
+}
+.trust-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  margin-top: 26px;
+}
+.trust-header nav a {
+  padding: 9px 15px;
+  border: 1px solid #c8d8cf;
+  border-radius: 30px;
+  text-decoration: none;
+}
+.trust-header nav a[aria-current="page"] {
+  background: #176b52;
+  color: white;
+  border-color: #176b52;
+}
+.trust-content {
+  max-width: 790px;
+  margin: auto;
+  line-height: 1.8;
+}
+.trust-content h2 {
+  font-size: 22px;
+  line-height: 1.35;
+  margin: 0 0 14px;
+}
+.trust-content > section {
+  margin-bottom: 30px;
+}
+.trust-content details {
+  border-top: 1px solid #cbd9d0;
+  padding: 20px 0;
+}
+.trust-content summary {
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #203b32;
+}
+.trust-content details p {
+  margin: 16px 0 0;
+  max-width: 720px;
+}
+.trust-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 30px 0;
+}
+.trust-cards section {
+  background: #eff4ea;
+  border: 1px solid #d2ddcd;
+  border-radius: 18px;
+  padding: 22px;
+}
+.trust-cards span {
+  font-size: 12px;
+  color: #176b52;
+  font-weight: 700;
+}
+.trust-cards h2 {
+  font-size: 19px;
+  margin-top: 16px;
+}
+.trust-cards p {
+  font-size: 14px;
+}
+.trust-cards a {
+  font-size: 13px;
+  font-weight: 600;
+}
+.trust-checks {
+  padding-left: 22px;
+  display: grid;
+  gap: 14px;
+}
+.trust-date {
+  font-size: 13px;
+  color: #536c60;
+}
+.trust-contact {
+  border-top: 1px solid #cbd9d0;
+  padding-top: 28px;
+  margin-top: 28px;
+}
+.trust-page a {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .trust-page {
+    padding: 0 16px 40px;
+  }
+  .trust-header {
+    margin: 36px auto 28px;
+  }
+  .trust-cards {
+    grid-template-columns: 1fr;
+  }
+  .trust-cards section {
+    padding: 20px;
+  }
+  .trust-header nav a {
+    font-size: 13px;
+  }
+}

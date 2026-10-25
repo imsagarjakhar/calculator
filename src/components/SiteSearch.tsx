@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { searchPages } from "../content/search.mjs";
+import { searchPages, isTrustPage } from "../content/search.mjs";
 import { terms } from "../content/financeBasics";
 import { plannerHref, type PlannerRoute } from "../runtime/routes";
 import type { VlogSummary } from "../vlogs/repository";
@@ -34,7 +34,11 @@ const entries: Entry[] = [
     title: page.name,
     description: page.description,
     href: plannerHref(route as PlannerRoute),
-    kind: route === "learn" ? "Guide" : "Planner",
+    kind: isTrustPage(route)
+      ? "Website information"
+      : route === "learn"
+        ? "Guide"
+        : "Planner",
     aliases: aliases[route as PlannerRoute],
   })),
   {

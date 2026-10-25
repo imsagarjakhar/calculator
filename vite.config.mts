@@ -275,6 +275,10 @@ export default defineConfig({
           "salary-budget",
           "loan-payoff",
           "learn",
+          "about",
+          "contact",
+          "privacy",
+          "methodology",
         ].map((page) => [
           page,
           resolve(
