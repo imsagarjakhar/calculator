@@ -209,6 +209,10 @@ export function withRepaymentBudget(p: LoanPlan): LoanPlan {
     useSalaryInvestment: p.useSalaryInvestment ?? false,
   };
 }
+/** Manual repayment budgets do not declare an additional monthly savings contribution. */
+export function protectedSavingsAt(p: LoanPlan, month: number): number {
+  return p.emergency + (p.fundingMode === "manual" ? 0 : p.reserve * month);
+}
 export function validateLoanPlan(value: unknown): string[] {
   if (!value || typeof value !== "object") return ["Enter a valid loan plan."];
   const p = value as LoanPlan;
@@ -510,8 +514,7 @@ export function simulate(
         gainsTax +
         spareCash +
         assetValueAt(assets, month) +
-        p.emergency +
-        p.reserve * month -
+        protectedSavingsAt(p, month) -
         debt -
         arrears,
       loans: details,

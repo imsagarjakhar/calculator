@@ -1,5 +1,16 @@
 # Financial AI Planner — React migration
 
+The loan comparison presents three cards: pay regular EMIs and invest surplus,
+repay eligible loans faster then invest released money, or sell one asset,
+settle debt and invest remaining proceeds and monthly surplus. A single return
+input (12% for new plans) drives all paths. A shared interactive chart switches
+between net wealth, remaining debt and cash/investments, with hover/tap values.
+Asset sales deduct entered costs and taxes and remove the asset and its earnings.
+Per-loan scheduled-payment graphs remain in an expandable section. The underlying
+cash-only scenarios remain available for compatibility with existing reports.
+Manual loan budgets include only explicitly entered protected savings today;
+legacy salary-mode monthly reserves do not create additional projected wealth.
+
 The loan planner now accepts individually entered loans, a manually entered
 monthly repayment budget, spare savings outside the
 emergency fund, and up to eight assets. Cash-only scenarios compare required

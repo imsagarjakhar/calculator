@@ -1,248 +1,308 @@
 import { useEffect, useId, useRef, useState, type PointerEvent } from "react";
-import { compareDecisions, netRent } from "../loans/decisions";
-import { simulate, type LoanPlan } from "../loans/model";
+import { compareDecisions, netRent, type Decision } from "../loans/decisions";
+import { protectedSavingsAt, type LoanPlan } from "../loans/model";
 import { LoanPaymentOverview } from "./LoanPaymentOverview";
 import { InfoTooltip } from "./InfoTooltip";
 
-type ChartRow = { month: number; debt: number; net: number; liquid: number };
-type ChartPath = { name: string; rows: ChartRow[] };
+type Field = "net" | "debt" | "liquid";
+type Path = { decision: Decision; color: string; label: string };
+const colors = ["#176b52", "#467cbd", "#ad7131"];
+const chartLabels: Record<Field, string> = {
+  net: "Total wealth",
+  debt: "Loan balance",
+  liquid: "Cash & investments",
+};
 
-function InfoHelp({ label, text }: { label: string; text: string }) {
-  return <InfoTooltip label={`Explain ${label}`}>{text}</InfoTooltip>;
+function ChoiceIcon({ kind }: { kind: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      aria-hidden="true"
+    >
+      {kind === 0 ? (
+        <>
+          <path d="M3 18 9 12l4 3 8-11M15 4h6v6" />
+          <path d="M4 21h16" />
+        </>
+      ) : kind === 1 ? (
+        <>
+          <path d="m14 3-9 11h6l-1 7 9-12h-6l1-6Z" />
+        </>
+      ) : (
+        <>
+          <path d="m3 11 9-8 9 8M6 9v12h12V9M10 21v-7h4v7" />
+        </>
+      )}
+    </svg>
+  );
 }
 
-function ScenarioChart({
-  base,
-  selected,
-  field,
-  title,
-  currency,
+function OutcomeChart({
+  paths,
+  selectedId,
+  plan,
   money,
-  baselineLabel = "EMIs + keep surplus as cash",
-  sliderLabel,
   when,
 }: {
-  base: ChartPath;
-  selected: ChartPath;
-  field: "debt" | "net" | "liquid";
-  title: string;
-  currency: string;
+  paths: Path[];
+  selectedId: string;
+  plan: LoanPlan;
   money: (n: number) => string;
-  baselineLabel?: string;
-  sliderLabel?: string;
-  when: (month: number | null) => string;
+  when: (n: number | null) => string;
 }) {
   const svg = useRef<SVGSVGElement>(null),
     id = useId();
-  const [width, setWidth] = useState(640),
-    [month, setMonth] = useState<number | null>(null),
-    [showTooltip, setShowTooltip] = useState(false);
+  const [width, setWidth] = useState(700),
+    [field, setField] = useState<Field>("net");
+  const [month, setMonth] = useState<number | null>(null),
+    [hover, setHover] = useState(false);
   useEffect(() => {
     const el = svg.current;
     if (!el) return;
-    const measure = () =>
-      setWidth(Math.max(240, Math.round(el.getBoundingClientRect().width)));
-    measure();
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver(() =>
+      setWidth(Math.max(260, el.getBoundingClientRect().width)),
+    );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const length = base.rows.length - 1;
-  const active = Math.min(month ?? length, length);
-  const values = [
-    0,
-    ...base.rows.map((r) => r[field]),
-    ...selected.rows.map((r) => r[field]),
-  ];
-  const low = Math.min(...values),
-    high = Math.max(...values),
-    span = Math.max(1, high - low);
-  const x = (m: number) => 78 + (m / Math.max(1, length)) * (width - 94),
-    y = (n: number) => 220 - ((n - low) / span) * 190;
-  const explore = (event: PointerEvent<SVGSVGElement>) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const px = ((event.clientX - bounds.left) / bounds.width) * width;
-    const py = ((event.clientY - bounds.top) / bounds.height) * 255;
-    if (px < 78 || px > width - 16 || py < 30 || py > 220) {
-      setShowTooltip(false);
-      return;
-    }
-    setMonth(
-      Math.max(
-        0,
-        Math.min(length, Math.round(((px - 78) / (width - 94)) * length)),
-      ),
-    );
-    setShowTooltip(true);
-  };
-  const line = (rows: ChartRow[]) =>
-    rows
-      .map(
-        (r, i) =>
-          `${i ? "L" : "M"}${x(r.month).toFixed(2)},${y(r[field]).toFixed(2)}`,
-      )
-      .join(" ");
+  const end = plan.horizon,
+    active = Math.min(month ?? end, end);
+  const values = paths.flatMap(({ decision }) =>
+    decision.rows.map((row) => row[field]),
+  );
+  const min = Math.min(...values),
+    max = Math.max(...values);
+  const padding = Math.max(1, (max - min) * 0.08);
+  const low = field === "debt" ? 0 : min - padding,
+    high = max + padding;
+  const x = (m: number) => 76 + (m / Math.max(1, end)) * (width - 98);
+  const y = (n: number) => 260 - ((n - low) / Math.max(1, high - low)) * 224;
   const short = (n: number) =>
-    new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
+    new Intl.NumberFormat(plan.currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
-      currency,
+      currency: plan.currency,
       notation: Math.abs(n) >= 1e12 ? "scientific" : "compact",
       maximumFractionDigits: 1,
     }).format(n);
+  const line = (decision: Decision) =>
+    decision.rows
+      .map(
+        (row, i) =>
+          `${i ? "L" : "M"}${x(row.month).toFixed(2)},${y(row[field]).toFixed(2)}`,
+      )
+      .join(" ");
+  const explore = (event: PointerEvent<SVGSVGElement>) => {
+    const b = event.currentTarget.getBoundingClientRect();
+    const px = ((event.clientX - b.left) / b.width) * width;
+    const py = ((event.clientY - b.top) / b.height) * 314;
+    if (px < 76 || px > width - 22 || py < 36 || py > 260) {
+      setHover(false);
+      return;
+    }
+    setMonth(
+      Math.max(0, Math.min(end, Math.round(((px - 76) / (width - 98)) * end))),
+    );
+    setHover(true);
+  };
+  const highlighted =
+    paths.find((path) => path.decision.id === selectedId) ?? paths[0];
   return (
-    <figure className="loan-decision-chart">
-      <div className="loan-chart-heading">
-        <h3>{title}</h3>
-        <InfoHelp
-          label={title}
-          text={
-            field === "debt"
-              ? `The amount still owed on all loans. A lower line means less debt; zero means the loans are cleared. Compare ${selected.name} with ${baselineLabel}, over the same timeline.`
-              : field === "liquid"
-                ? `Investments after the entered gains tax, plus spare cash. Compare ${selected.name} with ${baselineLabel}. Money paid toward loans does not also earn investment returns. Property values are excluded from this chart.`
-                : "Cash plus the value of assets you keep and protected savings, minus debt and unpaid costs. A higher line means more projected wealth. Selling an asset removes its value and future earnings from this path."
-          }
-        />
+    <figure className="loan-outcome-chart">
+      <div className="loan-outcome-chart-header">
+        <div className="loan-chart-heading">
+          <h3>Your choices, over time</h3>
+          <InfoTooltip label="Explain comparison chart">
+            All lines use the same starting wealth, monthly budget and finish
+            date. Total wealth includes cash, investments after estimated gains
+            tax, retained assets and protected savings, minus loans and unpaid
+            costs. Money used to repay loans is not also invested. Asset sales
+            remove the asset and its earnings and deduct entered selling costs
+            and taxes.
+          </InfoTooltip>
+        </div>
+        <div className="loan-chart-tabs" role="group" aria-label="Chart amount">
+          {(["net", "debt", "liquid"] as Field[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={field === key}
+              onClick={() => setField(key)}
+            >
+              {chartLabels[key]}
+            </button>
+          ))}
+        </div>
       </div>
+      <p className="budget-help">
+        {field === "debt"
+          ? "Lower means less debt. Zero means your loans are cleared."
+          : field === "net"
+            ? "Higher means more projected wealth, after debt and entered costs."
+            : "Investments after gains tax, plus spare cash. Property values are separate."}
+      </p>
       <div className="loan-time-plot">
         <svg
           ref={svg}
-          viewBox={`0 0 ${width} 255`}
+          viewBox={`0 0 ${width} 314`}
           role="img"
-          aria-labelledby={`${id}-title`}
-          aria-describedby={`${id}-desc`}
+          aria-labelledby={`${id}-title ${id}-desc`}
           onPointerMove={explore}
           onPointerDown={explore}
           onPointerLeave={(event) => {
-            if (event.pointerType !== "touch") setShowTooltip(false);
+            if (event.pointerType !== "touch") setHover(false);
           }}
-          onPointerCancel={() => setShowTooltip(false)}
+          onPointerCancel={() => setHover(false)}
         >
-          <title id={`${id}-title`}>{title}</title>
+          <title id={`${id}-title`}>
+            {chartLabels[field]} for your repayment choices
+          </title>
           <desc id={`${id}-desc`}>
-            {selected.name} compared with {baselineLabel} over {length} months.
-            At the end: {money(selected.rows.at(-1)![field])} versus{" "}
-            {money(base.rows.at(-1)![field])}.
+            Time runs horizontally and amount in {plan.currency} vertically.{" "}
+            {paths
+              .map(
+                (path) =>
+                  `${path.label}: ${money(path.decision.rows.at(-1)![field])} at the finish.`,
+              )
+              .join(" ")}
           </desc>
+          <defs>
+            <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0"
+                stopColor={highlighted.color}
+                stopOpacity=".16"
+              />
+              <stop
+                offset="1"
+                stopColor={highlighted.color}
+                stopOpacity=".01"
+              />
+            </linearGradient>
+          </defs>
+          <text x="0" y="16" className="loan-axis-name">
+            Amount ({plan.currency})
+          </text>
           {[0, 0.25, 0.5, 0.75, 1].map((f) => (
             <g key={f}>
               <line
-                x1="78"
-                x2={width - 16}
-                y1={y(low + span * f)}
-                y2={y(low + span * f)}
+                x1="76"
+                x2={width - 22}
+                y1={y(low + (high - low) * f)}
+                y2={y(low + (high - low) * f)}
                 className="loan-decision-grid"
               />
-              <text x="68" y={y(low + span * f) + 4} textAnchor="end">
-                {short(low + span * f)}
+              <text x="65" y={y(low + (high - low) * f) + 4} textAnchor="end">
+                {short(low + (high - low) * f)}
               </text>
             </g>
           ))}
-          {[0, 0.5, 1].map((f) => (
+          {[...new Set([0, Math.round(end / 2), end])].map((m) => (
             <text
-              key={f}
-              x={x(Math.round(length * f))}
-              y="246"
-              textAnchor="middle"
+              key={m}
+              x={x(m)}
+              y="286"
+              textAnchor={m === 0 ? "start" : m === end ? "end" : "middle"}
             >
-              M{Math.round(length * f)}
+              {m === 0 ? "Now" : when(m)}
             </text>
           ))}
-          <path d={line(base.rows)} className="loan-decision-baseline" />
-          <path d={line(selected.rows)} className="loan-decision-line" />
+          <text x={(76 + width - 22) / 2} y="309" textAnchor="middle">
+            Time
+          </text>
+          <path
+            d={`${line(highlighted.decision)} L${x(end)},260 L76,260 Z`}
+            fill={`url(#${id}-fill)`}
+          />
+          {paths.map((path) => (
+            <path
+              key={path.decision.id}
+              d={line(path.decision)}
+              fill="none"
+              stroke={path.color}
+              strokeWidth={selectedId === path.decision.id ? 3.5 : 2.2}
+              strokeDasharray={
+                path.decision.id === selectedId ? undefined : "6 4"
+              }
+            />
+          ))}
           <line
             x1={x(active)}
             x2={x(active)}
-            y1="30"
-            y2="220"
+            y1="36"
+            y2="260"
             className="loan-decision-marker"
           />
-          <circle
-            cx={x(active)}
-            cy={y(selected.rows[active][field])}
-            r="4"
-            className="loan-decision-dot"
-          />
-          <circle
-            cx={x(active)}
-            cy={y(base.rows[active][field])}
-            r="4"
-            className="loan-baseline-dot"
-          />
+          {paths.map((path) => (
+            <circle
+              key={path.decision.id}
+              cx={x(active)}
+              cy={y(path.decision.rows[active][field])}
+              r="4.5"
+              fill={path.color}
+              stroke="white"
+              strokeWidth="2"
+            />
+          ))}
         </svg>
-        {showTooltip && (
+        {hover && (
           <div
-            className="loan-time-tooltip"
+            className="loan-time-tooltip loan-outcome-tooltip"
             role="tooltip"
-            style={active > length / 2 ? { right: 8 } : { left: 8 }}
+            style={active > end / 2 ? { right: 8 } : { left: 8 }}
           >
             <strong>
               {active === 0 ? "At the start" : when(active)} · Month {active}
             </strong>
-            <div>
-              <span>{selected.name}</span>
-              <b>{money(selected.rows[active][field])}</b>
-            </div>
-            <div>
-              <span>{baselineLabel}</span>
-              <b>{money(base.rows[active][field])}</b>
-            </div>
-            <div>
-              <span>
-                {field === "debt"
-                  ? "Less debt"
-                  : field === "liquid"
-                    ? "Amount difference"
-                    : "Wealth difference"}
-              </span>
-              <b>
-                {money(
-                  field === "debt"
-                    ? base.rows[active][field] - selected.rows[active][field]
-                    : selected.rows[active][field] - base.rows[active][field],
-                )}
-              </b>
-            </div>
+            {paths.map((path) => (
+              <div key={path.decision.id}>
+                <span>
+                  <i style={{ background: path.color }} />
+                  {path.label}
+                </span>
+                <b>{money(path.decision.rows[active][field])}</b>
+              </div>
+            ))}
           </div>
         )}
       </div>
-      <div className="loan-decision-legend">
+      <label className="loan-outcome-scrubber">
         <span>
-          <i /> {selected.name}
-        </span>
-        <span>
-          <i /> {baselineLabel}
-        </span>
-      </div>
-      <label className="loan-decision-slider">
-        <span>
-          {sliderLabel ??
-            `Explore ${field === "debt" ? "debt" : "net wealth"} month`}
+          Explore month {active} of {end}
         </span>
         <input
           type="range"
-          min={0}
-          max={length}
-          step={1}
+          min="0"
+          max={end}
           value={active}
-          aria-valuetext={`Month ${active}: ${money(selected.rows[active][field])}`}
+          aria-valuetext={`Month ${active}. ${paths.map((path) => `${path.label}: ${money(path.decision.rows[active][field])}`).join(". ")}`}
           onChange={(e) => {
             setMonth(Number(e.target.value));
-            setShowTooltip(true);
+            setHover(true);
           }}
-          onFocus={() => setShowTooltip(true)}
-          onBlur={() => setShowTooltip(false)}
+          onFocus={() => setHover(true)}
+          onBlur={() => setHover(false)}
         />
       </label>
-      <figcaption aria-live="polite">
-        Month {active}: <strong>{money(selected.rows[active][field])}</strong>
-        <span>
-          {baselineLabel}: {money(base.rows[active][field])}
-        </span>
+      <figcaption className="loan-outcome-readout" aria-live="polite">
+        {paths.map((path) => (
+          <div key={path.decision.id}>
+            <span>
+              <i style={{ background: path.color }} />
+              {path.label}
+            </span>
+            <strong>{money(path.decision.rows[active][field])}</strong>
+          </div>
+        ))}
       </figcaption>
     </figure>
   );
 }
+
 export function LoanDecisionLab({
   plan,
   money,
@@ -255,440 +315,445 @@ export function LoanDecisionLab({
   onReturnChange: (n: number) => void;
 }) {
   const scenarios = compareDecisions(plan);
-  const [choice, setChoice] = useState("monthly");
-  const [reference, setReference] = useState("minimum");
+  const [choice, setChoice] = useState("invest"),
+    [assetId, setAssetId] = useState("");
   const [visible, setVisible] = useState(12);
-  useEffect(() => setVisible(12), [choice, plan.horizon]);
-  const selected =
-    scenarios.find((s) => s.id === choice && !s.error) ?? scenarios[1];
-  const base =
-    scenarios.find(
-      (scenario) => scenario.id === reference && !scenario.error,
-    ) ?? scenarios[0];
-  const ranked = [...plan.loans]
-    .filter((l) => l.balance > 0)
-    .sort((a, b) => b.rate - a.rate);
-  const maxRate = Math.max(1, ...ranked.map((l) => l.rate));
-  if (!base || !selected) return null;
-  const final = selected.rows.at(-1)!,
-    baseline = base.rows.at(-1)!;
-  const interestSaved = base.interest - selected.interest,
-    feeDifference = selected.fees - base.fees;
-  const sale = plan.assets?.find((a) => `sell-${a.id}` === selected.id);
-  const maxCost = Math.max(
-    1,
-    ...scenarios.filter((s) => !s.error).map((s) => s.interest + s.fees),
+  useEffect(() => setVisible(12), [choice, assetId, plan.horizon]);
+  const assets = plan.assets ?? [],
+    saleId = assets.some((asset) => asset.id === assetId)
+      ? assetId
+      : assets[0]?.id;
+  const invest = scenarios.find((s) => s.id === "invest"),
+    repay = scenarios.find((s) => s.id === "repay-invest");
+  const sale = scenarios.find((s) => s.id === `sell-${saleId}`);
+  if (!invest || !repay) return null;
+  const options = [
+    {
+      key: "invest",
+      title: "Pay EMIs + invest",
+      label: "Invest surplus",
+      description: "Keep regular EMIs. Put extra money into investments.",
+      decision: invest,
+    },
+    {
+      key: "repay",
+      title: "Clear loans faster",
+      label: "Repay faster",
+      description: "Pay EMIs + extra. Invest the money released after payoff.",
+      decision: repay,
+    },
+    {
+      key: "sell",
+      title: "Sell, repay + invest",
+      label: "Sell & invest",
+      description:
+        "Sell one asset, clear eligible debt and invest the remainder.",
+      decision: sale,
+    },
+  ];
+  const selectedOption =
+    options.find((option) => option.key === choice) ?? options[0];
+  const selected = selectedOption.decision;
+  const paths: Path[] = options
+    .filter((option) => option.decision && !option.decision.error)
+    .map((option) => ({
+      decision: option.decision!,
+      label: option.label,
+      color: colors[options.indexOf(option)],
+    }));
+  const final = selected && !selected.error ? selected.rows.at(-1)! : null;
+  const baseline = invest.rows.at(-1)!;
+  const valid = paths.filter((path) => path.decision.fundingGap < 1e-7);
+  const bestNet = Math.max(
+    ...valid.map((path) => path.decision.rows.at(-1)!.net),
   );
-  const repay = simulate(plan, "avalanche"),
-    invest = simulate(plan, "invest"),
-    investmentAdvantage = invest.net - repay.net;
+  const selectedAsset = assets.find((asset) => asset.id === saleId);
+  const cashInvestedFromSale =
+    sale?.investment?.contributed !== undefined
+      ? sale.rows[0].liquid - (plan.lumpSum ?? 0)
+      : 0;
   return (
-    <section className="loan-decision-lab">
-      <LoanPaymentOverview
-        plan={plan}
-        money={money}
-        onReturnChange={onReturnChange}
-      />
+    <section className="loan-decision-lab loan-choice-workspace">
       <section
-        className="budget-panel loan-direct-comparison"
-        aria-labelledby="loan-direct-comparison-title"
+        className="budget-panel loan-choice-panel"
+        aria-labelledby="loan-choices-title"
       >
-        <div className="loan-chart-heading">
-          <h2 id="loan-direct-comparison-title">Repay extra or invest it?</h2>
-          <InfoHelp
-            label="repayment versus investing"
-            text="Both paths use the same monthly money, assets and finish date. One prepays eligible highest-interest loans, then invests released money. The other pays regular EMIs and invests the surplus from the start. Values include investment fees, entered gains tax, assets, cash and remaining debt. Interest saved is already reflected in wealth; it is not added again."
-          />
-        </div>
-        <p className="budget-help">
-          Same monthly money · {plan.horizon} months · {plan.returns}% assumed
-          annual investment return
-        </p>
-        <dl className="loan-calculated">
+        <header className="loan-choice-header">
           <div>
-            <dt>Repay extra, then invest</dt>
-            <dd>{money(repay.net)}</dd>
-          </div>
-          <div>
-            <dt>Regular EMIs + invest surplus</dt>
-            <dd>{money(invest.net)}</dd>
-          </div>
-          <div>
-            <dt>
-              {Math.abs(investmentAdvantage) < 0.5
-                ? "Projected difference"
-                : investmentAdvantage > 0
-                  ? "Investing ends ahead by"
-                  : "Extra repayment ends ahead by"}
-            </dt>
-            <dd>{money(Math.abs(investmentAdvantage))}</dd>
-          </div>
-        </dl>
-        <p className="budget-help">
-          Projected net wealth at {when(plan.horizon)}, after{" "}
-          {plan.investmentFee}% annual investment fees and {plan.gainsTax}% tax
-          on gains. Investment returns are assumptions, not guaranteed earnings.
-        </p>
-      </section>
-      <details className="loan-advanced-scenarios">
-        <summary>Optional: use spare savings or compare an asset sale</summary>
-        <div className="loan-decision-intro">
-          <h2 id="loan-decisions-title">See what each choice changes.</h2>
-          <p>
-            Same loans, timeline and non-rental monthly commitment. Compare
-            interest, debt and wealth—not just a lower EMI.
-          </p>
-        </div>
-        <section className="budget-panel loan-rate-ranking">
-          <h3>Your loans, highest to lowest interest</h3>
-          <p className="budget-help">
-            Annual rates show borrowing cost, not a “good” or “bad” loan.
-            Balances, tax relief, fees and lock-ins also matter.
-          </p>
-          <ol>
-            {ranked.map((loan, index) => (
-              <li key={loan.id}>
-                <div>
-                  <strong>
-                    {index + 1}. {loan.name}
-                  </strong>
-                  <b>{loan.rate}%</b>
-                </div>
-                <div className="loan-rate-track">
-                  <span style={{ width: `${(loan.rate / maxRate) * 100}%` }} />
-                </div>
-                <p>
-                  {money(loan.balance)} outstanding · about{" "}
-                  {money((loan.balance * loan.rate) / 1200)} interest in the
-                  first month
-                  {loan.lock > 0
-                    ? ` · extra payments locked for ${loan.lock} months`
-                    : ""}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="budget-panel">
-          <h3>Repay, invest or keep cash?</h3>
-          <label className="budget-field">
-            <span>Your option</span>
-            <select
-              aria-label="Compare repayment scenario"
-              value={selected.id}
-              onChange={(e) => {
-                const next = e.target.value;
-                setChoice(next);
-                setReference(
-                  next === "invest"
-                    ? "repay-invest"
-                    : next === "repay-invest"
-                      ? "invest"
-                      : "minimum",
-                );
-              }}
-            >
-              {scenarios
-                .filter((s) => !s.error)
-                .map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="budget-field loan-reference-choice">
-            <span>Compare against</span>
-            <select
-              aria-label="Comparison baseline"
-              value={base.id}
-              onChange={(event) => setReference(event.target.value)}
-            >
-              {scenarios
-                .filter((scenario) =>
-                  ["minimum", "repay-invest", "invest"].includes(scenario.id),
-                )
-                .map((scenario) => (
-                  <option key={scenario.id} value={scenario.id}>
-                    {scenario.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <p className="budget-help">{selected.description}</p>
-          {selected.investment ? (
-            <div className="loan-scenario-return">
-              <span className="loan-return-badge">
-                Expected return · {plan.returns}% / year
-              </span>
-              <label className="budget-field">
-                <span>Expected annual return (%)</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={-99}
-                  max={100}
-                  step="any"
-                  value={plan.returns}
-                  onChange={(event) => {
-                    if (Number.isFinite(event.target.valueAsNumber))
-                      onReturnChange(
-                        Math.max(
-                          -99,
-                          Math.min(100, event.target.valueAsNumber),
-                        ),
-                      );
-                  }}
-                />
-              </label>
-              <p className="budget-help">
-                {selected.id === "repay-invest"
-                  ? "Money paid toward loans earns no investment return. Only leftover money is invested; after payoff, the released monthly budget is invested."
-                  : "Regular EMIs stay paid. Surplus is invested at month end instead of paying extra toward loans."}{" "}
-                Includes {plan.investmentFee}% annual fees and {plan.gainsTax}%
-                tax on gains. Returns are not guaranteed.
-              </p>
-              <dl className="loan-calculated">
-                <div>
-                  <dt>Total invested</dt>
-                  <dd>{money(selected.investment.contributed)}</dd>
-                </div>
-                <div>
-                  <dt>Projected investment value</dt>
-                  <dd>{money(selected.investment.value)}</dd>
-                </div>
-                <div>
-                  <dt>After gains tax</dt>
-                  <dd>
-                    {money(selected.investment.value - selected.investment.tax)}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          ) : (
-            <p className="loan-comparison-basis">
-              Your option keeps unused money as cash at {plan.cashReturn ?? 0}%
-              annually. Comparing against: {base.name}.
+            <p className="budget-eyebrow">YOUR MONEY. THREE POSSIBILITIES.</p>
+            <h2 id="loan-choices-title">Choose how your money works.</h2>
+            <p className="budget-help">
+              Same monthly budget. Same finish date: {when(plan.horizon)}.
             </p>
-          )}
-          <div className="loan-decision-stats">
+          </div>
+          <div className="loan-choice-return">
+            <span className="loan-return-badge">
+              Expected investment return
+            </span>
+            <label>
+              <span className="loan-sr-only">Expected annual return (%)</span>
+              <input
+                aria-label="Expected annual return (%)"
+                type="number"
+                min={-99}
+                max={100}
+                step="any"
+                inputMode="decimal"
+                value={plan.returns}
+                onChange={(event) => {
+                  if (Number.isFinite(event.target.valueAsNumber))
+                    onReturnChange(
+                      Math.max(-99, Math.min(100, event.target.valueAsNumber)),
+                    );
+                }}
+              />
+              <span>% / year</span>
+            </label>
+            <InfoTooltip label="Explain expected investment return">
+              Starts at 12% for a new plan. Change this assumption for all three
+              paths. Growth is applied monthly before month-end contributions,
+              after your entered annual investment fee. Money used to repay
+              loans earns no investment return. Released money can be invested
+              after payoff. Returns are not guaranteed.
+            </InfoTooltip>
+            <small className="loan-return-effective">
+              {Number(
+                (
+                  (1 + plan.returns / 100) *
+                    (1 - plan.investmentFee / 100) *
+                    100 -
+                  100
+                ).toFixed(2),
+              )}
+              % after annual fees · {plan.gainsTax}% gains tax
+            </small>
+          </div>
+        </header>
+        <div
+          className="loan-choice-cards"
+          role="group"
+          aria-label="Choose your money strategy"
+        >
+          {options.map((option, index) => {
+            const end =
+              option.decision && !option.decision.error
+                ? option.decision.rows.at(-1)!
+                : null;
+            const projectedBest =
+              end &&
+              option.decision!.fundingGap < 1e-7 &&
+              Math.abs(end.net - bestNet) < 0.5;
+            return (
+              <button
+                type="button"
+                key={option.key}
+                className={`loan-choice-card ${choice === option.key ? "is-active" : ""}`}
+                aria-pressed={choice === option.key}
+                onClick={() => setChoice(option.key)}
+                style={
+                  { "--choice-color": colors[index] } as React.CSSProperties
+                }
+              >
+                <span className="loan-choice-card-top">
+                  <span className="loan-choice-icon">
+                    <ChoiceIcon kind={index} />
+                  </span>
+                  <span className="loan-choice-number">0{index + 1}</span>
+                </span>
+                <h3>{option.title}</h3>
+                <p>{option.description}</p>
+                {end ? (
+                  <>
+                    <span className="loan-choice-metric-label">
+                      Projected total wealth
+                    </span>
+                    <strong>{money(end.net)}</strong>
+                    <small>
+                      {option.decision!.fundingGap > 1e-7
+                        ? "Needs more monthly funding"
+                        : projectedBest
+                          ? "Highest projected wealth"
+                          : "At the same finish date"}
+                    </small>
+                    <small>Assumed return: {plan.returns}% / year</small>
+                  </>
+                ) : (
+                  <span className="loan-choice-unavailable">
+                    {option.decision?.error
+                      ? "Sale needs review"
+                      : "Add an asset to explore"}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {choice === "sell" && (
+          <div className="loan-sale-settings">
+            {!assets.length ? (
+              <p>Add an asset in your loan inputs to compare selling it.</p>
+            ) : (
+              <>
+                {assets.length > 1 ? (
+                  <label className="budget-field">
+                    <span>Which asset would you sell?</span>
+                    <select
+                      value={saleId}
+                      aria-label="Asset to sell"
+                      onChange={(event) => setAssetId(event.target.value)}
+                    >
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <strong>Selling: {selectedAsset?.name}</strong>
+                )}
+                {sale?.error ? (
+                  <p className="loan-warning" role="alert">
+                    {sale.error}
+                  </p>
+                ) : (
+                  sale && (
+                    <dl className="loan-sale-flow">
+                      <div>
+                        <dt>Loan principal cleared today</dt>
+                        <dd>{money(sale.initialPayment)}</dd>
+                      </div>
+                      <div>
+                        <dt>Invested from sale today</dt>
+                        <dd>{money(Math.max(0, cashInvestedFromSale))}</dd>
+                      </div>
+                      <div>
+                        <dt>Asset net earnings stop</dt>
+                        <dd>
+                          {money(selectedAsset ? netRent(selectedAsset) : 0)} /
+                          month
+                        </dd>
+                      </div>
+                    </dl>
+                  )
+                )}
+                <InfoTooltip label="Explain the asset sale">
+                  Selling costs and entered sale taxes are deducted first. The
+                  linked loan is settled, then proceeds repay other eligible
+                  loans. Remaining sale proceeds are invested today. Monthly
+                  surplus is invested after regular EMIs. The sold asset no
+                  longer counts toward wealth or earns income; replacement costs
+                  are included. Spare savings stay separate.
+                </InfoTooltip>
+              </>
+            )}
+          </div>
+        )}
+        {final && selected && (
+          <div className="loan-selected-summary">
             <div>
-              <div className="loan-metric-label">
-                Interest {interestSaved >= 0 ? "saved" : "added"}
-                <InfoHelp
-                  label="interest saved"
-                  text={`Difference in loan interest compared with ${base.name}. This figure shows borrowing costs only. The wealth difference also accounts for investment growth given up while repaying, fees and entered tax.`}
-                />
-              </div>
-              <strong data-testid="decision-interest-saved">
-                {money(Math.abs(interestSaved))}
-              </strong>
-              <small>
-                Loan interest only; extra fees {money(feeDifference)}
-              </small>
-            </div>
-            <div>
-              <div className="loan-metric-label">
-                When loans finish
-                <InfoHelp
-                  label="when loans finish"
-                  text="When all loans reach zero under this option. Cleared at start means the upfront payment covers all outstanding loans."
-                />
-              </div>
+              <span>Loans cleared</span>
               <strong>
                 {selected.debtFree === 0
-                  ? "Cleared at start"
-                  : when(selected.debtFree)}
+                  ? "Today"
+                  : selected.debtFree === null
+                    ? "Beyond timeline"
+                    : when(selected.debtFree)}
               </strong>
-              <small>
-                {selected.debtFree === null
-                  ? "Debt remains at the end of the comparison"
-                  : `Month ${selected.debtFree} of ${plan.horizon}`}
-              </small>
             </div>
             <div>
-              <div className="loan-metric-label">
-                Wealth difference
-                <InfoHelp
-                  label="wealth difference"
-                  text={`Your option's projected net wealth minus ${base.name}, at the same finish date. Positive means your option ends ahead; negative means it ends behind. Money used for extra loan payments is not also invested. When comparing repayment with investing, forgone investment growth is included automatically; interest savings are not added twice.`}
-                />
-              </div>
-              <strong data-testid="decision-net-difference">
-                {money(final.net - baseline.net)}
+              <span>Loan interest + fees</span>
+              <strong>{money(selected.interest + selected.fees)}</strong>
+            </div>
+            <div>
+              <span>Investments after tax</span>
+              <strong>
+                {money(
+                  (selected.investment?.value ?? 0) -
+                    (selected.investment?.tax ?? 0),
+                )}
               </strong>
-              <small>
-                At month {plan.horizon}, versus {base.name.toLowerCase()}
-              </small>
-              {selected.investment && base.investment && (
-                <small>
-                  Includes investment growth forgone while repaying loans.
-                </small>
-              )}
+            </div>
+            <div>
+              <span>
+                {choice === "invest"
+                  ? "Wealth vs repaying faster"
+                  : "Wealth vs investing surplus"}
+              </span>
+              <strong className="loan-wealth-difference">
+                {money(
+                  final.net -
+                    (choice === "invest"
+                      ? repay.rows.at(-1)!.net
+                      : baseline.net),
+                )}
+              </strong>
             </div>
           </div>
-          {selected.fundingGap > 1e-7 && (
-            <p className="loan-scenario-warning" role="alert">
-              This scenario cannot fund every required payment:{" "}
-              {money(selected.fundingGap)} cumulative funding gap. Unpaid loan
-              amounts remain in the debt balance. Don’t read this as an
-              affordable repayment plan.
-            </p>
-          )}
-          {(selected.initialPayment > 0 || sale) && (
-            <details className="loan-scenario-details">
-              <summary>
-                How upfront money and asset earnings are handled
-              </summary>
-              {selected.initialPayment > 0 && (
-                <p className="loan-decision-note">
-                  At the start: {money(selected.initialPayment)} applied to
-                  principal and {money(selected.initialFees)} in
-                  closure/prepayment fees. Unused cash remains in savings.
-                  Locked loans receive no optional prepayment.
-                </p>
-              )}
-              {sale && (
-                <p className="loan-decision-note">
-                  Sale proceeds after entered costs, taxes and linked-loan
-                  settlement: {money(selected.saleProceeds)}. Net asset earnings
-                  removed: {money(netRent(sale))} per month initially. The sold
-                  asset has no remaining value in this scenario. Other assets
-                  stay held; each sale is modeled independently.
-                </p>
-              )}
-            </details>
-          )}
-          <div className="loan-decision-charts">
-            {selected.investment && (
-              <ScenarioChart
-                base={base}
-                selected={selected}
-                field="liquid"
-                title="Investments and cash over time"
-                currency={plan.currency}
-                money={money}
-                when={when}
-                sliderLabel="Explore investment month"
-                baselineLabel={base.name}
-              />
-            )}
-            <ScenarioChart
-              base={base}
-              selected={selected}
-              field="debt"
-              title="Loan balance over time"
-              currency={plan.currency}
-              money={money}
-              when={when}
-              baselineLabel={base.name}
-            />
-            <ScenarioChart
-              base={base}
-              selected={selected}
-              field="net"
-              title="Your total wealth over time"
-              currency={plan.currency}
-              money={money}
-              when={when}
-              baselineLabel={base.name}
-            />
-          </div>
-          <dl className="loan-decision-ledger">
-            <div>
-              <dt>
-                {selected.investment
-                  ? "Cash & investments after tax at the finish"
-                  : "Liquid cash at the finish"}
-              </dt>
-              <dd>{money(final.liquid)}</dd>
-            </div>
-            <div>
-              <dt>Retained assets, estimated market value</dt>
-              <dd>{money(final.assetValue)}</dd>
-            </div>
-            <div>
-              <dt>Protected emergency fund & new reserve savings</dt>
-              <dd>{money(plan.emergency + plan.reserve * plan.horizon)}</dd>
-            </div>
-            <div>
-              <dt>Remaining debt</dt>
-              <dd>− {money(final.debt)}</dd>
-            </div>
-            {final.arrears > 0 && (
-              <div>
-                <dt>Unpaid operating costs</dt>
-                <dd>− {money(final.arrears)}</dd>
-              </div>
-            )}
-            <div>
-              <dt>Projected net wealth</dt>
-              <dd>{money(final.net)}</dd>
-            </div>
-          </dl>
+        )}
+        {selected && selected.fundingGap > 1e-7 && (
+          <p className="loan-warning" role="alert">
+            This path has {money(selected.fundingGap)} of unfunded payments.
+            Increase the budget or review asset earnings and costs before
+            treating it as affordable.
+          </p>
+        )}
+        <OutcomeChart
+          paths={paths}
+          selectedId={selected?.id ?? invest.id}
+          plan={plan}
+          money={money}
+          when={when}
+        />
+        <p className="loan-choice-footnote">
+          Projections include {plan.investmentFee}% annual investment fees and{" "}
+          {plan.gainsTax}% gains tax. Returns are assumptions, not guarantees.
+        </p>
+        <details className="loan-choice-details">
+          <summary>See the calculation breakdown</summary>
+          <p>
+            Both paths use your actual loan rates and the same monthly money.
+            Loan interest is included in payments; it is not deducted a second
+            time from the final wealth.
+          </p>
           <div className="budget-table-scroll">
             <table className="loan-table">
-              <caption>Each loan’s projected finish · {selected.name}</caption>
+              <caption>
+                From payments to projected wealth · {plan.horizon} months
+              </caption>
               <thead>
                 <tr>
-                  <th>Loan</th>
-                  <th>First month payment incl. fees</th>
-                  <th>Loan cleared</th>
-                  <th>Debt at finish</th>
+                  <th>Calculation</th>
+                  {paths.map((path) => (
+                    <th key={path.decision.id}>{path.label}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {plan.loans.map((loan) => (
-                  <tr key={loan.id}>
-                    <th>{loan.name}</th>
-                    <td>{money(selected.firstPayments[loan.id] ?? 0)}</td>
-                    <td>
-                      {selected.paidOff[loan.id] === 0
-                        ? "At start"
-                        : when(selected.paidOff[loan.id] ?? null)}
+                <tr>
+                  <th>Loan interest paid</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(path.decision.interest)}
                     </td>
-                    <td>{money(selected.remaining[loan.id])}</td>
-                  </tr>
-                ))}
+                  ))}
+                </tr>
+                <tr>
+                  <th>Loan prepayment fees</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>{money(path.decision.fees)}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Money invested</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(path.decision.investment?.contributed ?? 0)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Investment growth after annual fees</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(
+                        (path.decision.investment?.value ?? 0) -
+                          (path.decision.investment?.contributed ?? 0),
+                      )}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Tax on investment gains</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(path.decision.investment?.tax ?? 0)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Cash + investments after tax</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(path.decision.rows.at(-1)!.liquid)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Assets kept</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(path.decision.rows.at(-1)!.assetValue)}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Protected savings</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(protectedSavingsAt(plan, plan.horizon))}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Remaining debt + unpaid costs</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      {money(
+                        path.decision.rows.at(-1)!.debt +
+                          path.decision.rows.at(-1)!.arrears,
+                      )}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <th>Projected total wealth</th>
+                  {paths.map((path) => (
+                    <td key={path.decision.id}>
+                      <strong>{money(path.decision.rows.at(-1)!.net)}</strong>
+                    </td>
+                  ))}
+                </tr>
               </tbody>
             </table>
           </div>
-        </section>
-        <section className="budget-panel">
-          <h3>Monthly schedule for {selected.name}</h3>
-          <p className="budget-help">
-            Payments, asset earnings and remaining debt for this scenario. Month
-            0 shows any upfront principal payment.
+        </details>
+        <details className="loan-choice-details">
+          <summary>How the comparison works</summary>
+          <p>
+            Total wealth = cash + investments after estimated gains tax + assets
+            kept + protected savings − debt − unpaid costs. Each path uses the
+            same monthly budget and end date. Loan interest saved and investment
+            growth are already included; neither is added twice. Retained asset
+            prices are before future selling costs. Sale paths deduct the
+            entered costs and taxes and remove future earnings. This comparison
+            illustrates choices rather than recommending a sale.
           </p>
-          <details className="loan-decision-schedule">
-            <summary>View scenario’s monthly numbers</summary>
+        </details>
+        {selected && !selected.error && (
+          <details className="loan-choice-details">
+            <summary>Monthly numbers · {selectedOption.title}</summary>
             <div className="budget-table-scroll">
               <table className="loan-table">
-                <caption>
-                  {selected.name} · {plan.currency}
-                </caption>
                 <thead>
                   <tr>
                     <th>Month</th>
-                    <th>Paid to loans</th>
+                    <th>Loan payments</th>
                     <th>Fees</th>
-                    <th>Net earnings</th>
-                    <th>Debt</th>
-                    <th>Cash & investments after tax</th>
-                    <th>Funding gap</th>
+                    <th>Asset earnings</th>
+                    <th>Debt left</th>
+                    <th>Cash + investments after tax</th>
                   </tr>
                 </thead>
                 <tbody>
                   {selected.rows.slice(0, visible + 1).map((row) => (
                     <tr key={row.month}>
-                      <th>{row.month}</th>
+                      <th>{row.month === 0 ? "Today" : when(row.month)}</th>
                       <td>{money(row.paid)}</td>
                       <td>{money(row.fees)}</td>
                       <td>{money(row.rent)}</td>
                       <td>{money(row.debt)}</td>
                       <td>{money(row.liquid)}</td>
-                      <td>{money(row.shortfall)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -701,85 +766,20 @@ export function LoanDecisionLab({
                   setVisible((v) => Math.min(plan.horizon, v + 12))
                 }
               >
-                Show 12 more scenario months
+                Show 12 more months
               </button>
             )}
           </details>
-        </section>
-        <section className="budget-panel">
-          <h3>Interest and fees over the same timeline</h3>
-          <p className="budget-help">
-            Borrowing costs only. The net-wealth chart also includes rental
-            income, retained asset value and cash. A lower interest bill alone
-            does not establish a better overall outcome.
-          </p>
-          <div
-            className="loan-cost-chart"
-            role="img"
-            aria-label="Borrowing cost comparison; amounts listed for every scenario"
-          >
-            {scenarios.map((s) => (
-              <div key={s.id}>
-                <div>
-                  <span>{s.name}</span>
-                  <strong>
-                    {s.error ? "Needs review" : money(s.interest + s.fees)}
-                  </strong>
-                </div>
-                {!s.error && (
-                  <div className="loan-cost-track">
-                    <span
-                      style={{
-                        width: `${((s.interest + s.fees) / maxCost) * 100}%`,
-                      }}
-                    />
-                  </div>
-                )}
-                {s.error && <p>{s.error}</p>}
-                {s.fundingGap > 1e-7 && (
-                  <p>
-                    Unfunded payments: {money(s.fundingGap)}. This scenario
-                    needs more cash.
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-          <details className="loan-decision-method">
-            <summary>Assumptions and what these charts leave out</summary>
-            <p>
-              All paths start with the same assets, spare savings and debt.
-              Spare savings are separate from emergency money. The EMI-only
-              baseline retains surplus as cash. The investment option pays
-              regular EMIs and invests surplus at the selected expected return,
-              after fees and entered gains tax. Other scenarios prepay eligible
-              highest effective-rate loans and retain any excess cash. Released
-              EMIs continue within the same monthly commitment. Cash earns the
-              entered after-tax cash rate; this is separate from
-              investment-return alternatives below.
-            </p>
-            <p>
-              Rental income is adjusted for vacancy and entered monthly
-              costs/taxes. Rent growth affects gross rent; running costs are
-              held constant. Income marked as already included is not counted
-              twice and is removed from funding if the asset is sold. Sale
-              scenarios settle the selected linked loan first and use only the
-              remaining sale proceeds; spare savings remain untouched. A sale is
-              blocked if its linked loan is locked or proceeds cannot cover
-              settlement.
-            </p>
-            <p>
-              Net wealth = liquid cash + retained asset market values +
-              protected emergency/reserve savings − debt − unpaid operating
-              costs. Retained asset values are before any future sale
-              costs/taxes. Enter sale-tax estimates yourself; no
-              country-specific tax rules, changing loan rates or future
-              unexpected expenses are inferred. Replacement monthly costs
-              entered for an asset apply only if it is sold. Forecasts are
-              illustrations, not instructions to sell, keep or invest.
-            </p>
-          </details>
-        </section>
+        )}
+      </section>
+      <details className="loan-choice-details loan-individual-details">
+        <summary>Explore each loan’s payments</summary>
+        <LoanPaymentOverview
+          plan={plan}
+          money={money}
+          onReturnChange={onReturnChange}
+          showInvestmentOutlook={false}
+        />
       </details>
     </section>
   );

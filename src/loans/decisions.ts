@@ -2,6 +2,7 @@ import {
   cashFlow,
   payment,
   simulate,
+  protectedSavingsAt,
   validateLoanPlan,
   type LoanPlan,
   type LoanAsset,
@@ -43,7 +44,7 @@ export type Decision = {
   firstPayments: Record<string, number>;
 };
 
-/** Cash-only alternatives. Same starting wealth and non-rental monthly commitment. */
+/** Same starting wealth and monthly commitment, including sale settlement costs. */
 export function decisionScenario(
   p: LoanPlan,
   id: string,
@@ -52,6 +53,7 @@ export function decisionScenario(
   useSavings = false,
   soldId?: string,
   extraPayments = true,
+  investSurplus = false,
 ): Decision {
   p = resolveLoanPlan(p);
   const assets = p.assets ?? [];
@@ -66,6 +68,8 @@ export function decisionScenario(
           a.loan.rate * (1 - a.loan.taxRelief / 100) || a.index - b.index,
     );
   let cash = p.lumpSum ?? 0,
+    portfolio = 0,
+    contributed = 0,
     initialPayment = 0,
     initialFees = 0,
     saleProceeds = 0;
@@ -123,6 +127,11 @@ export function decisionScenario(
     cash -= paid.principal + paid.fees;
     initialPayment += paid.principal;
     initialFees += paid.fees;
+    if (sold && investSurplus) {
+      portfolio = paid.left;
+      contributed = paid.left;
+      cash -= paid.left;
+    }
   }
   const held = error ? assets : assets.filter((a) => a.id !== soldId);
   const valueAt = (month: number) =>
@@ -132,7 +141,11 @@ export function decisionScenario(
       0,
     );
   const totalDebt = () => balances.reduce((sum, n) => sum + n, 0);
-  const reserveAt = (month: number) => p.emergency + p.reserve * month;
+  const reserveAt = (month: number) => protectedSavingsAt(p, month);
+  const liquidValue = () =>
+    cash +
+    portfolio -
+    (Math.max(0, portfolio - contributed) * p.gainsTax) / 100;
   const paidOff: Record<string, number> = Object.create(null);
   const firstPayments: Record<string, number> = Object.create(null);
   p.loans.forEach((loan, index) => {
@@ -142,9 +155,9 @@ export function decisionScenario(
     {
       month: 0,
       debt: totalDebt(),
-      liquid: cash,
+      liquid: liquidValue(),
       assetValue: valueAt(0),
-      net: cash + valueAt(0) + reserveAt(0) - totalDebt(),
+      net: liquidValue() + valueAt(0) + reserveAt(0) - totalDebt(),
       interest: 0,
       paid: initialPayment,
       fees: initialFees,
@@ -160,8 +173,11 @@ export function decisionScenario(
   let arrears = 0;
   let debtFree: number | null = totalDebt() < 1e-7 ? 0 : null;
   const cashRate = Math.expm1(Math.log1p((p.cashReturn ?? 0) / 100) / 12);
+  const investmentRate =
+    Math.pow((1 + p.returns / 100) * (1 - p.investmentFee / 100), 1 / 12) - 1;
   for (let month = 1; month <= p.horizon && !error; month++) {
     cash *= 1 + cashRate;
+    portfolio *= 1 + investmentRate;
     let rentalChange = 0,
       rent = 0;
     for (const asset of assets) {
@@ -217,7 +233,10 @@ export function decisionScenario(
           firstPayments[id] = (firstPayments[id] ?? 0) + payment;
     }
     // Negative operating cash flow beyond the committed budget is reported, never invented as funding.
-    cash += left + credit;
+    if (investSurplus) {
+      portfolio += left + credit;
+      contributed += left + credit;
+    } else cash += left + credit;
     interest += monthInterest;
     fees += monthFees;
     rentReceived += rent;
@@ -230,9 +249,9 @@ export function decisionScenario(
     rows.push({
       month,
       debt,
-      liquid: cash,
+      liquid: liquidValue(),
       assetValue: valueAt(month),
-      net: cash + valueAt(month) + reserveAt(month) - debt - arrears,
+      net: liquidValue() + valueAt(month) + reserveAt(month) - debt - arrears,
       interest: monthInterest,
       paid,
       fees: monthFees,
@@ -242,6 +261,15 @@ export function decisionScenario(
     });
   }
   return {
+    ...(investSurplus
+      ? {
+          investment: {
+            contributed,
+            value: portfolio,
+            tax: (Math.max(0, portfolio - contributed) * p.gainsTax) / 100,
+          },
+        }
+      : {}),
     id,
     name,
     description,
@@ -367,9 +395,11 @@ export function compareDecisions(p: LoanPlan) {
         p,
         `sell-${asset.id}`,
         `Sell ${asset.name}`,
-        "Model a sale today, settle its linked loan, apply net proceeds to eligible debt and stop its rental cash flow.",
+        "Sell the asset, settle its linked loan and eligible debt, then invest remaining proceeds and monthly surplus. Sold-asset earnings stop.",
         false,
         asset.id,
+        false,
+        true,
       ),
     );
   return result;

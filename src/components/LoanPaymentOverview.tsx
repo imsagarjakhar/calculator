@@ -64,7 +64,12 @@ function TimeAmountGraph({
       setShowTooltip(false);
       return;
     }
-    setCursor(Math.max(0, Math.min(end, Math.round(((plotX - 76) / (width - 94)) * end))));
+    setCursor(
+      Math.max(
+        0,
+        Math.min(end, Math.round(((plotX - 76) / (width - 94)) * end)),
+      ),
+    );
     setShowTooltip(true);
   };
   const line = (field: "amount" | "invested") =>
@@ -85,98 +90,115 @@ function TimeAmountGraph({
     <figure className="loan-decision-chart loan-time-chart">
       <h3>{title}</h3>
       <div className="loan-time-plot">
-      <svg
-        ref={svg}
-        viewBox={`0 0 ${width} 294`}
-        role="img"
-        aria-labelledby={`${id}-title ${id}-description`}
-        onPointerMove={explorePoint}
-        onPointerDown={explorePoint}
-        onPointerLeave={(event) => {
-          if (event.pointerType !== "touch") setShowTooltip(false);
-        }}
-        onPointerCancel={() => setShowTooltip(false)}
-      >
-        <title id={`${id}-title`}>{title}</title>
-        <desc id={`${id}-description`}>
-          Time is the horizontal axis and amount in {currency} is the vertical
-          axis. {lineLabel} at {dateLabel(firstMonth, end)}:{" "}
-          {money(points[end].amount)}.
-        </desc>
-        <text x="0" y="16" className="loan-axis-name">
-          Amount ({currency})
-        </text>
-        {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
-          <g key={fraction}>
-            <line
-              x1="76"
-              x2={width - 18}
-              y1={y(high * fraction)}
-              y2={y(high * fraction)}
-              className="loan-decision-grid"
-            />
-            <text x="66" y={y(high * fraction) + 4} textAnchor="end">
-              {short(high * fraction)}
-            </text>
-          </g>
-        ))}
-        {[...new Set([0, Math.round(end / 2), end])].map((month) => (
-          <text
-            key={month}
-            x={x(month)}
-            y="251"
-            textAnchor={
-              month === 0 ? "start" : month === end ? "end" : "middle"
-            }
-          >
-            {dateLabel(firstMonth, month)}
+        <svg
+          ref={svg}
+          viewBox={`0 0 ${width} 294`}
+          role="img"
+          aria-labelledby={`${id}-title ${id}-description`}
+          onPointerMove={explorePoint}
+          onPointerDown={explorePoint}
+          onPointerLeave={(event) => {
+            if (event.pointerType !== "touch") setShowTooltip(false);
+          }}
+          onPointerCancel={() => setShowTooltip(false)}
+        >
+          <title id={`${id}-title`}>{title}</title>
+          <desc id={`${id}-description`}>
+            Time is the horizontal axis and amount in {currency} is the vertical
+            axis. {lineLabel} at {dateLabel(firstMonth, end)}:{" "}
+            {money(points[end].amount)}.
+          </desc>
+          <text x="0" y="16" className="loan-axis-name">
+            Amount ({currency})
           </text>
-        ))}
-        <text
-          x={(76 + width - 18) / 2}
-          y="280"
-          textAnchor="middle"
-          className="loan-axis-name"
-        >
-          Time
-        </text>
-        {showInvested && (
-          <path d={line("invested")} className="loan-decision-baseline" />
-        )}
-        <path d={line("amount")} className="loan-decision-line" />
-        <line
-          x1={x(active)}
-          x2={x(active)}
-          y1="35"
-          y2="225"
-          className="loan-decision-marker"
-        />
-        <circle
-          cx={x(active)}
-          cy={y(points[active].amount)}
-          r="4"
-          className="loan-decision-dot"
-        />
-      </svg>
-      {showTooltip && (
-        <div
-          className="loan-time-tooltip"
-          role="tooltip"
-          style={active > end / 2 ? { right: 8 } : { left: 8 }}
-        >
-          <strong>{active === 0 ? "Before " : ""}{dateLabel(firstMonth, active)}</strong>
-          <div><span>{lineLabel}</span><b>{money(points[active].amount)}</b></div>
-          {showInstallments && (
-            <div><span>Installments paid</span><b>{points[active].month} of {points[end].month}</b></div>
-          )}
-          {points[active].balance !== undefined && (
-            <div><span>Remaining balance</span><b>{money(points[active].balance)}</b></div>
-          )}
+          {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
+            <g key={fraction}>
+              <line
+                x1="76"
+                x2={width - 18}
+                y1={y(high * fraction)}
+                y2={y(high * fraction)}
+                className="loan-decision-grid"
+              />
+              <text x="66" y={y(high * fraction) + 4} textAnchor="end">
+                {short(high * fraction)}
+              </text>
+            </g>
+          ))}
+          {[...new Set([0, Math.round(end / 2), end])].map((month) => (
+            <text
+              key={month}
+              x={x(month)}
+              y="251"
+              textAnchor={
+                month === 0 ? "start" : month === end ? "end" : "middle"
+              }
+            >
+              {dateLabel(firstMonth, month)}
+            </text>
+          ))}
+          <text
+            x={(76 + width - 18) / 2}
+            y="280"
+            textAnchor="middle"
+            className="loan-axis-name"
+          >
+            Time
+          </text>
           {showInvested && (
-            <div><span>Money invested</span><b>{money(points[active].invested ?? 0)}</b></div>
+            <path d={line("invested")} className="loan-decision-baseline" />
           )}
-        </div>
-      )}
+          <path d={line("amount")} className="loan-decision-line" />
+          <line
+            x1={x(active)}
+            x2={x(active)}
+            y1="35"
+            y2="225"
+            className="loan-decision-marker"
+          />
+          <circle
+            cx={x(active)}
+            cy={y(points[active].amount)}
+            r="4"
+            className="loan-decision-dot"
+          />
+        </svg>
+        {showTooltip && (
+          <div
+            className="loan-time-tooltip"
+            role="tooltip"
+            style={active > end / 2 ? { right: 8 } : { left: 8 }}
+          >
+            <strong>
+              {active === 0 ? "Before " : ""}
+              {dateLabel(firstMonth, active)}
+            </strong>
+            <div>
+              <span>{lineLabel}</span>
+              <b>{money(points[active].amount)}</b>
+            </div>
+            {showInstallments && (
+              <div>
+                <span>Installments paid</span>
+                <b>
+                  {points[active].month} of {points[end].month}
+                </b>
+              </div>
+            )}
+            {points[active].balance !== undefined && (
+              <div>
+                <span>Remaining balance</span>
+                <b>{money(points[active].balance)}</b>
+              </div>
+            )}
+            {showInvested && (
+              <div>
+                <span>Money invested</span>
+                <b>{money(points[active].invested ?? 0)}</b>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className="loan-decision-legend">
         <span>
@@ -212,7 +234,9 @@ function TimeAmountGraph({
         {dateLabel(firstMonth, active)}:{" "}
         <strong>{money(points[active].amount)}</strong>
         {showInstallments && (
-          <span>Installments paid: {points[active].month} of {points[end].month}</span>
+          <span>
+            Installments paid: {points[active].month} of {points[end].month}
+          </span>
         )}
         {points[active].balance !== undefined && (
           <span>Remaining balance: {money(points[active].balance)}</span>
@@ -229,10 +253,12 @@ export function LoanPaymentOverview({
   plan,
   money,
   onReturnChange,
+  showInvestmentOutlook = true,
 }: {
   plan: LoanPlan;
   money: (value: number) => string;
   onReturnChange: (value: number) => void;
+  showInvestmentOutlook?: boolean;
 }) {
   const investment = simulate(plan, "invest"),
     cash = cashFlow(plan);
@@ -316,76 +342,78 @@ export function LoanPaymentOverview({
             })}
         </div>
       </section>
-      <section
-        className="budget-panel loan-investment-outlook"
-        aria-labelledby="loan-investment-title"
-      >
-        <h2 id="loan-investment-title">
-          What could the money left over become?
-        </h2>
-        <p className="budget-help">
-          From {dateLabel(plan.start, 1)}, pay regular EMIs first, then invest
-          the remaining monthly money. As a loan finishes, its released EMI
-          becomes available to invest.
-        </p>
-        <label className="budget-field loan-return-field">
-          <span>Expected annual investment return (%)</span>
-          <input
-            type="number"
-            min={-99}
-            max={100}
-            step="any"
-            inputMode="decimal"
-            value={plan.returns}
-            onChange={(event) => {
-              if (Number.isFinite(event.target.valueAsNumber))
-                onReturnChange(
-                  Math.max(-99, Math.min(100, event.target.valueAsNumber)),
-                );
-            }}
-          />
-        </label>
-        <dl className="loan-calculated">
-          <div>
-            <dt>First month invested</dt>
-            <dd>{money(investment.rows[0]?.invested ?? 0)}</dd>
-          </div>
-          <div>
-            <dt>Total money invested</dt>
-            <dd>{money(investment.contributed)}</dd>
-          </div>
-          <div>
-            <dt>Projected final value</dt>
-            <dd data-testid="loan-investment-final">
-              {money(investment.portfolio)}
-            </dd>
-          </div>
-        </dl>
-        <TimeAmountGraph
-          points={investmentPoints}
-          firstMonth={plan.start}
-          title="Your investments after EMIs"
-          lineLabel="Investment value"
-          currency={plan.currency}
-          money={money}
-          showInvested
-        />
-        <p className="budget-help">
-          Initial monthly money: {money(cash.totalFunding)}, including
-          additional asset earnings. The projection ends{" "}
-          {dateLabel(plan.start, plan.horizon)}, at the latest loan ending. Uses{" "}
-          {plan.returns}% assumed annual return and {plan.investmentFee}% annual
-          investment fees. Estimated final gains tax:{" "}
-          {money(investment.investmentTax)}. Returns are not guaranteed.
-        </p>
-        {investment.fundingGap > 0 && (
-          <p className="loan-warning">
-            Some future EMIs or asset running costs are not funded. Review your
-            budget and earnings assumptions; the loan payment graphs assume
-            regular EMIs.
+      {showInvestmentOutlook && (
+        <section
+          className="budget-panel loan-investment-outlook"
+          aria-labelledby="loan-investment-title"
+        >
+          <h2 id="loan-investment-title">
+            What could the money left over become?
+          </h2>
+          <p className="budget-help">
+            From {dateLabel(plan.start, 1)}, pay regular EMIs first, then invest
+            the remaining monthly money. As a loan finishes, its released EMI
+            becomes available to invest.
           </p>
-        )}
-      </section>
+          <label className="budget-field loan-return-field">
+            <span>Expected annual investment return (%)</span>
+            <input
+              type="number"
+              min={-99}
+              max={100}
+              step="any"
+              inputMode="decimal"
+              value={plan.returns}
+              onChange={(event) => {
+                if (Number.isFinite(event.target.valueAsNumber))
+                  onReturnChange(
+                    Math.max(-99, Math.min(100, event.target.valueAsNumber)),
+                  );
+              }}
+            />
+          </label>
+          <dl className="loan-calculated">
+            <div>
+              <dt>First month invested</dt>
+              <dd>{money(investment.rows[0]?.invested ?? 0)}</dd>
+            </div>
+            <div>
+              <dt>Total money invested</dt>
+              <dd>{money(investment.contributed)}</dd>
+            </div>
+            <div>
+              <dt>Projected final value</dt>
+              <dd data-testid="loan-investment-final">
+                {money(investment.portfolio)}
+              </dd>
+            </div>
+          </dl>
+          <TimeAmountGraph
+            points={investmentPoints}
+            firstMonth={plan.start}
+            title="Your investments after EMIs"
+            lineLabel="Investment value"
+            currency={plan.currency}
+            money={money}
+            showInvested
+          />
+          <p className="budget-help">
+            Initial monthly money: {money(cash.totalFunding)}, including
+            additional asset earnings. The projection ends{" "}
+            {dateLabel(plan.start, plan.horizon)}, at the latest loan ending.
+            Uses {plan.returns}% assumed annual return and {plan.investmentFee}%
+            annual investment fees. Estimated final gains tax:{" "}
+            {money(investment.investmentTax)}. Returns are not guaranteed.
+          </p>
+          {investment.fundingGap > 0 && (
+            <p className="loan-warning">
+              Some future EMIs or asset running costs are not funded. Review
+              your budget and earnings assumptions; the loan payment graphs
+              assume regular EMIs.
+            </p>
+          )}
+        </section>
+      )}
     </>
   );
 }

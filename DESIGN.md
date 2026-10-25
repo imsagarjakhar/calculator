@@ -44,6 +44,15 @@ action. Suppress shortfall dialogs while total income is zero, and show an
 income-entry prompt instead of claiming an empty budget is fully assigned.
 
 The loan planner opens with an empty personal loan list and an optional example.
+Its comparison interface has exactly three strategy cards: invest surplus after
+regular EMIs, repay faster then invest released money, and sell one selected
+asset to repay eligible debt and invest the remainder. Use one editable annual
+return (12% on new plans), no scenario/baseline dropdowns. Overlay the available
+paths in one chart with net-wealth, debt and cash/investment views, hover/tap
+readouts and keyboard month exploration. Asset selection appears only when the
+user chooses sale and has multiple assets. Detailed schedules and original
+per-loan payment graphs stay expandable. This replaces the older cash-baseline
+comparison interface described below; that engine remains for report compatibility.
 Its primary task is a neutral decision comparison: declare extra/total repayment
 money, list loans, then optionally add spare savings
 and rental assets. Rank interest rates without labeling debt morally. Cash-only
