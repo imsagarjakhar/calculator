@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// npm run test:e2e assigns a free PREVIEW_PORT in CI and passes it to all workers.
 const previewPort = Number(process.env.PREVIEW_PORT || "4173");
 const previewOrigin = `http://127.0.0.1:${previewPort}`;
 

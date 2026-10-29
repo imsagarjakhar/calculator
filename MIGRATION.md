@@ -116,6 +116,14 @@ npm run test:e2e
 
 Run `npm run build` before `npm run test:e2e` when source files have changed. The test runner starts its own preview server on port 4173 if none is already running. If you start a preview yourself, it must serve this branch's latest `dist` folder.
 
+In CI, `npm run test:e2e` automatically selects an available local port and
+passes `PREVIEW_PORT` to Playwright and its workers. This prevents a persistent
+Windows runner from conflicting with a developer preview or an older process
+on 4173. CI still starts a fresh server with `reuseExistingServer: false`; it
+does not validate another process's potentially stale build. Explicit
+`PREVIEW_PORT` values remain supported. Use the npm command in workflows so the
+port is selected before Playwright loads its configuration.
+
 ## 4. Push and review the migration branch
 
 After reviewing the changed files and passing the checks:

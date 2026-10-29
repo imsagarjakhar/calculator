@@ -18,7 +18,7 @@
     "test:loans": "node --experimental-strip-types --test scripts/loans.test.mjs scripts/loan-decisions.test.mjs scripts/loan-origination.test.mjs scripts/loan-assets.test.mjs",
     "test:budget": "node --experimental-strip-types --test scripts/budget.test.mjs",
     "test:vlogs": "node --test scripts/vlog-worker.test.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/run-e2e.cjs",
     "check": "npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
