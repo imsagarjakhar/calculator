@@ -5,6 +5,7 @@ export type PlannerRoute =
   | "methodology"
   | "home"
   | "learn"
+  | "guides"
   | "growth"
   | "survival"
   | "custom-plan"

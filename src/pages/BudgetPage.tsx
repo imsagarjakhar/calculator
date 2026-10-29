@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { preferredCurrency, usePlanCurrency } from "../runtime/currency";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -1523,6 +1524,7 @@ export function BudgetPage() {
           copy.
         </p>
       </footer>
+      <WorkedExampleLink route="salary-budget" />
     </main>
   );
 }

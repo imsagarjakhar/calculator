@@ -1,5 +1,10 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { searchPages, isTrustPage } from "../content/search.mjs";
+import {
+  searchPages,
+  isTrustPage,
+  isLearningPage,
+} from "../content/search.mjs";
+import { guideChapters } from "../content/planningExamples";
 import { terms } from "../content/financeBasics";
 import { plannerHref, type PlannerRoute } from "../runtime/routes";
 import type { VlogSummary } from "../vlogs/repository";
@@ -28,6 +33,8 @@ const aliases: Partial<Record<PlannerRoute, string>> = {
     "custom monthly plan bonus extra deposit assets investments loans",
   learn:
     "what is meaning explain beginner dictionary finance terms learn sip swp return",
+  guides:
+    "worked examples how calculation budget bill reserve repayment invest inflation retirement income yield",
 };
 const entries: Entry[] = [
   ...Object.entries(searchPages).map(([route, page]) => ({
@@ -36,10 +43,16 @@ const entries: Entry[] = [
     href: plannerHref(route as PlannerRoute),
     kind: isTrustPage(route)
       ? "Website information"
-      : route === "learn"
+      : isLearningPage(route)
         ? "Guide"
         : "Planner",
     aliases: aliases[route as PlannerRoute],
+  })),
+  ...guideChapters.map((chapter) => ({
+    title: chapter.title,
+    description: chapter.summary,
+    href: plannerHref("guides") + "#" + chapter.id,
+    kind: "Worked example",
   })),
   {
     title: "Financial planning guide",

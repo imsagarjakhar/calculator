@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { memo, type ReactNode } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -551,7 +552,8 @@ export const FreedomPage = memo(function FreedomPage() {
         <footer>
           EDUCATIONAL ILLUSTRATION · NOT INVESTMENT ADVICE · NO RETURN GUARANTEE
         </footer>
-      </main>
+        <WorkedExampleLink route="freedom" />
+    </main>
     </div>
   );
 });

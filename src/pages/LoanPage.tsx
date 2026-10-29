@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
 import {
@@ -1640,6 +1641,7 @@ export function LoanPage() {
           Reset to example
         </button>
       </footer>
+      <WorkedExampleLink route="loan-payoff" />
     </main>
   );
 }

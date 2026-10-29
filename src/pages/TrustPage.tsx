@@ -116,13 +116,45 @@ export function TrustPage({ page }: { page: TrustRoute }) {
         )}
         {page === "about" && (
           <>
+            <section id="editorial-standards">
+              <h2>Publisher & content standards</h2>
+              <p>
+                This site is published under the name {publisher.name}. The
+                public contact is{" "}
+                <a href={`mailto:${publisher.contactEmail}`}>
+                  {publisher.contactEmail}
+                </a>
+                . We do not claim registered investment-adviser status,
+                professional finance credentials, or an independent expert
+                review.
+              </p>
+              <p>
+                Educational copy and software are developed with AI assistance.
+                Worked examples are original, use invented amounts, state their
+                timing and assumptions, and are checked against explicit
+                formulas and the calculator code. Links to primary sources
+                provide background; they do not imply endorsement. Market
+                forecasts and product recommendations are not presented as
+                verified facts.
+              </p>
+              <p>
+                Content checks are recorded with the affected example, rather
+                than automatically changing dates on every build. Corrections
+                should update the calculation, explanation and regression check
+                together. Calculator fixes and educational content changes are
+                tracked in the project history.
+              </p>
+              <a href={plannerHref("guides")}>
+                Read the worked examples and their check date →
+              </a>
+            </section>
             <section>
               <h2>Built for understanding</h2>
               <p>
                 Start with what you earn, own, owe or want to spend. Compare a
                 few realistic assumptions, inspect the chart and monthly
-                schedule, then keep a report. Use the tools without
-                a visitor account.
+                schedule, then keep a report. Use the tools without a visitor
+                account.
               </p>
             </section>
             <div className="trust-cards">

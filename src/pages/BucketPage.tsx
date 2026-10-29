@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
 import { memo } from "react";
@@ -827,7 +828,8 @@ export const BucketPage = memo(function BucketPage() {
           Financial AI Planner retirement lab · Independent prototype · No
           changes to your other plans
         </footer>
-      </main>
+        <WorkedExampleLink route="bucket-plan" />
+    </main>
     </div>
   );
 });

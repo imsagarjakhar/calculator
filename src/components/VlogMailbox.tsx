@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { loadVlog, type Vlog } from "../vlogs/client";
 import type { Hub } from "./Vlogs";
 import "../styles/vlog-mailbox.css";
+import { plannerHref } from "../runtime/routes";
 
 const dateLabel = (value: string) =>
   new Intl.DateTimeFormat("en", {
@@ -91,7 +92,12 @@ export function VlogMailbox({ hub }: { hub: Hub }) {
           <h2 id="vlogsTitle" tabIndex={-1}>
             The Financial AI Planner Blog
           </h2>
-          <p>Ideas for your money. A little space to think.</p>
+          <p>
+            Ideas for your money. A little space to think.{" "}
+            <a href={plannerHref("guides")}>
+              Read our worked financial planning examples →
+            </a>
+          </p>
         </div>
         <button
           className="ghost vlog-refresh"

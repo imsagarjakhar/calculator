@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -227,6 +228,7 @@ export const SurvivalPage = memo(function SurvivalPage() {
             .
           </p>
         </details>
+        <WorkedExampleLink route="survival" />
       </div>
     </div>
   );

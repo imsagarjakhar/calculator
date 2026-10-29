@@ -275,6 +275,7 @@ export default defineConfig({
           "salary-budget",
           "loan-payoff",
           "learn",
+          "guides",
           "about",
           "contact",
           "privacy",

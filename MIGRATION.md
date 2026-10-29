@@ -1,5 +1,39 @@
 # React migration: local testing and GitHub Pages
 
+## AdSense content remediation — 29 October 2026
+
+The rejection supplied by the publisher identifies low-value content. This is
+a content-quality review, not an ads.txt or keyword-density error. The local
+update adds `/guides/`: five original, dated worked examples, with visible
+assumptions, independently checked arithmetic, primary-source reading and links
+to the relevant calculators. It is prerendered, included in the sitemap and
+classified as a learning resource. Each planner links to an appropriate example;
+the public reading page remains available without the live blog service.
+The About page now describes the publisher, AI assistance, verification scope,
+correction process and the absence of a claimed independent adviser review.
+
+Before requesting another AdSense review:
+
+1. Read and approve the actual educational copy and publisher statements. Do not
+   claim a reviewer, qualification or endorsement that has not been provided.
+2. Deploy the revised build. Check `/guides/`, each calculator, About, Contact,
+   Privacy, the sitemap and mobile navigation on the live domain, including
+   without JavaScript. The agent could not fetch the live domain from the current
+   execution environment; local checks do not establish public reachability.
+3. Check Search Console URL inspection for the deployed guide and sitemap.
+   A successful local build does not mean Google has crawled the revised content.
+4. Use AdSense's review flow only after the public changes are present. Do not
+   claim guaranteed approval, a required article/word count, or fabricated
+   traffic. Sustained usefulness and genuine audience interest need ongoing work.
+
+The existing AdSense account meta tag is verification, not an ad placement.
+This change does not insert ad slots on empty blog, login, error or navigation
+screens. Any future ad deployment must separately respect Google's publisher
+and consent requirements.
+
+References: [publisher-content policy](https://support.google.com/publisherpolicies/answer/11112688?hl=en),
+[helpful content guidance](https://developers.google.com/search/docs/fundamentals/creating-helpful-content).
+
 The `react` branch runs all five calculators through React, TypeScript and Vite, without a calculator database. Existing browser storage keys, report formats, calculation engines and public URLs are preserved. The optional runtime vlog feature uses a separate public content repository and a Cloudflare publishing API; it never stores calculator plans.
 
 ## 1. Prepare your computer

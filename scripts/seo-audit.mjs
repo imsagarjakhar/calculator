@@ -8,6 +8,7 @@ import {
   searchMetadataTags,
   siteUrl,
   isTrustPage,
+  isLearningPage,
 } from "../src/content/search.mts";
 
 const decode = (s) =>
@@ -132,7 +133,7 @@ for (const [page, info] of Object.entries(searchPages)) {
     /<details\b/,
     `Missing readable supporting content: ${page}`,
   );
-  if (page !== "home" && page !== "learn" && !isTrustPage(page))
+  if (page !== "home" && !isLearningPage(page) && !isTrustPage(page))
     assert.match(
       html,
       /<input\b[^>]*type="number"/,
@@ -157,6 +158,27 @@ for (const [page, info] of Object.entries(searchPages)) {
     );
   }
   const webpage = graph.find((node) => node["@type"] === "WebPage");
+  if (page === "guides") {
+    assert.ok(
+      graph.some((node) => node["@type"] === "LearningResource"),
+      "Worked guides must be classified as educational content",
+    );
+    assert.ok(
+      !graph.some((node) => node["@type"] === "WebApplication"),
+      "Worked guides are not a calculator app",
+    );
+    for (const section of [
+      "monthly-budget",
+      "sip-growth",
+      "repay-or-invest",
+      "asset-income",
+      "retirement-income",
+    ])
+      assert.ok(
+        html.includes(`id="${section}"`),
+        `Missing crawlable worked example: ${section}`,
+      );
+  }
   assert.equal(webpage.url, canonicalUrl(page));
   assert.ok(
     graph.some((node) => node["@id"] === webpage.mainEntity["@id"]),

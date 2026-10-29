@@ -1,6 +1,7 @@
 import { SiteSearch } from "../components/SiteSearch";
 import { PlannerDirectory } from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
+import { WorkedGuidesPreview } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
 import { useEffect, useRef, useState } from "react";
@@ -90,7 +91,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             onClick={() => setMenuOpen(false)}
           >
             <a href="#planners">The planners</a>
-            <a href="#financial-planning">Planning guide</a>
+            <a href={plannerHref("guides")}>Planning guide</a>
             <a href={plannerHref("learn")}>Learn finance</a>
             <a href="#vlogs">Blog</a>
           </nav>
@@ -148,9 +149,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               <br />
               <em>A clearer future.</em>
             </h1>
-            <p>
-              Plan your budget, investments and life after work.
-            </p>
+            <p>Plan your budget, investments and life after work.</p>
             <div className="welcome-actions">
               <a
                 href={plannerHref("growth")}
@@ -200,6 +199,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         </div>
         <PlannerDirectory />
         <FinancialPlanningGuide />
+        <WorkedGuidesPreview />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
           <h2 id="planningQuestions">Questions, answered.</h2>
           <details>

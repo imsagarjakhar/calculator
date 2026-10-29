@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  guides: {
+    title: "Financial Planning Worked Examples | Financial AI Planner",
+    description:
+      "Follow five worked financial planning examples: monthly bill reserves, SIP growth, loan repayment versus investing, net asset income and retirement withdrawals.",
+    name: "Financial planning worked examples",
+  },
   contact: {
     title: "Contact & Calculation Corrections | Financial AI Planner",
     description:
@@ -83,6 +89,9 @@ export type SearchPage = keyof typeof searchPages;
 export function isTrustPage(page: string) {
   return ["about", "privacy", "methodology", "contact"].includes(page);
 }
+export function isLearningPage(page: string) {
+  return page === "learn" || page === "guides";
+}
 export function canonicalUrl(page: SearchPage) {
   return siteUrl + (page === "home" ? "/" : "/" + page + "/");
 }
@@ -165,7 +174,7 @@ export function searchGraph(page: SearchPage) {
                   url +
                   (isTrustPage(page)
                     ? "#information"
-                    : page === "learn"
+                    : isLearningPage(page)
                       ? "#guide"
                       : "#calculator"),
               },
@@ -181,7 +190,7 @@ export function searchGraph(page: SearchPage) {
               itemListElement: (Object.keys(searchPages) as SearchPage[])
                 .filter(
                   (key) =>
-                    key !== "home" && key !== "learn" && !isTrustPage(key),
+                    key !== "home" && !isLearningPage(key) && !isTrustPage(key),
                 )
                 .map((key, index) => ({
                   "@type": "ListItem",
@@ -213,14 +222,14 @@ export function searchGraph(page: SearchPage) {
             {
               "@type": isTrustPage(page)
                 ? "CreativeWork"
-                : page === "learn"
+                : isLearningPage(page)
                   ? "LearningResource"
                   : "WebApplication",
               "@id":
                 url +
                 (isTrustPage(page)
                   ? "#information"
-                  : page === "learn"
+                  : isLearningPage(page)
                     ? "#guide"
                     : "#calculator"),
               name: info.name,
@@ -228,9 +237,12 @@ export function searchGraph(page: SearchPage) {
               description: info.description,
               ...(isTrustPage(page)
                 ? {}
-                : page === "learn"
+                : isLearningPage(page)
                   ? {
-                      learningResourceType: "Interactive glossary",
+                      learningResourceType:
+                        page === "guides"
+                          ? "Worked examples"
+                          : "Interactive glossary",
                       educationalUse: "instruction",
                     }
                   : {

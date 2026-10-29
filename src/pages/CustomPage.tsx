@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
 import { memo } from "react";
@@ -811,7 +812,8 @@ export const CustomPage = memo(function CustomPage() {
           Calculations run in your browser · Separate from Growth and Survival ·
           No account needed
         </footer>
-      </main>
+        <WorkedExampleLink route="custom-plan" />
+    </main>
     </div>
   );
 });

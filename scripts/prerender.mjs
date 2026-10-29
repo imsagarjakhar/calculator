@@ -40,6 +40,7 @@ try {
     "salary-budget": "BudgetPage",
     "loan-payoff": "LoanPage",
     learn: "LearnPage",
+    guides: "GuidesPage",
     about: "TrustPage",
     contact: "TrustPage",
     privacy: "TrustPage",
@@ -70,6 +71,7 @@ try {
         "div",
         null,
         route !== "learn" &&
+          route !== "guides" &&
           name !== "TrustPage" &&
           createElement(
             "noscript",

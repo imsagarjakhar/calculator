@@ -1,3 +1,4 @@
+import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -594,6 +595,7 @@ export const GrowthPage = memo(function GrowthPage() {
             </p>
           </details>
         </div>
+        <WorkedExampleLink route="growth" />
         <footer>
           EDUCATIONAL ILLUSTRATION / NOT INVESTMENT ADVICE / NO RETURN GUARANTEE
         </footer>
