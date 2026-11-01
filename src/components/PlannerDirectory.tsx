@@ -66,6 +66,14 @@ const tools: Tool[] = [
     icon: "M3 9h5l-1 12H4L3 9Zm7-4h5l-1 16h-3L10 5Zm7 7h5l-1 9h-3l-1-9ZM4 6V4m8-2V1m7 8V7",
   },
   {
+    route: "currency-converter",
+    style: "currency",
+    title: "Currency converter",
+    copy: "See what your money is worth in another currency.",
+    action: "Convert currencies",
+    icon: "M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4",
+  },
+  {
     route: "blog",
     style: "vlog",
     title: "Blog & ideas",

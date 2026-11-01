@@ -32,6 +32,7 @@ try {
     "/src/components/PlannerNavigation.tsx",
   );
   const pages = {
+    "currency-converter": "CurrencyPage",
     growth: "GrowthPage",
     survival: "SurvivalPage",
     "custom-plan": "CustomPage",

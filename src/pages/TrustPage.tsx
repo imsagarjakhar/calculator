@@ -229,7 +229,7 @@ export function TrustPage({ page }: { page: TrustRoute }) {
         )}
         {page === "privacy" && (
           <>
-            <p className="trust-date">Policy updated: 25 October 2026</p>
+            <p className="trust-date">Policy updated: 1 November 2026</p>
             <section>
               <h2>Calculator entries &amp; reports</h2>
               <p>
@@ -259,6 +259,12 @@ export function TrustPage({ page }: { page: TrustRoute }) {
             </details>
             <details>
               <summary>What information do website services receive?</summary>
+              <p>
+                The currency converter requests currency codes and their latest
+                reference rate from Frankfurter (api.frankfurter.dev). Your
+                entered amount stays in your browser. The rate provider receives
+                normal connection information, including your IP address.
+              </p>
               <p>
                 Loading this website sends ordinary connection information, such
                 as your IP address, browser details and requested URL, to

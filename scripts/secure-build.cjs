@@ -18,6 +18,8 @@ for (const page of [
   "salary-budget/index.html",
   "loan-payoff/index.html",
   "learn/index.html",
+  "guides/index.html",
+  "currency-converter/index.html",
   "about/index.html",
   "contact/index.html",
   "privacy/index.html",
@@ -71,7 +73,9 @@ for (const page of [
             "https://raw.githubusercontent.com",
           ]
       ).join(" ")
-    : "'none'";
+    : page === "currency-converter/index.html"
+      ? "https://api.frankfurter.dev"
+      : "'none'";
   const policy =
     "default-src 'none'; script-src 'self' " +
     [...new Set(inline)].join(" ") +

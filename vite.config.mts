@@ -276,6 +276,7 @@ export default defineConfig({
           "loan-payoff",
           "learn",
           "guides",
+          "currency-converter",
           "about",
           "contact",
           "privacy",

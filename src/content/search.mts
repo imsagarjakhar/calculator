@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  "currency-converter": {
+    title: "Currency Converter & Latest Exchange Rates | Financial AI Planner",
+    description:
+      "Convert SAR, INR, USD, EUR and other currencies using the latest daily reference rates. See the rate date, swap currencies and calculate privately in your browser.",
+    name: "Currency converter",
+  },
   guides: {
     title: "Financial Planning Worked Examples | Financial AI Planner",
     description:

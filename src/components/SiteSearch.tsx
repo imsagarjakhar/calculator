@@ -18,6 +18,8 @@ type Entry = {
   aliases?: string;
 };
 const aliases: Partial<Record<PlannerRoute, string>> = {
+  "currency-converter":
+    "exchange rate currency convert money forex sar inr usd eur aed gbp dollar rupee riyal",
   "salary-budget":
     "spending expenses income paycheck bills cash budget money left emergency savings",
   "loan-payoff":
