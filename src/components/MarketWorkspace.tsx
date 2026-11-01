@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useHub } from "./Vlogs";
+import { readChartStock, type ChartStock } from "../markets/chartSymbol";
 import {
   countryByCode,
   needsExternalChart,
@@ -24,6 +26,41 @@ export function MarketWorkspace({
   chartRevision: number;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const chart = useRef<HTMLIFrameElement>(null);
+  const hub = useHub();
+  const [candidate, setCandidate] = useState<ChartStock | null>(null);
+  const [reading, setReading] = useState(false);
+  const [chartError, setChartError] = useState("");
+  const requestId = useRef(0);
+  useEffect(() => {
+    requestId.current++;
+    setReading(false);
+    setCandidate(null);
+    setChartError("");
+  }, [open, chartRevision, symbol]);
+  async function bookmark() {
+    if (!hub.session) {
+      hub.login();
+      return;
+    }
+    if (!chart.current || reading) return;
+    const current = ++requestId.current;
+    setReading(true);
+    setChartError("");
+    try {
+      const stock = await readChartStock(chart.current);
+      if (requestId.current === current) setCandidate(stock);
+    } catch (error) {
+      if (requestId.current === current)
+        setChartError(
+          error instanceof Error
+            ? error.message
+            : "Could not read the chart stock.",
+        );
+    } finally {
+      if (requestId.current === current) setReading(false);
+    }
+  }
   useEffect(() => {
     const node = dialog.current!;
     if (!open) {
@@ -78,6 +115,39 @@ export function MarketWorkspace({
               expanded={country.code === "in"}
             />
           )}
+          {!needsExternalChart(symbol) && (
+            <div className="market-chart-actions">
+              <span>Search in the chart, then bookmark your stock.</span>
+              <button
+                type="button"
+                className="market-bookmark"
+                aria-label="Add chart stock to watchlist"
+                title="Add chart stock to watchlist"
+                disabled={reading}
+                aria-busy={reading}
+                onClick={() => void bookmark()}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M6 3h12v18l-6-4-6 4z" />
+                  <path d="M9 9h6m-3-3v6" />
+                </svg>
+                {reading && <span>Reading…</span>}
+              </button>
+            </div>
+          )}
+          {chartError && (
+            <p role="alert" className="vlog-error">
+              {chartError}
+            </p>
+          )}
           {open &&
             (needsExternalChart(symbol) ? (
               <div className="market-country-fallback market-chart-fallback">
@@ -97,6 +167,7 @@ export function MarketWorkspace({
               </div>
             ) : (
               <MarketWidget
+                iframeRef={chart}
                 key={chartRevision}
                 country={country}
                 kind="chart"
@@ -111,7 +182,11 @@ export function MarketWorkspace({
             </p>
           )}
         </section>
-        <MarketWatchlists selectSymbol={selectSymbol} />
+        <MarketWatchlists
+          selectSymbol={selectSymbol}
+          candidate={candidate}
+          clearCandidate={() => setCandidate(null)}
+        />
       </div>
     </dialog>
   );

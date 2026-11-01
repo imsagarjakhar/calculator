@@ -3,19 +3,24 @@ import { useHub } from "./Vlogs";
 import { request, publisherConfigured } from "../vlogs/client";
 import {
   emptyWatchlists,
-  normaliseSymbol,
   parseSavedWatchlists,
   parseWatchlists,
   type SavedWatchlists,
   type Watchlists,
 } from "../markets/watchlists";
 
+import type { ChartStock } from "../markets/chartSymbol";
+
 const message = (error: unknown) =>
   error instanceof Error ? error.message : "Could not update watchlists.";
 export function MarketWatchlists({
   selectSymbol,
+  candidate,
+  clearCandidate,
 }: {
   selectSymbol: (symbol: string) => void;
+  candidate: ChartStock | null;
+  clearCandidate: () => void;
 }) {
   const hub = useHub();
   const [data, setData] = useState<SavedWatchlists>({
@@ -24,7 +29,13 @@ export function MarketWatchlists({
   });
   const [selected, setSelected] = useState("");
   const [name, setName] = useState("");
-  const [stock, setStock] = useState("");
+  const candidatePanel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (candidate) {
+      candidatePanel.current?.scrollIntoView({ block: "nearest" });
+      candidatePanel.current?.focus();
+    }
+  }, [candidate]);
   const [dirty, setDirty] = useState(false);
   const dirtyRef = useRef(false);
   const [loading, setLoading] = useState(false);
@@ -110,41 +121,48 @@ export function MarketWatchlists({
     setSelected(id);
     setName("");
   }
-  function add(value: string) {
-    if (locked || !list) return;
+  async function addChartStock() {
+    if (locked || !list || !candidate || savingRef.current) return;
+    if (list.symbols.includes(candidate.symbol)) {
+      setError("This stock is already in the watchlist.");
+      return;
+    }
     try {
-      const next = normaliseSymbol(value);
-      if (list.symbols.includes(next))
-        throw new Error("This stock is already in the watchlist.");
-      change({
-        version: 1,
-        lists: data.lists.map((item) =>
-          item.id === list.id
-            ? { ...item, symbols: [...item.symbols, next] }
-            : item,
-        ),
-      });
-      setStock("");
+      const next = {
+        ...parseWatchlists({
+          version: 1,
+          lists: data.lists.map((item) =>
+            item.id === list.id
+              ? { ...item, symbols: [...item.symbols, candidate.symbol] }
+              : item,
+          ),
+        }),
+        revision: data.revision,
+      };
+      // Preserve the addition as an unsaved draft if the network/save fails.
+      change(next);
+      await save(next);
     } catch (e) {
       setError(message(e));
     }
   }
-  async function save() {
+  async function save(next?: SavedWatchlists) {
     const session = hub.session;
-    if (locked || savingRef.current || !session || !dirty) return;
+    if (locked || savingRef.current || !session || (!dirty && !next)) return;
     savingRef.current = true;
     setSaving(true);
     setError("");
     setNotice("");
     try {
       const result = parseSavedWatchlists(
-        await request("/watchlists", "POST", session, data),
+        await request("/watchlists", "POST", session, next ?? data),
       );
       if (sessionRef.current?.token !== session.token) return;
       setData(result);
       setDirty(false);
       dirtyRef.current = false;
       setNotice("Watchlists saved to your account.");
+      clearCandidate();
     } catch (e) {
       setError(message(e));
     } finally {
@@ -202,6 +220,45 @@ export function MarketWatchlists({
               ))}
             </select>
           </label>
+          {candidate && (
+            <div
+              className="watchlist-candidate"
+              ref={candidatePanel}
+              tabIndex={-1}
+              role="region"
+              aria-label="Add chart stock"
+            >
+              <strong>{candidate.description || candidate.symbol}</strong>
+              <p>{candidate.symbol}</p>
+              <p className="market-help">
+                {list
+                  ? `Add to ${list.name}.`
+                  : "Create a watchlist below first, then add this stock."}{" "}
+                {dirty && "Also saves your pending list changes."}
+              </p>
+              <div className="watchlist-candidate-actions">
+                <button
+                  type="button"
+                  className="primary"
+                  disabled={
+                    locked || !list || list.symbols.includes(candidate.symbol)
+                  }
+                  onClick={() => void addChartStock()}
+                >
+                  {list?.symbols.includes(candidate.symbol)
+                    ? "Already in this list"
+                    : "Add & save"}
+                </button>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={clearCandidate}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
           {list && (
             <section
               className="watchlist-content"
@@ -255,36 +312,11 @@ export function MarketWatchlists({
                 <div className="watchlist-empty" role="status">
                   <strong>{list.name} is empty</strong>
                   <p>
-                    Add your first stock below. The list name does not
-                    automatically add companies.
+                    Search for a stock inside the chart, then use its bookmark
+                    icon to add it here.
                   </p>
                 </div>
               )}
-              <form
-                className="watchlist-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  add(stock);
-                }}
-              >
-                <label htmlFor="watchlist-stock">
-                  Add a stock · exchange:ticker
-                </label>
-                <div>
-                  <input
-                    id="watchlist-stock"
-                    placeholder="NASDAQ:AAPL"
-                    value={stock}
-                    maxLength={66}
-                    required
-                    disabled={locked}
-                    onChange={(e) => setStock(e.target.value)}
-                  />
-                  <button type="submit" disabled={locked || !stock.trim()}>
-                    Add
-                  </button>
-                </div>
-              </form>
             </section>
           )}
           {!list && !loading && ready && (

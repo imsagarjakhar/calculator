@@ -633,3 +633,40 @@ html:has(.markets-page) {
     height: 480px;
   }
 }
+.market-chart-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+.market-chart-actions .market-bookmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  color: #176b53;
+  background: #eaf4ee;
+  border: 1px solid #b4d2c4;
+  border-radius: 10px;
+}
+.watchlist-candidate {
+  padding: 16px;
+  margin: 12px 0;
+  background: #eaf4ee;
+  border: 1px solid #b4d2c4;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.watchlist-candidate p {
+  margin: 8px 0;
+}
+.watchlist-candidate-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

@@ -1,17 +1,20 @@
 import { countryByCode, widgetConfig } from "../content/markets";
 import { canonicalStockSymbol } from "../markets/symbols";
+import type { Ref } from "react";
 export function MarketWidget({
   kind,
   country,
   range,
   view,
   symbol,
+  iframeRef,
 }: {
   kind: "indices" | "stocks" | "chart";
   country: ReturnType<typeof countryByCode>;
   range?: string;
   view?: string;
   symbol?: string;
+  iframeRef?: Ref<HTMLIFrameElement>;
 }) {
   const config = {
     ...widgetConfig(kind, country, range, view),
@@ -30,6 +33,7 @@ export function MarketWidget({
   return (
     <div className={`market-embed market-embed-${kind}`}>
       <iframe
+        ref={iframeRef}
         key={source}
         title={
           kind === "chart"

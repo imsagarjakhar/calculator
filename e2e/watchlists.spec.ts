@@ -45,7 +45,15 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   const sessions: string[] = [];
   await page.route("https://www.tradingview-widget.com/**", (route) =>
     route.fulfill({
-      body: "<!doctype html><title>Chart</title>",
+      body: `<!doctype html><title>Chart</title><button onclick="window.stock={name:'INFY',exchange:'BSE',description:'Infosys Limited'}">Search Infosys</button>
+        <script>
+        window.stock={name:'AAPL',exchange:'NASDAQ',description:'Apple Inc.'};
+        addEventListener('message', event => {
+          const request=JSON.parse(event.data);
+          if(request.name !== 'symbolInfo') return;
+          parent.postMessage(JSON.stringify({...request,type:'on',data:window.stock}),event.origin);
+        });
+        </script>`,
       contentType: "text/html",
     }),
   );
@@ -110,21 +118,42 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await expect(
     desk.getByText("Long-term ideas is empty", { exact: true }),
   ).toBeVisible();
-  await desk.getByLabel("Add a stock · exchange:ticker").fill("NASDAQ:AAPL");
-  await desk.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(desk.getByLabel("Add a stock · exchange:ticker")).toHaveCount(0);
+  await desk
+    .getByRole("button", { name: "Add chart stock to watchlist" })
+    .click();
+  const candidate = desk.getByRole("region", {
+    name: "Add chart stock",
+    exact: true,
+  });
+  await expect(candidate).toContainText("NASDAQ:AAPL");
+  await candidate
+    .getByRole("button", { name: "Add & save", exact: true })
+    .click();
+  await expect(candidate).toBeHidden();
   await listName.fill("India ideas");
   await desk.getByRole("button", { name: "Create", exact: true }).click();
-  await desk.getByLabel("Add a stock · exchange:ticker").fill("BSE:500209");
-  await desk.getByRole("button", { name: "Add", exact: true }).click();
+  // Simulate a native chart search: the React chart prop still says AAPL.
+  await desk
+    .locator("iframe")
+    .contentFrame()
+    .getByRole("button", { name: "Search Infosys" })
+    .click();
+  await desk
+    .getByRole("button", { name: "Add chart stock to watchlist" })
+    .click();
+  await expect(candidate).toContainText("BSE:INFY");
+  await expect(candidate).toContainText("India ideas");
+  await candidate
+    .getByRole("button", { name: "Add & save", exact: true })
+    .click();
+  await expect(candidate).toBeHidden();
   await desk.getByRole("button", { name: "INFY BSE", exact: true }).click();
   const selectedChart = await desk.locator("iframe").getAttribute("src");
   expect(
     JSON.parse(decodeURIComponent(new URL(selectedChart!).hash.slice(1)))
       .symbol,
   ).toBe("BSE:INFY");
-  await desk
-    .getByRole("button", { name: "Save watchlists", exact: true })
-    .click();
   await expect(
     desk.getByText("Watchlists saved to your account.", { exact: true }),
   ).toBeVisible();
@@ -164,20 +193,52 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await expect(
     desk.getByRole("button", { name: "INFY BSE", exact: true }),
   ).toBeVisible();
-  conflict = true;
-  await desk.getByLabel("Add a stock · exchange:ticker").fill("NSE:INFY");
-  await desk.getByRole("button", { name: "Add", exact: true }).click();
+  // A duplicate can be cancelled without another write.
   await desk
-    .getByRole("button", { name: "Save watchlists", exact: true })
+    .locator("iframe")
+    .contentFrame()
+    .getByRole("button", { name: "Search Infosys" })
+    .click();
+  await desk
+    .getByRole("button", { name: "Add chart stock to watchlist" })
+    .click();
+  await expect(
+    candidate.getByRole("button", { name: "Already in this list" }),
+  ).toBeDisabled();
+  await candidate.getByRole("button", { name: "Cancel", exact: true }).click();
+  conflict = true;
+  // The remounted chart starts at Apple again; adding it must preserve drafts on conflict.
+  await desk
+    .locator("iframe")
+    .contentFrame()
+    .locator("body")
+    .evaluate(() => {
+      (window as any).stock = {
+        name: "MSFT",
+        exchange: "NASDAQ",
+        description: "Microsoft",
+      };
+    });
+  await desk
+    .getByRole("button", { name: "Add chart stock to watchlist" })
+    .click();
+  await expect(candidate).toContainText("NASDAQ:MSFT");
+  await candidate
+    .getByRole("button", { name: "Add & save", exact: true })
     .click();
   await expect(desk.getByRole("alert")).toContainText("another tab");
   await expect(
-    desk.getByRole("button", { name: "INFY NSE", exact: true }),
+    desk.getByRole("button", { name: "MSFT NASDAQ", exact: true }),
   ).toBeVisible();
-  await desk.getByRole("button", { name: "INFY NSE", exact: true }).click();
   await expect(
-    desk.getByRole("link", { name: "Open NSE:INFY on TradingView" }),
-  ).toBeVisible();
+    desk.getByRole("button", { name: "Save watchlists", exact: true }),
+  ).toBeEnabled();
+  conflict = false;
+  await desk
+    .getByRole("button", { name: "Save watchlists", exact: true })
+    .click();
+  await expect(candidate).toBeHidden();
+  expect(saved.lists[1].symbols).toEqual(["BSE:INFY", "NASDAQ:MSFT"]);
   expect(
     sessions.every((value) => value === "Bearer test-signed-session"),
   ).toBe(true);
