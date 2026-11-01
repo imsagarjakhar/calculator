@@ -277,6 +277,7 @@ export default defineConfig({
           "learn",
           "guides",
           "currency-converter",
+          "markets",
           "about",
           "contact",
           "privacy",

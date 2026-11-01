@@ -20,6 +20,7 @@ for (const page of [
   "learn/index.html",
   "guides/index.html",
   "currency-converter/index.html",
+  "markets/index.html",
   "about/index.html",
   "contact/index.html",
   "privacy/index.html",
@@ -81,7 +82,11 @@ for (const page of [
     [...new Set(inline)].join(" ") +
     "; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; connect-src " +
     connections +
-    "; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'none'";
+    "; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src " +
+    (page === "markets/index.html"
+      ? "https://www.tradingview-widget.com"
+      : "'none'") +
+    "; worker-src 'none'";
   source = source.replace(
     /(<meta\s+charset="utf-8"\s*\/?>)/i,
     '$1\n<meta http-equiv="Content-Security-Policy" content="' +

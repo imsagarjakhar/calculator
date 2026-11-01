@@ -213,4 +213,15 @@ The standalone **Loan Payoff & Investment Planner** is at `/loan-payoff/`. It co
 
 Generated `dist/`, `node_modules/`, `test-results/` and `playwright-report/` are ignored by Git.
 
+The `/markets/` page uses TradingView embeds without an API key. Exchange coverage
+is limited: `src/content/markets.ts` guards unsupported country filters because
+the provider can silently substitute US stocks. Those countries open an external
+market page instead. Some supported countries exclude particular exchanges; the
+page explains these exclusions. The US Nasdaq 100 overview uses daily FRED data.
+Third-party code runs on TradingView's origin, with frames allowed only on this
+page. No provider scripts run in the planner's origin. Run the focused browser
+checks with `npm run test:e2e -- e2e/markets.spec.ts`; the optional
+`node scripts/check-market-embeds.cjs` checks real provider responses against a
+preview on port 4186 (override with `MARKETS_CHECK_URL`).
+
 For the new repository preview at `https://imsagarjakhar.github.io/calculator/`, use GitHub Actions with repository variables `PAGES_DEPLOY_BRANCH=react` and `PAGES_BASE_PATH=/calculator/`. Leave the new repository’s custom domain empty during testing. Follow [the Pages setup guide](MIGRATION.md#set-up-pages-in-the-new-repository-without-moving-the-domain).

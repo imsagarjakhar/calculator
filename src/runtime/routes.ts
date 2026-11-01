@@ -1,4 +1,5 @@
 export type PlannerRoute =
+  | "markets"
   | "currency-converter"
   | "about"
   | "contact"

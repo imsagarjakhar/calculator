@@ -260,6 +260,13 @@ export function TrustPage({ page }: { page: TrustRoute }) {
             <details>
               <summary>What information do website services receive?</summary>
               <p>
+                The Global markets page embeds TradingView market data and charts.
+                TradingView and its data services receive ordinary connection
+                information, such as your IP address and browser details. The
+                widgets run in isolated frames without access to saved planner
+                values. TradingView’s own privacy policy applies to its content.
+              </p>
+              <p>
                 The currency converter requests currency codes and their latest
                 reference rate from Frankfurter (api.frankfurter.dev). Your
                 entered amount stays in your browser. The rate provider receives

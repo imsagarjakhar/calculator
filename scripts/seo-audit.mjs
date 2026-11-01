@@ -133,7 +133,12 @@ for (const [page, info] of Object.entries(searchPages)) {
     /<details\b/,
     `Missing readable supporting content: ${page}`,
   );
-  if (page !== "home" && !isLearningPage(page) && !isTrustPage(page))
+  if (
+    page !== "home" &&
+    page !== "markets" &&
+    !isLearningPage(page) &&
+    !isTrustPage(page)
+  )
     assert.match(
       html,
       /<input\b[^>]*type="number"/,

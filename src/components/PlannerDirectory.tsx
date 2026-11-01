@@ -74,6 +74,14 @@ const tools: Tool[] = [
     icon: "M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4",
   },
   {
+    route: "markets",
+    style: "markets",
+    title: "Global markets",
+    copy: "Explore country indices, stock prices and performance over time.",
+    action: "Explore stock markets",
+    icon: "M3 20h18M4 15l5-6 4 3 7-8m-5 0h5v5M7 20v-3m5 3v-4m5 4v-7",
+  },
+  {
     route: "blog",
     style: "vlog",
     title: "Blog & ideas",

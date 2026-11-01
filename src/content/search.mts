@@ -1,5 +1,11 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  markets: {
+    title: "Global Stock Markets, Indices & Performance | Financial AI Planner",
+    description:
+      "Explore country stock markets, major indices, prices and performance with TradingView charts. Compare one day to five years; data may be delayed by exchange.",
+    name: "Global stock markets",
+  },
   "currency-converter": {
     title: "Currency Converter & Latest Exchange Rates | Financial AI Planner",
     description:

@@ -272,7 +272,7 @@ test("search engines can read content, links and consistent metadata without Jav
         staticPage.locator(
           '.site-footer nav[aria-label="Calculator directory"] a',
         ),
-      ).toHaveCount(11);
+      ).toHaveCount(12);
       await expect(
         staticPage.locator(
           '.site-footer nav[aria-label="Website information"] a',

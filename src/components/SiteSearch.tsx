@@ -18,6 +18,8 @@ type Entry = {
   aliases?: string;
 };
 const aliases: Partial<Record<PlannerRoute, string>> = {
+  markets:
+    "stock market share price index indices exchange world countries US USA India Saudi Arabia Nasdaq SP500 Nifty Sensex performance daily weekly monthly yearly",
   "currency-converter":
     "exchange rate currency convert money forex sar inr usd eur aed gbp dollar rupee riyal",
   "salary-budget":
