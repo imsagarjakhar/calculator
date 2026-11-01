@@ -1,3 +1,7 @@
+/* Keep symbol-search controls stationary when the chart swaps or input loses focus. */
+html:has(.markets-page) {
+  scroll-behavior: auto;
+}
 .markets-page {
   max-width: 1440px;
   margin: auto;
@@ -149,6 +153,43 @@
 .market-periods {
   margin-bottom: 20px;
 }
+.market-symbol-search {
+  margin: 18px 0;
+}
+.market-symbol-search label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+.market-symbol-search > div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.market-symbol-search input {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #cedbd2;
+  border-radius: 8px;
+  font: inherit;
+}
+.market-symbol-search button {
+  min-height: 44px;
+}
+.markets-page .market-symbol-example {
+  display: inline;
+  min-height: 44px;
+  padding: 4px 8px;
+  color: #176c50;
+  background: #edf4e9;
+  border: 0;
+  text-decoration: underline;
+}
+.market-help a {
+  color: #176c50;
+  text-decoration: underline;
+}
 .market-embed {
   width: 100%;
   min-width: 0;
@@ -192,6 +233,9 @@
   color: #496459;
   line-height: 1.8;
   max-width: 65ch;
+}
+.market-chart-fallback {
+  min-height: 580px;
 }
 .market-country-fallback a {
   color: #176c50;

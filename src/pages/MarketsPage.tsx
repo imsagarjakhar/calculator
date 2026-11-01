@@ -7,6 +7,8 @@ import {
   widgetConfig,
   hasEmbeddedMarket,
   marketExternalUrl,
+  needsExternalChart,
+  stockChartUrl,
 } from "../content/markets";
 
 function MarketWidget({
@@ -14,13 +16,18 @@ function MarketWidget({
   country,
   range,
   view,
+  symbol,
 }: {
   kind: "indices" | "stocks" | "chart";
   country: ReturnType<typeof countryByCode>;
   range?: string;
   view?: string;
+  symbol?: string;
 }) {
-  const config = widgetConfig(kind, country, range, view);
+  const config = {
+    ...widgetConfig(kind, country, range, view),
+    ...(kind === "chart" && symbol ? { symbol } : {}),
+  };
   // Direct third-party frames keep the provider on its own origin, rather than
   // executing provider scripts in a page that can read planner local storage.
   const names = {
@@ -54,8 +61,14 @@ export function MarketsPage() {
   const [range, setRange] = useState("12M");
   const [view, setView] = useState("overview");
   const [revision, setRevision] = useState(0);
+  const [symbol, setSymbol] = useState("NASDAQ:AAPL");
+  const [search, setSearch] = useState("NASDAQ:AAPL");
   const country = countryByCode(code);
   const embedded = hasEmbeddedMarket(country);
+  const selectSymbol = (value: string) => {
+    setSymbol(value);
+    setSearch(value);
+  };
   return (
     <main className="planner-page markets-page">
       <PlannerNavigation />
@@ -90,6 +103,7 @@ export function MarketsPage() {
             onChange={(event) => {
               setCode(event.target.value);
               setView("overview");
+              selectSymbol(countryByCode(event.target.value).stock);
             }}
           >
             {[...new Set(marketCountries.map((item) => item.region))].map(
@@ -236,32 +250,99 @@ export function MarketsPage() {
               </div>
             </div>
             <p className="market-help">
-              Use the symbol search inside the chart to explore a stock or
-              index. Starts with {country.stock}; prices use the symbol’s
-              trading currency.
+              Enter an exchange and ticker for a chart here, or a company name
+              to search on TradingView. Prices use the listing’s trading
+              currency.
             </p>
-            <div
-              className="market-periods"
-              role="group"
-              aria-label="Chart time range"
+            <form
+              className="market-symbol-search"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const value = search.trim().toUpperCase();
+                if (value) selectSymbol(value);
+              }}
             >
-              {marketPeriods.map((period) => (
-                <button
-                  key={period.range}
-                  type="button"
-                  aria-pressed={range === period.range}
-                  onClick={() => setRange(period.range)}
+              <label htmlFor="market-symbol">Stock or index</label>
+              <div>
+                <input
+                  id="market-symbol"
+                  value={search}
+                  maxLength={100}
+                  required
+                  placeholder="e.g. NASDAQ:AAPL or NSE:INFY"
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+                <button type="submit">Find stock</button>
+              </div>
+            </form>
+            {code === "in" && (
+              <p className="market-help">
+                BSE chart examples: Infosys · BSE:500209; Reliance · BSE:500325.
+                NSE listings open on TradingView.
+              </p>
+            )}
+            {needsExternalChart(symbol) ? (
+              <div
+                className="market-country-fallback market-chart-fallback"
+                role="status"
+              >
+                <h3>
+                  {symbol.includes(":")
+                    ? "This listing opens on TradingView."
+                    : "Search for this company on TradingView."}
+                </h3>
+                <p>
+                  {symbol.includes(":")
+                    ? "TradingView does not license this exchange’s charts for embedding. The listing may still be viewed on its own website."
+                    : "A company name can match several exchanges. Choose the exact listing on TradingView, or enter an exchange and ticker above."}
+                </p>
+                <a
+                  href={stockChartUrl(symbol)}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {period.label}
-                </button>
-              ))}
-            </div>
-            <MarketWidget kind="chart" country={country} range={range} />
-            <p className="market-help">
-              One week shows five trading days. Changing the country or time
-              range resets the chart to the starting stock. Newer listings may
-              have less than five years of history.
-            </p>
+                  Open {symbol} on TradingView ↗
+                </a>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="market-periods"
+                  role="group"
+                  aria-label="Chart time range"
+                >
+                  {marketPeriods.map((period) => (
+                    <button
+                      key={period.range}
+                      type="button"
+                      aria-pressed={range === period.range}
+                      onClick={() => setRange(period.range)}
+                    >
+                      {period.label}
+                    </button>
+                  ))}
+                </div>
+                <MarketWidget
+                  kind="chart"
+                  country={country}
+                  range={range}
+                  symbol={symbol}
+                />
+                <p className="market-help">
+                  Viewing {symbol}. One week shows five trading days. Newer
+                  listings may have less than five years of history. If this
+                  listing is unavailable here,{" "}
+                  <a
+                    href={stockChartUrl(symbol)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    open the same stock on TradingView ↗
+                  </a>
+                  .
+                </p>
+              </>
+            )}
           </section>
         </div>
       )}

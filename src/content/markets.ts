@@ -394,6 +394,16 @@ export function countryByCode(code: string): MarketCountry {
     marketCountries[0]
   );
 }
+// These exchanges are excluded from public widgets. Unqualified searches open
+// on the provider, where its search can resolve the company without guessing.
+export function needsExternalChart(symbol: string) {
+  return (
+    !symbol.includes(":") || /^(NSE|LSE|DFM|SZSE|HOSE|TADAWUL):/.test(symbol)
+  );
+}
+export function stockChartUrl(symbol: string) {
+  return `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(symbol)}`;
+}
 export function widgetConfig(
   kind: "indices" | "stocks" | "chart",
   country: MarketCountry,
@@ -444,7 +454,7 @@ export function widgetConfig(
     theme: "light",
     style: "3",
     locale: "en",
-    allow_symbol_change: true,
+    allow_symbol_change: false,
     hide_side_toolbar: true,
     withdateranges: true,
     save_image: false,
