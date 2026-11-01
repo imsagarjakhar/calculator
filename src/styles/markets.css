@@ -123,6 +123,38 @@ html:has(.markets-page) {
   line-height: 1.8;
   margin: 14px 0;
 }
+.indian-market-help {
+  margin: 14px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #d0ddd4;
+  border-radius: 10px;
+  background: #f4f8f0;
+  font-size: 0.82rem;
+  color: #38574a;
+}
+.indian-market-help summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.indian-market-help p {
+  line-height: 1.65;
+  margin: 10px 0;
+}
+.indian-market-help > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.indian-market-help button {
+  min-height: 44px;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+}
+.indian-market-help a {
+  color: #176c50;
+  text-decoration: underline;
+}
 .market-index-link {
   display: inline-block;
   margin-left: 12px;

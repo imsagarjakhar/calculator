@@ -1,5 +1,6 @@
 import { MarketWidget } from "../components/MarketWidget";
 import { MarketWorkspace } from "../components/MarketWorkspace";
+import { IndianMarketHelp } from "../components/IndianMarketHelp";
 import { VlogProvider } from "../components/Vlogs";
 import { useState } from "react";
 import { PlannerNavigation } from "../components/PlannerNavigation";
@@ -25,10 +26,12 @@ function MarketsContent() {
   const [view, setView] = useState("overview");
   const [revision, setRevision] = useState(0);
   const [symbol, setSymbol] = useState("NASDAQ:AAPL");
+  const [chartRevision, setChartRevision] = useState(0);
   const country = countryByCode(code);
   const embedded = hasEmbeddedMarket(country);
   const selectSymbol = (value: string) => {
     setSymbol(value);
+    setChartRevision((value) => value + 1);
   };
   return (
     <main className="planner-page markets-page">
@@ -38,6 +41,7 @@ function MarketsContent() {
         close={() => setWorkspaceOpen(false)}
         country={country}
         symbol={symbol}
+        chartRevision={chartRevision}
         selectSymbol={selectSymbol}
       />
       <header className="markets-hero">
@@ -228,12 +232,10 @@ function MarketsContent() {
               Click the stock name or symbol at the top of the chart to search.
               Choose time ranges inside the chart.
             </p>
-            {code === "in" && (
-              <p className="market-help">
-                Search BSE:INFY for Infosys or BSE:RELIANCE for Reliance. BSE
-                uses end-of-day data. NSE listings open on TradingView.
-              </p>
-            )}
+            <IndianMarketHelp
+              selectSymbol={selectSymbol}
+              expanded={code === "in"}
+            />
             {needsExternalChart(symbol) ? (
               <div
                 className="market-country-fallback market-chart-fallback"
@@ -259,7 +261,12 @@ function MarketsContent() {
               </div>
             ) : (
               <>
-                <MarketWidget kind="chart" country={country} symbol={symbol} />
+                <MarketWidget
+                  key={chartRevision}
+                  kind="chart"
+                  country={country}
+                  symbol={symbol}
+                />
                 <p className="market-help">
                   Prices use the listing’s trading currency. Some exchanges
                   restrict embedded charts; use the TradingView link in its

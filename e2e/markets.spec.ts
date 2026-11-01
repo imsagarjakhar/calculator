@@ -1,5 +1,59 @@
 import { test, expect } from "./test";
 const base = process.env.VITE_BASE_PATH || "/";
+test("BSE recovery reloads the chart even after native search changed an already-selected stock", async ({
+  page,
+}) => {
+  await page.route("https://www.tradingview-widget.com/**", (route) =>
+    route.fulfill({
+      body: "<!doctype html><body>Provider frame</body>",
+      contentType: "text/html",
+    }),
+  );
+  await page.goto(base + "markets/");
+  await page.getByLabel("Market country", { exact: true }).selectOption("in");
+  await page
+    .getByRole("button", { name: "Open Infosys on BSE", exact: true })
+    .click();
+  const chart = page.locator(".market-embed-chart iframe");
+  const config = JSON.parse(
+    decodeURIComponent(
+      new URL((await chart.getAttribute("src"))!).hash.slice(1),
+    ),
+  );
+  expect(config.symbol).toBe("BSE:INFY");
+  await chart.evaluate((node) =>
+    node.setAttribute("data-previous-chart", "restricted"),
+  );
+  await page
+    .frameLocator(".market-embed-chart iframe")
+    .locator("body")
+    .evaluate(
+      (node) =>
+        (node.textContent = "This symbol is only available on TradingView"),
+    );
+  await page
+    .getByRole("button", { name: "Open Infosys on BSE", exact: true })
+    .click();
+  await expect(chart).not.toHaveAttribute("data-previous-chart", "restricted");
+  await expect(
+    page.frameLocator(".market-embed-chart iframe").locator("body"),
+  ).toContainText("Provider frame");
+  await page.getByRole("button", { name: "Open chart workspace" }).click();
+  const desk = page.getByRole("dialog", { name: "Your market desk." });
+  await desk
+    .locator("iframe")
+    .evaluate((node) => node.setAttribute("data-previous-chart", "restricted"));
+  await desk
+    .getByRole("button", { name: "Open Infosys on BSE", exact: true })
+    .click();
+  await expect(desk.locator("iframe")).not.toHaveAttribute(
+    "data-previous-chart",
+    "restricted",
+  );
+  expect(
+    await desk.evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
+  ).toBe(true);
+});
 test("charts use native symbol search without separate search fields", async ({
   page,
 }) => {

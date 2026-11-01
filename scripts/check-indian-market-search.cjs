@@ -82,6 +82,19 @@ const { join } = require("node:path");
         path: join(tmpdir(), `indian-market-${symbol.replace(":", "-")}.png`),
       });
     }
+    await page
+      .getByRole("button", { name: "Open Infosys on BSE", exact: true })
+      .click();
+    await expect(region).toContainText("Infosys Limited", { timeout: 20000 });
+    await expect(region).toContainText(/\d[\d,]*\.\d{2}/, { timeout: 20000 });
+    await expect(
+      chart.getByText("This symbol is only available on TradingView.", {
+        exact: false,
+      }),
+    ).toHaveCount(0);
+    console.log(
+      "RECOVERY: BSE Infosys button clears the NSE notice and loads daily prices",
+    );
   } finally {
     await browser.close();
   }

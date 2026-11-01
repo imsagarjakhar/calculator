@@ -6,6 +6,7 @@ import {
 } from "../content/markets";
 import { MarketWidget } from "./MarketWidget";
 import { MarketWatchlists } from "./MarketWatchlists";
+import { IndianMarketHelp } from "./IndianMarketHelp";
 
 export function MarketWorkspace({
   open,
@@ -13,12 +14,14 @@ export function MarketWorkspace({
   country,
   symbol,
   selectSymbol,
+  chartRevision,
 }: {
   open: boolean;
   close: () => void;
   country: ReturnType<typeof countryByCode>;
   symbol: string;
   selectSymbol: (symbol: string) => void;
+  chartRevision: number;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -69,6 +72,12 @@ export function MarketWorkspace({
             Click the stock name or symbol in the chart to search. Use its time
             controls to change the range.
           </p>
+          {open && (
+            <IndianMarketHelp
+              selectSymbol={selectSymbol}
+              expanded={country.code === "in"}
+            />
+          )}
           {open &&
             (needsExternalChart(symbol) ? (
               <div className="market-country-fallback market-chart-fallback">
@@ -87,7 +96,12 @@ export function MarketWorkspace({
                 </a>
               </div>
             ) : (
-              <MarketWidget country={country} kind="chart" symbol={symbol} />
+              <MarketWidget
+                key={chartRevision}
+                country={country}
+                kind="chart"
+                symbol={symbol}
+              />
             ))}
           {!needsExternalChart(symbol) && (
             <p className="market-help">
