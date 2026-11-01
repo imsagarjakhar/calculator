@@ -1,4 +1,5 @@
 import { countryByCode, widgetConfig } from "../content/markets";
+import { canonicalStockSymbol } from "../markets/symbols";
 export function MarketWidget({
   kind,
   country,
@@ -14,7 +15,9 @@ export function MarketWidget({
 }) {
   const config = {
     ...widgetConfig(kind, country, range, view),
-    ...(kind === "chart" && symbol ? { symbol } : {}),
+    ...(kind === "chart" && symbol
+      ? { symbol: canonicalStockSymbol(symbol) }
+      : {}),
   };
   // Direct third-party frames keep the provider on its own origin, rather than
   // executing provider scripts in a page that can read planner local storage.

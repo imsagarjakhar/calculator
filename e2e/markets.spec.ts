@@ -18,7 +18,8 @@ test("charts use native symbol search without separate search fields", async ({
   const config = JSON.parse(decodeURIComponent(new URL(src!).hash.slice(1)));
   expect(config.allow_symbol_change).toBe(true);
   expect(config.withdateranges).toBe(true);
-  expect(config.range).toBe("1D");
+  expect(config.range).toBeUndefined();
+  expect(config.interval).toBe("D");
   // Updating the table must preserve the chart frame and any native selections.
   await chart.evaluate((node) =>
     node.setAttribute("data-chart-instance", "preserved"),
@@ -68,7 +69,7 @@ test("market country, performance and chart ranges configure isolated widgets", 
   expect((await config("indices")).symbols[0][1]).toContain("BSE:SENSEX");
   await page.getByRole("button", { name: "Performance", exact: true }).click();
   expect((await config("stocks")).defaultColumn).toBe("performance");
-  expect((await config("chart")).range).toBe("1D");
+  expect((await config("chart")).interval).toBe("D");
   expect((await config("chart")).allow_symbol_change).toBe(true);
   await country.selectOption("sa");
   await expect(page.locator(".market-country-fallback")).toContainText(

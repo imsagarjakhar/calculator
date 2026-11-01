@@ -1,12 +1,13 @@
+import { canonicalStockSymbol } from "./symbols.ts";
 export type Watchlist = { id: string; name: string; symbols: string[] };
 export type Watchlists = { version: 1; lists: Watchlist[] };
 export type SavedWatchlists = Watchlists & { revision: string | null };
 export const emptyWatchlists = (): Watchlists => ({ version: 1, lists: [] });
 export function normaliseSymbol(value: string) {
-  const symbol = value.trim().toUpperCase();
+  const symbol = canonicalStockSymbol(value);
   if (!/^[A-Z0-9_]{1,25}:[A-Z0-9_.!/-]{1,40}$/.test(symbol))
     throw new Error(
-      "Enter an exchange and ticker, such as NASDAQ:AAPL or BSE:500209.",
+      "Enter an exchange and ticker, such as NASDAQ:AAPL or BSE:INFY.",
     );
   return symbol;
 }
@@ -38,13 +39,21 @@ export function parseWatchlists(value: unknown): Watchlists {
         "Each watchlist needs a name (up to 60 characters) and at most 50 symbols.",
       );
     ids.add(item.id);
-    const symbols = item.symbols.map((symbol: unknown) => {
+    const symbols: string[] = item.symbols.map((symbol: unknown) => {
       if (typeof symbol !== "string") throw new Error("Invalid stock symbol.");
       return normaliseSymbol(symbol);
     });
-    if (new Set(symbols).size !== symbols.length)
+    if (
+      new Set(item.symbols.map((symbol: string) => symbol.trim().toUpperCase()))
+        .size !== symbols.length
+    )
       throw new Error("This stock is already in the watchlist.");
-    return { id: item.id, name: item.name.trim(), symbols };
+    // Old lists may contain both a scrip code and its equivalent trading ticker.
+    return {
+      id: item.id,
+      name: item.name.trim(),
+      symbols: [...new Set(symbols)],
+    };
   });
   return { version: 1, lists };
 }

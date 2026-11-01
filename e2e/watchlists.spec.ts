@@ -16,7 +16,8 @@ test("workspace opens with one-day chart, drawing tools and a usable close actio
   await expect(desk).toBeVisible();
   const src = await desk.locator("iframe").getAttribute("src");
   const config = JSON.parse(decodeURIComponent(new URL(src!).hash.slice(1)));
-  expect(config.range).toBe("1D");
+  expect(config.range).toBeUndefined();
+  expect(config.interval).toBe("D");
   expect(config.hide_side_toolbar).toBe(false);
   expect(config.allow_symbol_change).toBe(true);
   await expect(
@@ -112,12 +113,12 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await desk.getByRole("button", { name: "Create", exact: true }).click();
   await desk.getByLabel("Add a stock · exchange:ticker").fill("BSE:500209");
   await desk.getByRole("button", { name: "Add", exact: true }).click();
-  await desk.getByRole("button", { name: "500209 BSE", exact: true }).click();
+  await desk.getByRole("button", { name: "INFY BSE", exact: true }).click();
   const selectedChart = await desk.locator("iframe").getAttribute("src");
   expect(
     JSON.parse(decodeURIComponent(new URL(selectedChart!).hash.slice(1)))
       .symbol,
-  ).toBe("BSE:500209");
+  ).toBe("BSE:INFY");
   await desk
     .getByRole("button", { name: "Save watchlists", exact: true })
     .click();
@@ -139,7 +140,7 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
     .getByLabel("Choose a watchlist")
     .selectOption({ label: "India ideas (1)" });
   await expect(
-    desk.getByRole("button", { name: "500209 BSE", exact: true }),
+    desk.getByRole("button", { name: "INFY BSE", exact: true }),
   ).toBeVisible();
   conflict = true;
   await desk.getByLabel("Add a stock · exchange:ticker").fill("NSE:INFY");

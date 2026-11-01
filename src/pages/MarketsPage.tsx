@@ -230,8 +230,8 @@ function MarketsContent() {
             </p>
             {code === "in" && (
               <p className="market-help">
-                BSE chart examples: Infosys · BSE:500209; Reliance · BSE:500325.
-                NSE listings open on TradingView.
+                Search BSE:INFY for Infosys or BSE:RELIANCE for Reliance. BSE
+                uses end-of-day data. NSE listings open on TradingView.
               </p>
             )}
             {needsExternalChart(symbol) ? (

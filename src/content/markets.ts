@@ -170,7 +170,7 @@ export const marketCountries = [
     region: "Asia Pacific",
     indices: [["Sensex", "BSE:SENSEX"]],
     externalIndices: [["Nifty 50", "NSE-NIFTY"]],
-    stock: "BSE:500325",
+    stock: "BSE:RELIANCE",
   },
   {
     code: "jp",
@@ -439,7 +439,7 @@ export function widgetConfig(
       chartType: "area",
       dateRange: "1D",
       dateRanges:
-        country.code === "us"
+        country.code === "us" || country.code === "in"
           ? ["1d|1D", "1w|1D", "1m|1D", "12m|1D", "60m|1W"]
           : ["1d|1", "1w|15", "1m|1D", "12m|1D", "60m|1W"],
       lineWidth: 2,
@@ -450,8 +450,11 @@ export function widgetConfig(
   return {
     autosize: true,
     symbol: country.stock,
-    interval: chartRange === "1D" ? "5" : chartRange === "5D" ? "30" : "D",
-    range: chartRange,
+    // Daily candles also work when native search switches to EOD-only BSE data.
+    interval: "D",
+    // A 1D *window* makes TradingView force minute bars, even with interval D.
+    // Default to 1-day candles instead so EOD-only exchanges have prices.
+    ...(chartRange === "1D" ? {} : { range: chartRange }),
     timezone: "Etc/UTC",
     theme: "light",
     style: "1",
