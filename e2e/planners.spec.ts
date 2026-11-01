@@ -90,7 +90,7 @@ test("clean routes support navigation, reloads, browser history and old bookmark
     path: info.outputPath("landing.png"),
     fullPage: false,
   });
-  await page.getByRole("link", { name: "Explore my future" }).click();
+  await page.locator(".growth-choice").click();
   expect(new URL(page.url()).pathname).toBe(appPath("/growth/"));
   await page.reload();
   await expect(page.locator("h1:visible")).toContainText("From your salary");
@@ -302,7 +302,7 @@ test("search metadata follows client navigation and browser history", async ({
 }) => {
   await page.goto(appPath("/"));
   const homeTitle = await page.title();
-  await page.getByRole("link", { name: "Explore my future" }).click();
+  await page.locator(".growth-choice").click();
   await expect(page).toHaveTitle(/SIP Calculator with Step-Up/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",

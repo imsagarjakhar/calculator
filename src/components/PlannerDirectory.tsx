@@ -10,6 +10,22 @@ type Tool = {
 };
 const tools: Tool[] = [
   {
+    route: "learn",
+    style: "learn",
+    title: "Understand money. One idea at a time.",
+    copy: "Try visual lessons and plain-language explanations of SIP, SWP, interest and inflation.",
+    action: "Learn finance",
+    icon: "M3 4h7l2 2 2-2h7v16h-7l-2 2-2-2H3V4Zm9 2v16M6 8h2m-2 4h2m8-4h2m-2 4h2",
+  },
+  {
+    route: "guides",
+    style: "guides",
+    title: "See the numbers worked through.",
+    copy: "Follow five original examples, from monthly bills to investing, debt and retirement.",
+    action: "Explore worked examples",
+    icon: "M6 3h12v18H6V3Zm3 4h6M9 11h2m3 0h1m-6 4h2m3 0h1",
+  },
+  {
     route: "salary-budget",
     style: "salary",
     title: "Give your salary a plan.",
@@ -38,7 +54,7 @@ const tools: Tool[] = [
     style: "survival",
     title: "Retirement withdrawals",
     copy: "Explore how long your savings could support your spending.",
-    action: "Explore corpus survival",
+    action: "See how long savings could last",
     icon: "M8 3h8M8 21h8M7 3v4l10 10v4M17 3v4L7 17v4M9 18h6",
   },
   {
@@ -124,83 +140,103 @@ function Arrow() {
     </svg>
   );
 }
-function BudgetPreview() {
+function ToolCard({
+  tool,
+  featured = false,
+}: {
+  tool: Tool;
+  featured?: boolean;
+}) {
   return (
-    <span className="tool-budget-preview" aria-hidden="true">
-      <span>One salary. A little more clarity.</span>
-      <span className="tool-budget-track">
-        <i />
-        <i />
-        <i />
+    <a
+      href={tool.route === "blog" ? "#vlogs" : plannerHref(tool.route)}
+      data-screen={
+        tool.route === "growth" || tool.route === "survival"
+          ? tool.route
+          : undefined
+      }
+      className={`choice ${tool.style}-choice tool-card${featured ? " tool-feature" : ""}`}
+    >
+      <span className="tool-card-heading">
+        <ToolIcon path={tool.icon} />
+        <strong>{tool.title}</strong>
       </span>
-      <span className="tool-preview-key">
-        <span>
-          <i /> Living
+      <span className="choice-copy">{tool.copy}</span>
+      {tool.route === "learn" && (
+        <span className="tool-learning-preview" aria-hidden="true">
+          <span>SIP</span>
+          <span>SWP</span>
+          <span>EMI</span>
+          <span>Return</span>
         </span>
-        <span>
-          <i /> Goals
+      )}
+      {tool.route === "guides" && (
+        <span
+          className="tool-learning-preview tool-guide-preview"
+          aria-hidden="true"
+        >
+          <span>A real question</span>
+          <span>→</span>
+          <span>A worked example</span>
         </span>
-        <span>
-          <i /> Room to grow
+      )}
+      <span className="choice-link">
+        {tool.action}
+        <span className="tool-open-arrow">
+          <Arrow />
         </span>
       </span>
-    </span>
+    </a>
   );
 }
-function LoanPreview() {
+const discoveryRoutes = [
+  "learn",
+  "guides",
+  "markets",
+  "currency-converter",
+  "blog",
+] as const;
+export function ExploreDirectory() {
   return (
-    <span className="tool-loan-preview" aria-hidden="true">
-      <span>Your extra money</span>
-      <span className="tool-loan-paths">
-        <span>
-          Pay loans faster
-          <Arrow />
-        </span>
-        <span>
-          Invest instead
-          <Arrow />
-        </span>
-      </span>
-    </span>
+    <section
+      className="tool-directory discovery-directory"
+      aria-labelledby="exploreDirectoryTitle"
+      id="explore"
+    >
+      <div className="planner-directory-heading">
+        <h2 id="exploreDirectoryTitle">Learn something. Use it today.</h2>
+        <p>Clear explanations, worked examples and useful everyday tools.</p>
+      </div>
+      <div className="planner-choices tool-directory-grid">
+        {discoveryRoutes.map((route) => {
+          const tool = tools.find((item) => item.route === route)!;
+          return (
+            <ToolCard
+              key={route}
+              tool={tool}
+              featured={route === "learn" || route === "guides"}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }
 export function PlannerDirectory() {
   return (
     <section className="tool-directory" aria-labelledby="toolDirectoryTitle">
       <div className="planner-directory-heading" id="planners">
-        <h2 id="toolDirectoryTitle">A tool for every chapter.</h2>
-        <p>Start with today. Make room for tomorrow.</p>
+        <h2 id="toolDirectoryTitle">Put your own numbers to work.</h2>
+        <p>Choose a planner for your next decision.</p>
       </div>
-      <div className="planner-choices has-custom has-freedom tool-directory-grid">
-        {tools.map((tool, index) => (
-          <a
-            key={tool.route}
-            href={tool.route === "blog" ? "#vlogs" : plannerHref(tool.route)}
-            data-screen={
-              tool.route === "growth" || tool.route === "survival"
-                ? tool.route
-                : undefined
-            }
-            className={`choice ${tool.style}-choice tool-card${index < 2 ? " tool-feature" : ""}`}
-          >
-            <span className="tool-card-heading">
-              <ToolIcon path={tool.icon} />
-              <strong>{tool.title}</strong>
-            </span>
-            <span className="choice-copy">{tool.copy}</span>
-            {index === 0 ? (
-              <BudgetPreview />
-            ) : index === 1 ? (
-              <LoanPreview />
-            ) : null}
-            <span className="choice-link">
-              {tool.action}
-              <span className="tool-open-arrow">
-                <Arrow />
-              </span>
-            </span>
-          </a>
-        ))}
+      <div className="planner-choices has-custom has-freedom tool-directory-grid tool-planners-grid">
+        {tools
+          .filter(
+            (tool) => !discoveryRoutes.some((route) => route === tool.route),
+          )
+          .map((tool) => (
+            <ToolCard key={tool.route} tool={tool} />
+          ))}
       </div>
     </section>
   );

@@ -761,7 +761,7 @@ svg [stroke="#56b8f5"] {
   margin-top: 36px;
 }
 
-/* A visual tool shelf: two everyday decisions, followed by focused planners. */
+/* Lead with learning and everyday resources; keep personal planners below. */
 .tool-directory .planner-choices.tool-directory-grid {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 18px;
@@ -792,6 +792,45 @@ svg [stroke="#56b8f5"] {
   background: #f2eee4;
   border-color: #ded6c3;
   color: #69552c;
+}
+.planner-choices.tool-directory-grid .guides-choice.tool-feature {
+  background: #f2eee4;
+  border-color: #ded6c3;
+}
+.discovery-directory .planner-choices.tool-directory-grid .tool-feature {
+  min-height: 245px;
+}
+.tool-learning-preview {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  color: #385e43;
+  font-size: 12px;
+}
+.tool-learning-preview > span {
+  border: 1px solid #c7d8bf;
+  border-radius: 6px;
+  background: #f7faf3;
+  padding: 7px 11px;
+}
+.tool-guide-preview > span {
+  border-color: #ded6c3;
+  background: #faf8f2;
+  color: #69552c;
+}
+.tool-guide-preview > span:nth-child(2) {
+  border: 0;
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+.tool-directory + .tool-directory {
+  margin-top: 42px;
+}
+.planner-choices.tool-directory-grid.tool-planners-grid .retirement-choice.choice {
+  grid-column: 1 / -1;
+  min-height: 155px;
 }
 .tool-card-heading {
   display: flex;
@@ -1169,6 +1208,12 @@ svg [stroke="#2a4550"] {
   align-items: center;
   padding: 8px 0;
   font-size: 13px;
+}
+@media (min-width: 1371px) {
+  .welcome-topbar.home-header { gap: 12px; }
+  .home-header .home-wordmark { font-size: 24px; gap: 8px; }
+  .home-header .home-nav { gap: 14px; margin-right: 0; }
+  .home-header .home-nav a { font-size: 12px; }
 }
 .home-header .home-currency {
   flex: 0 0 125px;

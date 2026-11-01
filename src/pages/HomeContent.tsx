@@ -1,7 +1,9 @@
 import { SiteSearch } from "../components/SiteSearch";
-import { PlannerDirectory } from "../components/PlannerDirectory";
+import {
+  ExploreDirectory,
+  PlannerDirectory,
+} from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
-import { WorkedGuidesPreview } from "../components/WorkedExampleLink";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
 import { useEffect, useRef, useState } from "react";
@@ -151,17 +153,13 @@ export function HomeContent({ active = true }: { active?: boolean }) {
               <br />
               <em>A clearer future.</em>
             </h1>
-            <p>Plan your budget, investments and life after work.</p>
+            <p>Understand money. Explore the markets. Plan your next step.</p>
             <div className="welcome-actions">
-              <a
-                href={plannerHref("growth")}
-                className="primary"
-                data-screen="growth"
-              >
-                Explore my future <span aria-hidden="true">→</span>
+              <a href={plannerHref("guides")} className="primary">
+                Start with an example <span aria-hidden="true">→</span>
               </a>
-              <a href="#planners">
-                Find your planner <span aria-hidden="true">↓</span>
+              <a href="#explore">
+                Explore the tools <span aria-hidden="true">↓</span>
               </a>
             </div>
             <p className="welcome-privacy">
@@ -175,33 +173,33 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             className="starting-point"
             aria-labelledby="startingPointTitle"
           >
-            <h2 id="startingPointTitle">What’s on your mind?</h2>
-            <a href={plannerHref("salary-budget")}>
+            <h2 id="startingPointTitle">A clearer place to start.</h2>
+            <a href={plannerHref("learn")}>
               <span>
-                Organise my salary
-                <small>Budget &amp; savings</small>
+                Make sense of money
+                <small>SIP, SWP and the words behind your plan</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
-            <a href={plannerHref("loan-payoff")}>
+            <a href={plannerHref("guides")}>
               <span>
-                Pay off my loans
-                <small>Repay debt or invest the extra</small>
+                See an example
+                <small>Follow the question, numbers and result</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
-            <a href={plannerHref("freedom")}>
+            <a href={plannerHref("markets")}>
               <span>
-                Plan my freedom
-                <small>When could I stop working?</small>
+                Explore global markets
+                <small>Prices, performance and historical charts</small>
               </span>
               <span aria-hidden="true">→</span>
             </a>
           </aside>
         </div>
+        <ExploreDirectory />
         <PlannerDirectory />
         <FinancialPlanningGuide />
-        <WorkedGuidesPreview />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
           <h2 id="planningQuestions">Questions, answered.</h2>
           <details>

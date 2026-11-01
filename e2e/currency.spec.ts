@@ -12,7 +12,7 @@ test("home currency follows every planner and all authored examples", async ({
   await expect(page.locator(".planning-steps")).toContainText("$100,000");
   await expect(page.locator(".planning-guide")).not.toContainText("₹");
   // SPA navigation must update already-mounted uncontrolled planner controllers.
-  await page.getByRole("link", { name: /Explore my future/ }).click();
+  await page.locator(".growth-choice").click();
   await expect(
     page.locator("#growthScreen .planner-currency select"),
   ).toHaveValue("USD");
@@ -67,7 +67,7 @@ test("currency choice still works when browser storage is unavailable", async ({
   await page.goto(base);
   await page.getByLabel("Your currency", { exact: true }).selectOption("EUR");
   await expect(page.locator(".planning-example")).toContainText("€50,000");
-  await page.getByRole("link", { name: /Explore my future/ }).click();
+  await page.locator(".growth-choice").click();
   await expect(
     page.locator("#growthScreen .planner-currency select"),
   ).toHaveValue("EUR");

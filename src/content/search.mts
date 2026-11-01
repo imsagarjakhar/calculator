@@ -61,9 +61,9 @@ export const searchPages = {
     name: "Monthly Salary & Budget Planner",
   },
   home: {
-    title: "Financial Planning Calculators | Financial AI Planner",
+    title: "Finance Guides & Financial Planning Tools | Financial AI Planner",
     description:
-      "Financial planning calculators for budgets, SIP investing, loan repayment and retirement. Choose your currency and explore your plan privately in your browser.",
+      "Learn finance with worked examples, explore exchange rates and market data, and use private calculators for budgeting, investing and retirement planning.",
     name: "Financial AI Planner",
   },
   growth: {
