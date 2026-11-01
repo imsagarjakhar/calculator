@@ -201,6 +201,245 @@ html:has(.markets-page) {
 .market-embed-chart {
   height: 520px;
 }
+.market-workspace-launch {
+  margin-top: 16px;
+}
+.market-workspace {
+  width: calc(100vw - 32px);
+  max-width: 1800px;
+  height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid #c3d3ca;
+  border-radius: 18px;
+  background: #f8faf7;
+  color: #203b32;
+  overflow: auto;
+  box-shadow: 0 24px 90px #102f3240;
+}
+.market-workspace::backdrop {
+  background: #112b25b3;
+}
+.market-workspace-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 26px;
+  border-bottom: 1px solid #d0ddd4;
+  background: #fff;
+}
+.market-workspace-heading h2 {
+  font:
+    550 2rem/1.1 Newsreader,
+    Georgia,
+    serif;
+  margin: 0;
+}
+.market-workspace-heading .markets-kicker {
+  margin-bottom: 6px;
+}
+.market-workspace-heading button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.market-workspace-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  min-height: calc(100% - 105px);
+}
+@media (min-width: 851px) {
+  .market-workspace-body {
+    height: calc(100% - 104px);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .market-workspace-chart,
+  .market-watchlists {
+    overflow-y: auto;
+  }
+}
+.market-workspace-chart {
+  padding: 24px;
+  min-width: 0;
+}
+.market-workspace .market-embed-chart {
+  height: max(360px, calc(100dvh - 360px));
+}
+.market-workspace .market-symbol-search {
+  margin-top: 0;
+}
+.market-watchlists {
+  padding: 24px 20px;
+  border-left: 1px solid #d0ddd4;
+  background: #fff;
+  min-width: 0;
+}
+.watchlists-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.watchlists-heading h3 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+.watchlists-count {
+  background: #edf4e9;
+  color: #285d47;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+.watchlists-login p {
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.watchlists-login button {
+  width: 100%;
+}
+.watchlists-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.market-watchlists button {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}
+.market-watchlists label {
+  font-size: 0.78rem;
+  display: block;
+  margin: 14px 0 8px;
+}
+.market-watchlists input,
+.market-watchlists select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #cedbd2;
+  border-radius: 8px;
+  background: #fff;
+  color: #203b32;
+  padding: 10px;
+  min-height: 44px;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.watchlist-form > div {
+  display: flex;
+  gap: 6px;
+}
+.watchlist-form input {
+  flex: 1;
+}
+.watchlist-select-label select {
+  margin-top: 8px;
+}
+.watchlist-manage {
+  font-size: 0.78rem;
+  padding: 8px 0;
+}
+.watchlist-manage summary {
+  cursor: pointer;
+  color: #176c50;
+}
+.watchlist-manage form button {
+  margin: 8px 0;
+}
+.watchlist-add-current {
+  width: 100%;
+  margin: 12px 0 0;
+  overflow-wrap: anywhere;
+}
+.watchlist-symbols {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+  max-height: 360px;
+  overflow: auto;
+}
+.watchlist-symbols li {
+  display: flex;
+  gap: 4px;
+  margin: 5px 0;
+}
+.watchlist-symbols .watchlist-symbol {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  min-width: 0;
+  background: #f8faf7;
+}
+.watchlist-symbol strong {
+  overflow-wrap: anywhere;
+}
+.watchlist-symbol span {
+  font-size: 0.65rem;
+  color: #496459;
+}
+.watchlist-symbol[aria-pressed="true"] {
+  border-color: #176c50;
+  background: #edf4e9;
+}
+.watchlist-save {
+  display: grid;
+  gap: 8px;
+  padding-top: 15px;
+  margin-top: 18px;
+  border-top: 1px solid #d0ddd4;
+}
+.watchlist-save > span,
+.watchlist-notice {
+  font-size: 0.8rem;
+  color: #176c50;
+}
+.watchlist-save .primary {
+  color: #fff;
+  background: #176c50;
+}
+.market-watchlists .market-help {
+  font-size: 0.73rem;
+}
+@media (max-width: 850px) {
+  .market-workspace {
+    width: calc(100vw - 12px);
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    border-radius: 12px;
+  }
+  .market-workspace-heading {
+    padding: 18px 14px;
+  }
+  .market-workspace-heading h2 {
+    font-size: 1.6rem;
+  }
+  .market-workspace-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .market-watchlists {
+    border-left: 0;
+    border-top: 1px solid #d0ddd4;
+  }
+  .market-workspace-chart {
+    padding: 18px 10px;
+  }
+  .market-workspace .market-embed-chart {
+    height: 510px;
+  }
+}
 .market-embed iframe {
   display: block;
   width: 100%;

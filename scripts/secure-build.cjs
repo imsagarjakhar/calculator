@@ -65,18 +65,23 @@ for (const page of [
     "survival/index.html",
   ].includes(page);
   const blogOrigin = vlogApiOrigin();
-  const connections = hasVlogs
-    ? (blogOrigin
-        ? ["'self'", blogOrigin]
-        : [
-            "'self'",
-            "https://api.github.com",
-            "https://raw.githubusercontent.com",
-          ]
-      ).join(" ")
-    : page === "currency-converter/index.html"
-      ? "https://api.frankfurter.dev"
-      : "'none'";
+  const connections =
+    page === "markets/index.html"
+      ? blogOrigin
+        ? ["'self'", blogOrigin].join(" ")
+        : "'self'"
+      : hasVlogs
+        ? (blogOrigin
+            ? ["'self'", blogOrigin]
+            : [
+                "'self'",
+                "https://api.github.com",
+                "https://raw.githubusercontent.com",
+              ]
+          ).join(" ")
+        : page === "currency-converter/index.html"
+          ? "https://api.frankfurter.dev"
+          : "'none'";
   const policy =
     "default-src 'none'; script-src 'self' " +
     [...new Set(inline)].join(" ") +

@@ -260,11 +260,12 @@ export function TrustPage({ page }: { page: TrustRoute }) {
             <details>
               <summary>What information do website services receive?</summary>
               <p>
-                The Global markets page embeds TradingView market data and charts.
-                TradingView and its data services receive ordinary connection
-                information, such as your IP address and browser details. The
-                widgets run in isolated frames without access to saved planner
-                values. TradingView’s own privacy policy applies to its content.
+                The Global markets page embeds TradingView market data and
+                charts. TradingView and its data services receive ordinary
+                connection information, such as your IP address and browser
+                details. The widgets run in isolated frames without access to
+                saved planner values. TradingView’s own privacy policy applies
+                to its content.
               </p>
               <p>
                 The currency converter requests currency codes and their latest
@@ -283,9 +284,15 @@ export function TrustPage({ page }: { page: TrustRoute }) {
               <p>
                 Only the site publisher uses the publishing login. It sends
                 authentication details to the publishing API to manage public
-                posts. Visitor calculators do not require this login. External
-                links and videos open other providers, whose own privacy
-                policies apply.
+                posts and save market watchlists. Watchlist names and symbols
+                are stored in the same GitHub repository as the blog, and are
+                visible to people with repository access. If the repository is
+                public, they are public too. Deleting a list does not erase its
+                Git history. Watchlists contain no calculator entries; avoid
+                personal details in their names. Chart drawings are not saved by
+                this site. Visitor calculators do not require this login.
+                External links and videos open other providers, whose own
+                privacy policies apply.
               </p>
             </details>
             <details open>

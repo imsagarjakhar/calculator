@@ -1,64 +1,29 @@
+import { MarketWidget } from "../components/MarketWidget";
+import { MarketWorkspace } from "../components/MarketWorkspace";
+import { VlogProvider } from "../components/Vlogs";
 import { useState } from "react";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import {
   countryByCode,
   marketCountries,
   marketPeriods,
-  widgetConfig,
   hasEmbeddedMarket,
   marketExternalUrl,
   needsExternalChart,
   stockChartUrl,
 } from "../content/markets";
 
-function MarketWidget({
-  kind,
-  country,
-  range,
-  view,
-  symbol,
-}: {
-  kind: "indices" | "stocks" | "chart";
-  country: ReturnType<typeof countryByCode>;
-  range?: string;
-  view?: string;
-  symbol?: string;
-}) {
-  const config = {
-    ...widgetConfig(kind, country, range, view),
-    ...(kind === "chart" && symbol ? { symbol } : {}),
-  };
-  // Direct third-party frames keep the provider on its own origin, rather than
-  // executing provider scripts in a page that can read planner local storage.
-  const names = {
-    indices: "symbol-overview",
-    stocks: "screener",
-    chart: "advanced-chart",
-  };
-  const source = `https://www.tradingview-widget.com/embed-widget/${names[kind]}/?locale=en#${encodeURIComponent(JSON.stringify(config))}`;
+export function MarketsPage() {
   return (
-    <div className={`market-embed market-embed-${kind}`}>
-      <iframe
-        key={source}
-        title={`${country.name} ${kind === "indices" ? "market indices" : kind === "stocks" ? "stock list" : "stock price chart"}`}
-        src={source}
-        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-        referrerPolicy="no-referrer"
-      />
-      <a
-        className="market-attribution"
-        href="https://www.tradingview.com/"
-        target="_blank"
-        rel="noopener nofollow noreferrer"
-      >
-        Market data by TradingView ↗
-      </a>
-    </div>
+    <VlogProvider active={false}>
+      <MarketsContent />
+    </VlogProvider>
   );
 }
-export function MarketsPage() {
+function MarketsContent() {
   const [code, setCode] = useState("us");
-  const [range, setRange] = useState("12M");
+  const [range, setRange] = useState("1D");
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [view, setView] = useState("overview");
   const [revision, setRevision] = useState(0);
   const [symbol, setSymbol] = useState("NASDAQ:AAPL");
@@ -72,6 +37,15 @@ export function MarketsPage() {
   return (
     <main className="planner-page markets-page">
       <PlannerNavigation />
+      <MarketWorkspace
+        open={workspaceOpen}
+        close={() => setWorkspaceOpen(false)}
+        country={country}
+        symbol={symbol}
+        selectSymbol={selectSymbol}
+        range={range}
+        setRange={setRange}
+      />
       <header className="markets-hero">
         <div>
           <p className="markets-kicker">A wider view of your money.</p>
@@ -81,6 +55,13 @@ export function MarketsPage() {
             One place to explore.
           </h1>
           <p>Explore indices, stock prices and the bigger picture over time.</p>
+          <button
+            className="primary market-workspace-launch"
+            type="button"
+            onClick={() => setWorkspaceOpen(true)}
+          >
+            Open chart workspace ↗
+          </button>
         </div>
         <div className="markets-globe" aria-hidden="true">
           <svg viewBox="0 0 180 180">

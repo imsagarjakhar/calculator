@@ -22,7 +22,7 @@ export async function loadFeed(fresh = false) {
   return parseFeed(await request("/public/posts", "GET"));
 }
 
-async function request(
+export async function request(
   path: string,
   method: string,
   session?: EditorSession,
@@ -47,9 +47,11 @@ async function request(
     });
   } catch {
     throw new Error(
-      path.startsWith("/public/")
-        ? "Could not load the blogs. Check your connection and try again."
-        : "Could not reach the publishing service. Your draft is still in this tab; try again.",
+      path === "/watchlists"
+        ? "Could not reach the watchlist service. Your changes are still in this tab; try again."
+        : path.startsWith("/public/")
+          ? "Could not load the blogs. Check your connection and try again."
+          : "Could not reach the publishing service. Your draft is still in this tab; try again.",
     );
   }
   const result = await response.json().catch(() => ({}));

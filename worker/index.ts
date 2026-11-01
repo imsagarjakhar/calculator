@@ -10,6 +10,8 @@ import {
   type VlogSummary,
 } from "../src/vlogs/repository";
 
+import { readWatchlists, writeWatchlists, WatchlistError } from "./watchlists";
+
 export type Env = {
   SITE_ORIGIN: string;
   ADMIN_USERNAME: string;
@@ -250,6 +252,8 @@ export default {
         return respond(await issue(env));
       }
       const session = await authenticate(request, env);
+      if (request.method === "GET" && path === "/watchlists")
+        return respond(await readWatchlists(session));
       const match = path.match(/^\/posts\/([a-f0-9-]{36})$/);
       if (request.method === "GET" && match)
         return respond(
@@ -264,6 +268,10 @@ export default {
           429,
           "Too many updates. Wait a minute before publishing again.",
         );
+      if (request.method === "POST" && path === "/watchlists") {
+        const data = await readJson(request);
+        return respond(await writeWatchlists(session, data, data.revision));
+      }
       if (request.method === "POST" && path === "/posts") {
         const data = await readJson(request);
         if (
@@ -307,7 +315,7 @@ export default {
       }
       return respond({ error: "This endpoint does not exist." }, 404);
     } catch (problem) {
-      if (problem instanceof HttpError)
+      if (problem instanceof HttpError || problem instanceof WatchlistError)
         return respond({ error: problem.message }, problem.status);
       // Repository errors are controlled messages; never serialize requests, headers or secrets.
       return respond(

@@ -16,7 +16,10 @@ test("market catalog has unique countries, symbols and valid widget defaults", (
     assert.match(c.stock, /^[A-Z0-9_]+:[A-Z0-9_]+$/);
     assert.ok(c.indices.length > 0);
     assert.equal(widgetConfig("stocks", c).market, c.market);
-    assert.equal(widgetConfig("chart", c, "invalid").range, "12M");
+    assert.equal(widgetConfig("chart", c, "invalid").range, "1D");
+    assert.equal(widgetConfig("chart", c).range, "1D");
+    assert.equal(widgetConfig("chart", c).hide_side_toolbar, false);
+    assert.equal(widgetConfig("indices", c).dateRange, "1D");
   }
   assert.equal(countryByCode("unknown").code, "us");
   assert.equal(hasEmbeddedMarket(countryByCode("sa")), false);

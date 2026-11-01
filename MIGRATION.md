@@ -287,6 +287,18 @@ Google decides what it indexes and how it ranks results. These changes improve c
 
 References: [Google's JavaScript SEO guidance](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [site-name guidance](https://developers.google.com/search/docs/appearance/site-names), and [Search Console setup](https://developers.google.com/search/docs/monitor-debug/search-console-start).
 
+## Market workspace and saved watchlists
+
+Open **Markets → Open chart workspace** for a larger candlestick chart, the provider's drawing toolbar, and multiple watchlists. Charts open on **1 day**; the US index uses daily FRED observations without intraday prices. Drawings are temporary and reset when the chart reloads. Saved watchlists contain only names and exchange-qualified symbols, never calculator entries, prices or drawings.
+
+This reuses the existing publisher account, not visitor registration. Log in on the markets page with the blog username and password. Sessions stay in memory and expire after 15 minutes; reload requires login again. Create, rename, delete or edit lists, then **Save watchlists**. Closing the workspace preserves edits in the current tab. Reloading saved lists asks before discarding edits.
+
+The Worker provides authenticated `GET /watchlists` and `POST /watchlists`, committing one file under `watchlists/<account-hash>.json` in the same repository and branch as the blog. The server derives the filename from the authenticated account. Limits: 20 lists, 50 unique symbols per list. GitHub's file SHA prevents stale tabs overwriting newer saves. Failed saves retain edits; a lost acknowledgement may require reloading saved lists to confirm the committed state.
+
+Deploy **both the publishing Worker and website**; an older Worker lacks these endpoints. Existing `GH_VLOG_TOKEN`, publisher credentials and `VLOG_API_ORIGIN` are reused. No new secrets are needed. The markets CSP permits the configured API; TradingView stays in isolated frames. Local tests use mocked repository writes. After deployment, verify save/reload with a non-sensitive test list.
+
+Watchlists are repository files. Everyone with repository access can read them; a public repository makes them public. Deleted lists can remain in Git history. Avoid personal details in names. This is not a private user database.
+
 ## Runtime vlogs: one-time setup
 
 The vlog directory uses a mailbox layout: all posts appear in a searchable, scrollable list and the selected article opens in the adjacent reading pane. On mobile, selection opens the reader with an **All vlogs** button back to the list. Refresh preserves the selected post when it still exists; changed or removed posts reload or select the next available entry. Article requests ignore obsolete responses and provide retry on failure. Public author metadata is hidden. Publishing/login remain dialogs; public reading is inline. `VlogMailbox.tsx` and `vlog-mailbox.css` contain this view separately from the publisher controls.

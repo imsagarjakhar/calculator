@@ -407,7 +407,7 @@ export function stockChartUrl(symbol: string) {
 export function widgetConfig(
   kind: "indices" | "stocks" | "chart",
   country: MarketCountry,
-  range = "12M",
+  range = "1D",
   view = "overview",
 ) {
   if (kind === "stocks")
@@ -437,25 +437,27 @@ export function widgetConfig(
       scaleMode: "Normal",
       changeMode: "price-and-percent",
       chartType: "area",
+      dateRange: "1D",
       dateRanges:
         country.code === "us"
-          ? ["12m|1D", "60m|1W", "1m|1D", "1w|1D"]
+          ? ["1d|1D", "1w|1D", "1m|1D", "12m|1D", "60m|1W"]
           : ["1d|1", "1w|15", "1m|1D", "12m|1D", "60m|1W"],
       lineWidth: 2,
     };
+  const chartRange = marketPeriods.some((period) => period.range === range)
+    ? range
+    : "1D";
   return {
     autosize: true,
     symbol: country.stock,
-    interval: "D",
-    range: marketPeriods.some((period) => period.range === range)
-      ? range
-      : "12M",
+    interval: chartRange === "1D" ? "5" : chartRange === "5D" ? "30" : "D",
+    range: chartRange,
     timezone: "Etc/UTC",
     theme: "light",
-    style: "3",
+    style: "1",
     locale: "en",
     allow_symbol_change: false,
-    hide_side_toolbar: true,
+    hide_side_toolbar: false,
     withdateranges: true,
     save_image: false,
     calendar: false,

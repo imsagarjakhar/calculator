@@ -62,6 +62,163 @@ async function login(bindings) {
   return response.json();
 }
 const postId = "11111111-1111-4111-8111-111111111111";
+test("watchlists reuse login, isolate storage and reject stale or invalid saves", async () => {
+  const bindings = env();
+  assert.equal((await call("/watchlists", bindings)).status, 401);
+  assert.equal(
+    (
+      await call(
+        "/watchlists",
+        bindings,
+        undefined,
+        undefined,
+        "GET",
+        "https://other.example",
+      )
+    ).status,
+    403,
+  );
+  const session = await login(bindings);
+  const originalFetch = globalThis.fetch;
+  let stored = null;
+  let sha = null;
+  let writes = 0;
+  let storagePath;
+  globalThis.fetch = async (url, options) => {
+    const parsed = new URL(url);
+    assert.equal(parsed.origin, "https://api.github.com");
+    assert.match(
+      parsed.pathname,
+      /^\/repos\/imsagarjakhar\/vlog\/contents\/watchlists\/[a-f0-9]{64}\.json$/,
+    );
+    storagePath ??= parsed.pathname;
+    assert.equal(parsed.pathname, storagePath);
+    assert.equal(options.headers.Authorization, "Bearer " + githubToken);
+    assert.equal(options.redirect, "manual");
+    assert.equal(Object.hasOwn(options, "credentials"), false);
+    if (options.method === "GET") {
+      assert.equal(parsed.searchParams.get("ref"), "main");
+      return new Response(
+        JSON.stringify(
+          stored
+            ? { type: "file", encoding: "base64", content: stored, sha }
+            : {},
+        ),
+        { status: stored ? 200 : 404 },
+      );
+    }
+    assert.equal(options.method, "PUT");
+    const body = JSON.parse(options.body);
+    assert.equal(body.branch, "main");
+    if ((body.sha ?? null) !== sha) return new Response("{}", { status: 409 });
+    writes++;
+    stored = body.content;
+    sha = String(writes).repeat(40);
+    return new Response(JSON.stringify({ content: { sha } }));
+  };
+  try {
+    let response = await call(
+      "/watchlists",
+      bindings,
+      undefined,
+      session.token,
+    );
+    assert.deepEqual(await response.json(), {
+      version: 1,
+      lists: [],
+      revision: null,
+    });
+    const data = {
+      version: 1,
+      revision: null,
+      username: "another-user",
+      lists: [
+        {
+          id: postId,
+          name: "दीर्घकालीन ideas",
+          symbols: ["nasdaq:aapl", "NSE:INFY"],
+        },
+      ],
+    };
+    response = await call("/watchlists", bindings, data, session.token);
+    assert.equal(response.status, 200);
+    const saved = await response.json();
+    assert.equal(saved.lists[0].name, data.lists[0].name);
+    assert.deepEqual(saved.lists[0].symbols, ["NASDAQ:AAPL", "NSE:INFY"]);
+    assert.equal(JSON.stringify(saved).includes(githubToken), false);
+    assert.equal(JSON.stringify(saved).includes("another-user"), false);
+    response = await call("/watchlists", bindings, undefined, session.token);
+    assert.deepEqual(await response.json(), saved);
+    assert.equal(
+      (await call("/watchlists", bindings, data, session.token)).status,
+      409,
+    );
+    assert.equal(writes, 1);
+    const duplicate = structuredClone(saved);
+    duplicate.lists[0].symbols.push("NASDAQ:AAPL");
+    assert.equal(
+      (await call("/watchlists", bindings, duplicate, session.token)).status,
+      400,
+    );
+    const malicious = structuredClone(saved);
+    malicious.lists[0].symbols = ["<script>alert(1)</script>"];
+    assert.equal(
+      (await call("/watchlists", bindings, malicious, session.token)).status,
+      400,
+    );
+    const limited = {
+      ...bindings,
+      WRITE_LIMITER: { limit: async () => ({ success: false }) },
+    };
+    assert.equal(
+      (await call("/watchlists", limited, saved, session.token)).status,
+      429,
+    );
+    response = await call(
+      "/watchlists",
+      bindings,
+      { ...saved, lists: [] },
+      session.token,
+    );
+    assert.equal(response.status, 200);
+    assert.equal(writes, 2);
+    assert.deepEqual((await response.json()).lists, []);
+    assert.equal((await call("/public/watchlists", bindings)).status, 404);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+test("watchlist storage fails closed for redirects and malformed files", async () => {
+  const bindings = env();
+  const session = await login(bindings);
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () =>
+      new Response("", {
+        status: 302,
+        headers: { Location: "https://other.example" },
+      });
+    assert.equal(
+      (await call("/watchlists", bindings, undefined, session.token)).status,
+      502,
+    );
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          type: "file",
+          encoding: "base64",
+          content: "not base64",
+          sha: "1".repeat(40),
+        }),
+      );
+    assert.equal(
+      (await call("/watchlists", bindings, undefined, session.token)).status,
+      502,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
 const draft = {
   title: "Investing ₹20,000",
   summary: "A practical monthly habit",

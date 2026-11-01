@@ -1,5 +1,7 @@
 # Security and deployment
 
+The market workspace reuses the publisher login for authenticated watchlist reads/writes. The Worker derives a hashed storage filename from the verified account and stores bounded, validated list names and exchange-qualified symbols in the blog repository. Clients cannot choose another account's path. GitHub file SHAs reject stale saves; existing origin checks, session expiry and write limits apply. No repository credential enters the browser. Repository access and Git history govern visibility, so watchlists are not a private user database. Calculator entries and chart drawings are never sent to this endpoint. Deploy the updated Worker as well as the website; see [watchlist setup](MIGRATION.md#market-workspace-and-saved-watchlists).
+
 The calculators run in the browser without a database or calculator account. The homepage also reads public vlogs from `imsagarjakhar/vlog`; publisher login and repository writes use a separate Cloudflare Worker. No GitHub credential is embedded in the React build. Calculator inputs remain in browser storage and exported files and are not sent to the publishing service. Those files and browser data are not encrypted by this app. Someone with access to the browser profile, a privileged extension, or compromised same-origin code can read them. Do not publish real plan/report files in either repository or upload them to hosting.
 
 ## React production build

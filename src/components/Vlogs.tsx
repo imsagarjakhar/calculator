@@ -38,7 +38,7 @@ export type Hub = {
   remove: (post: VlogSummary) => void;
 };
 const VlogContext = createContext<Hub | null>(null);
-function useHub() {
+export function useHub() {
   return useContext(VlogContext)!;
 }
 const blank: VlogDraft = { title: "", summary: "", body: "", videoUrl: "" };
@@ -464,8 +464,9 @@ function LoginModal({
   return (
     <Modal title="Publisher login" close={close} busy={busy}>
       <p className="vlog-helper">
-        For the Financial AI Planner site publisher. Visitors can read every blog
-        without logging in.
+        For the Financial AI Planner site publisher. Use this account to manage
+        blogs and saved market watchlists. Visitors can read every blog without
+        logging in.
       </p>
       {!publisherConfigured ? (
         <p className="vlog-error" role="status">
