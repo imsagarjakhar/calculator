@@ -10,8 +10,9 @@ export function IndianMarketHelp({
     <details className="indian-market-help" open={expanded || undefined}>
       <summary>Indian stock not loading?</summary>
       <p>
-        TradingView’s search can show NSE listings, but NSE charts cannot load
-        here. Choose the BSE listing for an end-of-day chart.
+        In the chart’s stock search, choose <strong>All sources → BSE</strong>,
+        then search any Indian company. This keeps results on BSE instead of
+        restricted NSE listings. BSE charts use end-of-day data.
       </p>
       <div>
         <button type="button" onClick={() => selectSymbol("BSE:INFY")}>

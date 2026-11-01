@@ -107,6 +107,9 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await expect(listName).toBeEnabled();
   await listName.fill("Long-term ideas");
   await desk.getByRole("button", { name: "Create", exact: true }).click();
+  await expect(
+    desk.getByText("Long-term ideas is empty", { exact: true }),
+  ).toBeVisible();
   await desk.getByLabel("Add a stock · exchange:ticker").fill("NASDAQ:AAPL");
   await desk.getByRole("button", { name: "Add", exact: true }).click();
   await listName.fill("India ideas");
@@ -133,6 +136,25 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await page.reload();
   await page.getByRole("button", { name: "Open chart workspace" }).click();
   await login();
+  const sidebar = desk.getByRole("complementary", { name: "Your watchlists" });
+  await expect(
+    sidebar.locator("select, input, button").first(),
+  ).toHaveJSProperty("tagName", "SELECT");
+  await expect(
+    sidebar
+      .getByRole("region", { name: "Stocks in Long-term ideas" })
+      .getByRole("button", { name: "AAPL NASDAQ", exact: true }),
+  ).toBeVisible();
+  expect(
+    await sidebar.evaluate((node) => {
+      const rows = node.querySelector(".watchlist-symbols")!;
+      const management = node.querySelector(".watchlist-management")!;
+      return Boolean(
+        rows.compareDocumentPosition(management) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    }),
+  ).toBe(true);
   await expect(desk.getByLabel("Choose a watchlist")).toContainText(
     "India ideas",
   );

@@ -159,7 +159,9 @@ export function MarketWatchlists({
           <p className="markets-kicker">Your collection</p>
           <h3>Watchlists</h3>
         </div>
-        <span className="watchlists-count">{data.lists.length}/20</span>
+        <span className="watchlists-count">
+          {data.lists.length} {data.lists.length === 1 ? "list" : "lists"}
+        </span>
       </div>
       {!hub.session ? (
         <div className="watchlists-login">
@@ -181,146 +183,38 @@ export function MarketWatchlists({
         </div>
       ) : (
         <>
-          <div className="watchlists-account">
-            <span>Signed in as {hub.session.username}</span>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => {
-                if (
-                  !dirty ||
-                  window.confirm(
-                    "Log out and discard unsaved watchlist changes?",
-                  )
-                ) {
-                  setData({ ...emptyWatchlists(), revision: null });
-                  setDirty(false);
-                  dirtyRef.current = false;
-                  setSelected("");
-                  hub.logout();
-                }
-              }}
+          <label className="watchlist-select-label">
+            Choose a watchlist
+            <select
+              value={list?.id ?? ""}
+              disabled={locked || !list}
+              onChange={(e) => setSelected(e.target.value)}
             >
-              Log out
-            </button>
-          </div>
-          <p className="market-help">
-            Saved to the blog’s GitHub repository. Names and symbols are visible
-            to anyone with repository access and remain in its history. Keep
-            personal details out.
-          </p>
-          <form className="watchlist-form" onSubmit={create}>
-            <label htmlFor="watchlist-name">New watchlist</label>
-            <div>
-              <input
-                id="watchlist-name"
-                placeholder="e.g. Long-term ideas"
-                maxLength={60}
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={locked}
-              />
-              <button type="submit" disabled={locked || !name.trim()}>
-                Create
-              </button>
-            </div>
-          </form>
+              {!list && (
+                <option value="">
+                  {loading ? "Loading your watchlists…" : "No watchlists yet"}
+                </option>
+              )}
+              {data.lists.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.symbols.length})
+                </option>
+              ))}
+            </select>
+          </label>
           {list && (
-            <>
-              <label className="watchlist-select-label">
-                Choose a watchlist
-                <select
-                  value={list.id}
-                  disabled={locked}
-                  onChange={(e) => setSelected(e.target.value)}
-                >
-                  {data.lists.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} ({item.symbols.length})
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <details className="watchlist-manage">
-                <summary>Rename or delete this list</summary>
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    if (locked) return;
-                    const nextName = String(
-                      new FormData(event.currentTarget).get("name") ?? "",
-                    );
-                    change({
-                      version: 1,
-                      lists: data.lists.map((item) =>
-                        item.id === list.id
-                          ? { ...item, name: nextName }
-                          : item,
-                      ),
-                    });
-                  }}
-                  key={list.id + list.name}
-                >
-                  <label>
-                    List name
-                    <input
-                      name="name"
-                      defaultValue={list.name}
-                      required
-                      maxLength={60}
-                      disabled={locked}
-                    />
-                  </label>
-                  <button type="submit" disabled={locked}>
-                    Rename
-                  </button>
-                </form>
-                <button
-                  type="button"
-                  disabled={locked}
-                  onClick={() => {
-                    if (
-                      !window.confirm(
-                        `Remove “${list.name}” from your watchlists? Save to confirm the deletion.`,
-                      )
-                    )
-                      return;
-                    change({
-                      version: 1,
-                      lists: data.lists.filter((item) => item.id !== list.id),
-                    });
-                    setSelected("");
-                  }}
-                >
-                  Delete this list
-                </button>
-              </details>
-              <form
-                className="watchlist-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  add(stock);
-                }}
-              >
-                <label htmlFor="watchlist-stock">
-                  Add a stock · exchange:ticker
-                </label>
-                <div>
-                  <input
-                    id="watchlist-stock"
-                    placeholder="NASDAQ:AAPL"
-                    value={stock}
-                    maxLength={66}
-                    required
-                    disabled={locked}
-                    onChange={(e) => setStock(e.target.value)}
-                  />
-                  <button type="submit" disabled={locked || !stock.trim()}>
-                    Add
-                  </button>
-                </div>
-              </form>
+            <section
+              className="watchlist-content"
+              aria-label={`Stocks in ${list.name}`}
+              aria-busy={loading}
+            >
+              <div className="watchlist-content-heading">
+                <span>Saved stocks</span>
+                <span>
+                  {list.symbols.length}{" "}
+                  {list.symbols.length === 1 ? "stock" : "stocks"}
+                </span>
+              </div>
               <ul className="watchlist-symbols">
                 {list.symbols.map((item) => (
                   <li key={item}>
@@ -358,12 +252,40 @@ export function MarketWatchlists({
                 ))}
               </ul>
               {list.symbols.length === 0 && (
-                <p className="market-help">
-                  No stocks yet. Enter an exchange and ticker above to save a
-                  stock.
-                </p>
+                <div className="watchlist-empty" role="status">
+                  <strong>{list.name} is empty</strong>
+                  <p>
+                    Add your first stock below. The list name does not
+                    automatically add companies.
+                  </p>
+                </div>
               )}
-            </>
+              <form
+                className="watchlist-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  add(stock);
+                }}
+              >
+                <label htmlFor="watchlist-stock">
+                  Add a stock · exchange:ticker
+                </label>
+                <div>
+                  <input
+                    id="watchlist-stock"
+                    placeholder="NASDAQ:AAPL"
+                    value={stock}
+                    maxLength={66}
+                    required
+                    disabled={locked}
+                    onChange={(e) => setStock(e.target.value)}
+                  />
+                  <button type="submit" disabled={locked || !stock.trim()}>
+                    Add
+                  </button>
+                </div>
+              </form>
+            </section>
           )}
           {!list && !loading && ready && (
             <p className="market-help">
@@ -371,6 +293,14 @@ export function MarketWatchlists({
               follow.
             </p>
           )}
+          <details className="watchlist-storage">
+            <summary>About saving</summary>
+            <p className="market-help">
+              Saved to the blog’s GitHub repository. Names and symbols are
+              visible to anyone with repository access and remain in its
+              history. Keep personal details out.
+            </p>
+          </details>
           <div className="watchlist-save">
             <span role="status">
               {loading
@@ -409,6 +339,107 @@ export function MarketWatchlists({
               }}
             >
               Reload saved lists
+            </button>
+          </div>
+          <div className="watchlist-management">
+            <h4>Manage watchlists</h4>
+            <form className="watchlist-form" onSubmit={create}>
+              <label htmlFor="watchlist-name">New watchlist</label>
+              <div>
+                <input
+                  id="watchlist-name"
+                  placeholder="e.g. Long-term ideas"
+                  maxLength={60}
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={locked}
+                />
+                <button type="submit" disabled={locked || !name.trim()}>
+                  Create
+                </button>
+              </div>
+            </form>
+            {list && (
+              <>
+                <details className="watchlist-manage">
+                  <summary>Rename or delete this list</summary>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (locked) return;
+                      const nextName = String(
+                        new FormData(event.currentTarget).get("name") ?? "",
+                      );
+                      change({
+                        version: 1,
+                        lists: data.lists.map((item) =>
+                          item.id === list.id
+                            ? { ...item, name: nextName }
+                            : item,
+                        ),
+                      });
+                    }}
+                    key={list.id + list.name}
+                  >
+                    <label>
+                      List name
+                      <input
+                        name="name"
+                        defaultValue={list.name}
+                        required
+                        maxLength={60}
+                        disabled={locked}
+                      />
+                    </label>
+                    <button type="submit" disabled={locked}>
+                      Rename
+                    </button>
+                  </form>
+                  <button
+                    type="button"
+                    disabled={locked}
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          `Remove “${list.name}” from your watchlists? Save to confirm the deletion.`,
+                        )
+                      )
+                        return;
+                      change({
+                        version: 1,
+                        lists: data.lists.filter((item) => item.id !== list.id),
+                      });
+                      setSelected("");
+                    }}
+                  >
+                    Delete this list
+                  </button>
+                </details>
+              </>
+            )}
+          </div>
+          <div className="watchlists-account">
+            <span>Signed in as {hub.session.username}</span>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => {
+                if (
+                  !dirty ||
+                  window.confirm(
+                    "Log out and discard unsaved watchlist changes?",
+                  )
+                ) {
+                  setData({ ...emptyWatchlists(), revision: null });
+                  setDirty(false);
+                  dirtyRef.current = false;
+                  setSelected("");
+                  hub.logout();
+                }
+              }}
+            >
+              Log out
             </button>
           </div>
         </>

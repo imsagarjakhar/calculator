@@ -376,6 +376,56 @@ html:has(.markets-page) {
 }
 .watchlist-select-label select {
   margin-top: 8px;
+  font-weight: 600;
+  background: #f4f8f0;
+  border-color: #91b5a1;
+}
+.market-watchlists > .watchlist-select-label {
+  margin-top: 0;
+}
+.watchlist-content-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #496459;
+  font-size: 0.75rem;
+  margin-top: 18px;
+}
+.watchlist-empty {
+  padding: 22px 16px;
+  margin: 12px 0;
+  border: 1px dashed #c3d3ca;
+  border-radius: 10px;
+  background: #f8faf7;
+}
+.watchlist-empty strong {
+  font-size: 0.9rem;
+}
+.watchlist-empty p {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+.watchlist-management {
+  border-top: 1px solid #d0ddd4;
+  padding: 18px 0;
+  margin-top: 20px;
+}
+.watchlist-management h4 {
+  font-size: 0.85rem;
+  margin: 0;
+}
+.watchlist-storage {
+  margin-top: 16px;
+  font-size: 0.75rem;
+}
+.watchlist-storage summary {
+  cursor: pointer;
+  color: #496459;
+}
+.watchlists-account {
+  border-top: 1px solid #d0ddd4;
+  padding-top: 12px;
 }
 .watchlist-manage {
   font-size: 0.78rem;
