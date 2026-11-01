@@ -1,6 +1,6 @@
 import { test, expect } from "./test";
 const base = process.env.VITE_BASE_PATH || "/";
-test("restricted stock search offers the exact listing externally and preserves supported selections", async ({
+test("charts use native symbol search without separate search fields", async ({
   page,
 }) => {
   await page.route("https://www.tradingview-widget.com/**", (route) =>
@@ -10,36 +10,32 @@ test("restricted stock search offers the exact listing externally and preserves 
     }),
   );
   await page.goto(base + "markets/");
-  await page.getByLabel("Market country", { exact: true }).selectOption("in");
-  const search = page.getByLabel("Stock or index", { exact: true });
-  await search.fill(" nse:infy ");
-  await page.getByRole("button", { name: "Find stock", exact: true }).click();
-  await expect(page.locator(".market-embed-chart iframe")).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: "Open NSE:INFY on TradingView" }),
-  ).toHaveAttribute(
-    "href",
-    "https://www.tradingview.com/chart/?symbol=NSE%3AINFY",
+  await expect(page.locator("#market-symbol, #workspace-symbol")).toHaveCount(
+    0,
   );
-  await search.fill("BSE:500209");
-  await page.getByRole("button", { name: "Find stock", exact: true }).click();
-  await page.getByRole("button", { name: "5 years", exact: true }).click();
-  const src = await page
-    .locator(".market-embed-chart iframe")
-    .getAttribute("src");
+  const chart = page.locator(".market-embed-chart iframe");
+  const src = await chart.getAttribute("src");
   const config = JSON.parse(decodeURIComponent(new URL(src!).hash.slice(1)));
-  expect(config.symbol).toBe("BSE:500209");
-  expect(config.range).toBe("60M");
-  expect(config.allow_symbol_change).toBe(false);
-  await expect(search).toHaveValue("BSE:500209");
-  await search.fill("Infosys");
-  await page.getByRole("button", { name: "Find stock", exact: true }).click();
-  await expect(
-    page.getByRole("link", { name: "Open INFOSYS on TradingView" }),
-  ).toBeVisible();
-  await page.getByLabel("Market country", { exact: true }).selectOption("us");
-  await expect(search).toHaveValue("NASDAQ:AAPL");
+  expect(config.allow_symbol_change).toBe(true);
+  expect(config.withdateranges).toBe(true);
+  expect(config.range).toBe("1D");
+  // Updating the table must preserve the chart frame and any native selections.
+  await chart.evaluate((node) =>
+    node.setAttribute("data-chart-instance", "preserved"),
+  );
+  await page.getByRole("button", { name: "Performance", exact: true }).click();
+  await expect(chart).toHaveAttribute("data-chart-instance", "preserved");
+  await page.getByRole("button", { name: "Open chart workspace" }).click();
+  const desk = page.getByRole("dialog", { name: "Your market desk." });
+  const workspaceSrc = await desk.locator("iframe").getAttribute("src");
+  const workspaceConfig = JSON.parse(
+    decodeURIComponent(new URL(workspaceSrc!).hash.slice(1)),
+  );
+  expect(workspaceConfig.allow_symbol_change).toBe(true);
+  expect(workspaceConfig.hide_side_toolbar).toBe(false);
+  await expect(desk.locator(".market-symbol-search")).toHaveCount(0);
 });
+
 test("market country, performance and chart ranges configure isolated widgets", async ({
   page,
 }) => {
@@ -72,11 +68,8 @@ test("market country, performance and chart ranges configure isolated widgets", 
   expect((await config("indices")).symbols[0][1]).toContain("BSE:SENSEX");
   await page.getByRole("button", { name: "Performance", exact: true }).click();
   expect((await config("stocks")).defaultColumn).toBe("performance");
-  await page.getByRole("button", { name: "5 years", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "5 years", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
-  expect((await config("chart")).range).toBe("60M");
+  expect((await config("chart")).range).toBe("1D");
+  expect((await config("chart")).allow_symbol_change).toBe(true);
   await country.selectOption("sa");
   await expect(page.locator(".market-country-fallback")).toContainText(
     "This market opens on TradingView.",

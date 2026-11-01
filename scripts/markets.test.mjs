@@ -19,6 +19,8 @@ test("market catalog has unique countries, symbols and valid widget defaults", (
     assert.equal(widgetConfig("chart", c, "invalid").range, "1D");
     assert.equal(widgetConfig("chart", c).range, "1D");
     assert.equal(widgetConfig("chart", c).hide_side_toolbar, false);
+    assert.equal(widgetConfig("chart", c).allow_symbol_change, true);
+    assert.equal(widgetConfig("chart", c).withdateranges, true);
     assert.equal(widgetConfig("indices", c).dateRange, "1D");
   }
   assert.equal(countryByCode("unknown").code, "us");

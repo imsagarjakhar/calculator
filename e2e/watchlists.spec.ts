@@ -11,9 +11,6 @@ test("workspace opens with one-day chart, drawing tools and a usable close actio
     }),
   );
   await page.goto(base + "markets/");
-  await expect(
-    page.getByRole("button", { name: "1 day", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Open chart workspace" }).click();
   const desk = page.getByRole("dialog", { name: "Your market desk." });
   await expect(desk).toBeVisible();
@@ -21,6 +18,7 @@ test("workspace opens with one-day chart, drawing tools and a usable close actio
   const config = JSON.parse(decodeURIComponent(new URL(src!).hash.slice(1)));
   expect(config.range).toBe("1D");
   expect(config.hide_side_toolbar).toBe(false);
+  expect(config.allow_symbol_change).toBe(true);
   await expect(
     desk.getByRole("button", { name: "Log in to save watchlists" }),
   ).toBeVisible();
@@ -108,17 +106,18 @@ test("existing account saves multiple watchlists, reloads and keeps changes afte
   await expect(listName).toBeEnabled();
   await listName.fill("Long-term ideas");
   await desk.getByRole("button", { name: "Create", exact: true }).click();
-  await desk
-    .getByRole("button", { name: "+ Add NASDAQ:AAPL", exact: true })
-    .click();
+  await desk.getByLabel("Add a stock · exchange:ticker").fill("NASDAQ:AAPL");
+  await desk.getByRole("button", { name: "Add", exact: true }).click();
   await listName.fill("India ideas");
   await desk.getByRole("button", { name: "Create", exact: true }).click();
   await desk.getByLabel("Add a stock · exchange:ticker").fill("BSE:500209");
   await desk.getByRole("button", { name: "Add", exact: true }).click();
   await desk.getByRole("button", { name: "500209 BSE", exact: true }).click();
-  await expect(desk.getByLabel("Chart symbol", { exact: true })).toHaveValue(
-    "BSE:500209",
-  );
+  const selectedChart = await desk.locator("iframe").getAttribute("src");
+  expect(
+    JSON.parse(decodeURIComponent(new URL(selectedChart!).hash.slice(1)))
+      .symbol,
+  ).toBe("BSE:500209");
   await desk
     .getByRole("button", { name: "Save watchlists", exact: true })
     .click();

@@ -456,7 +456,7 @@ export function widgetConfig(
     theme: "light",
     style: "1",
     locale: "en",
-    allow_symbol_change: false,
+    allow_symbol_change: true,
     hide_side_toolbar: false,
     withdateranges: true,
     save_image: false,

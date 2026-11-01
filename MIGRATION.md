@@ -289,6 +289,8 @@ References: [Google's JavaScript SEO guidance](https://developers.google.com/sea
 
 ## Market workspace and saved watchlists
 
+Stock search and time ranges use TradingView's native chart controls: click the stock name/symbol in the chart to search. There is no separate search box or range control above the chart, so app controls do not reset a stock chosen inside TradingView. Watchlist entries are managed separately using the exchange:ticker field in the watchlist sidebar. The embedded widget does not expose its internal symbol selection to the app, so the sidebar does not claim to auto-add or highlight the currently searched chart symbol. Select a saved watchlist entry to open its chart. Restricted exchange listings still follow TradingView's data licensing.
+
 Open **Markets → Open chart workspace** for a larger candlestick chart, the provider's drawing toolbar, and multiple watchlists. Charts open on **1 day**; the US index uses daily FRED observations without intraday prices. Drawings are temporary and reset when the chart reloads. Saved watchlists contain only names and exchange-qualified symbols, never calculator entries, prices or drawings.
 
 This reuses the existing publisher account, not visitor registration. Log in on the markets page with the blog username and password. Sessions stay in memory and expire after 15 minutes; reload requires login again. Create, rename, delete or edit lists, then **Save watchlists**. Closing the workspace preserves edits in the current tab. Reloading saved lists asks before discarding edits.

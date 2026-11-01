@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   countryByCode,
-  marketPeriods,
   needsExternalChart,
   stockChartUrl,
 } from "../content/markets";
@@ -14,22 +13,14 @@ export function MarketWorkspace({
   country,
   symbol,
   selectSymbol,
-  range,
-  setRange,
 }: {
   open: boolean;
   close: () => void;
   country: ReturnType<typeof countryByCode>;
   symbol: string;
   selectSymbol: (symbol: string) => void;
-  range: string;
-  setRange: (range: string) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [search, setSearch] = useState(symbol);
-  useEffect(() => {
-    setSearch(symbol);
-  }, [symbol]);
   useEffect(() => {
     const node = dialog.current!;
     if (!open) {
@@ -74,42 +65,10 @@ export function MarketWorkspace({
           className="market-workspace-chart"
           aria-label="Interactive stock chart"
         >
-          <form
-            className="market-symbol-search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (search.trim()) selectSymbol(search.trim().toUpperCase());
-            }}
-          >
-            <label htmlFor="workspace-symbol">Chart symbol</label>
-            <div>
-              <input
-                id="workspace-symbol"
-                required
-                maxLength={100}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="NASDAQ:AAPL"
-              />
-              <button type="submit">Show chart</button>
-            </div>
-          </form>
-          <div
-            className="market-periods"
-            role="group"
-            aria-label="Workspace chart time range"
-          >
-            {marketPeriods.map((period) => (
-              <button
-                key={period.range}
-                type="button"
-                aria-pressed={range === period.range}
-                onClick={() => setRange(period.range)}
-              >
-                {period.label}
-              </button>
-            ))}
-          </div>
+          <p className="market-help">
+            Click the stock name or symbol in the chart to search. Use its time
+            controls to change the range.
+          </p>
           {open &&
             (needsExternalChart(symbol) ? (
               <div className="market-country-fallback market-chart-fallback">
@@ -117,7 +76,7 @@ export function MarketWorkspace({
                 <p>
                   {symbol.includes(":")
                     ? "This exchange is not licensed for public embedded charts."
-                    : "Choose the exact company listing on TradingView, or enter exchange:ticker above."}
+                    : "Choose the exact company listing on TradingView or select another stock from your watchlist."}
                 </p>
                 <a
                   href={stockChartUrl(symbol)}
@@ -128,31 +87,17 @@ export function MarketWorkspace({
                 </a>
               </div>
             ) : (
-              <MarketWidget
-                country={country}
-                kind="chart"
-                range={range}
-                symbol={symbol}
-              />
+              <MarketWidget country={country} kind="chart" symbol={symbol} />
             ))}
           {!needsExternalChart(symbol) && (
             <p className="market-help">
               Use the chart’s left toolbar for trend lines, drawing shapes, text
               and measurements. Tools depend on the provider. Only watchlists
               are saved to your account; drawings reset when the chart reloads.
-              If a chart is unavailable,{" "}
-              <a
-                href={stockChartUrl(symbol)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                open {symbol} on TradingView ↗
-              </a>
-              .
             </p>
           )}
         </section>
-        <MarketWatchlists symbol={symbol} selectSymbol={selectSymbol} />
+        <MarketWatchlists selectSymbol={selectSymbol} />
       </div>
     </dialog>
   );

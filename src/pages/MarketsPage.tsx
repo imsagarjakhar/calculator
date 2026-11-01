@@ -6,7 +6,6 @@ import { PlannerNavigation } from "../components/PlannerNavigation";
 import {
   countryByCode,
   marketCountries,
-  marketPeriods,
   hasEmbeddedMarket,
   marketExternalUrl,
   needsExternalChart,
@@ -22,17 +21,14 @@ export function MarketsPage() {
 }
 function MarketsContent() {
   const [code, setCode] = useState("us");
-  const [range, setRange] = useState("1D");
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [view, setView] = useState("overview");
   const [revision, setRevision] = useState(0);
   const [symbol, setSymbol] = useState("NASDAQ:AAPL");
-  const [search, setSearch] = useState("NASDAQ:AAPL");
   const country = countryByCode(code);
   const embedded = hasEmbeddedMarket(country);
   const selectSymbol = (value: string) => {
     setSymbol(value);
-    setSearch(value);
   };
   return (
     <main className="planner-page markets-page">
@@ -43,8 +39,6 @@ function MarketsContent() {
         country={country}
         symbol={symbol}
         selectSymbol={selectSymbol}
-        range={range}
-        setRange={setRange}
       />
       <header className="markets-hero">
         <div>
@@ -231,31 +225,9 @@ function MarketsContent() {
               </div>
             </div>
             <p className="market-help">
-              Enter an exchange and ticker for a chart here, or a company name
-              to search on TradingView. Prices use the listing’s trading
-              currency.
+              Click the stock name or symbol at the top of the chart to search.
+              Choose time ranges inside the chart.
             </p>
-            <form
-              className="market-symbol-search"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const value = search.trim().toUpperCase();
-                if (value) selectSymbol(value);
-              }}
-            >
-              <label htmlFor="market-symbol">Stock or index</label>
-              <div>
-                <input
-                  id="market-symbol"
-                  value={search}
-                  maxLength={100}
-                  required
-                  placeholder="e.g. NASDAQ:AAPL or NSE:INFY"
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-                <button type="submit">Find stock</button>
-              </div>
-            </form>
             {code === "in" && (
               <p className="market-help">
                 BSE chart examples: Infosys · BSE:500209; Reliance · BSE:500325.
@@ -275,7 +247,7 @@ function MarketsContent() {
                 <p>
                   {symbol.includes(":")
                     ? "TradingView does not license this exchange’s charts for embedding. The listing may still be viewed on its own website."
-                    : "A company name can match several exchanges. Choose the exact listing on TradingView, or enter an exchange and ticker above."}
+                    : "A company name can match several exchanges. Choose the exact listing on TradingView or select another stock from your watchlist."}
                 </p>
                 <a
                   href={stockChartUrl(symbol)}
@@ -287,40 +259,11 @@ function MarketsContent() {
               </div>
             ) : (
               <>
-                <div
-                  className="market-periods"
-                  role="group"
-                  aria-label="Chart time range"
-                >
-                  {marketPeriods.map((period) => (
-                    <button
-                      key={period.range}
-                      type="button"
-                      aria-pressed={range === period.range}
-                      onClick={() => setRange(period.range)}
-                    >
-                      {period.label}
-                    </button>
-                  ))}
-                </div>
-                <MarketWidget
-                  kind="chart"
-                  country={country}
-                  range={range}
-                  symbol={symbol}
-                />
+                <MarketWidget kind="chart" country={country} symbol={symbol} />
                 <p className="market-help">
-                  Viewing {symbol}. One week shows five trading days. Newer
-                  listings may have less than five years of history. If this
-                  listing is unavailable here,{" "}
-                  <a
-                    href={stockChartUrl(symbol)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    open the same stock on TradingView ↗
-                  </a>
-                  .
+                  Prices use the listing’s trading currency. Some exchanges
+                  restrict embedded charts; use the TradingView link in its
+                  notice for those listings.
                 </p>
               </>
             )}

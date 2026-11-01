@@ -13,10 +13,8 @@ import {
 const message = (error: unknown) =>
   error instanceof Error ? error.message : "Could not update watchlists.";
 export function MarketWatchlists({
-  symbol,
   selectSymbol,
 }: {
-  symbol: string;
   selectSymbol: (symbol: string) => void;
 }) {
   const hub = useHub();
@@ -323,21 +321,12 @@ export function MarketWatchlists({
                   </button>
                 </div>
               </form>
-              <button
-                className="watchlist-add-current"
-                type="button"
-                disabled={locked || list.symbols.includes(symbol)}
-                onClick={() => add(symbol)}
-              >
-                + Add {symbol}
-              </button>
               <ul className="watchlist-symbols">
                 {list.symbols.map((item) => (
                   <li key={item}>
                     <button
                       type="button"
                       className="watchlist-symbol"
-                      aria-pressed={item === symbol}
                       onClick={() => selectSymbol(item)}
                     >
                       <strong>{item.split(":")[1]}</strong>
@@ -370,7 +359,8 @@ export function MarketWatchlists({
               </ul>
               {list.symbols.length === 0 && (
                 <p className="market-help">
-                  No stocks yet. Add the current chart or enter a symbol above.
+                  No stocks yet. Enter an exchange and ticker above to save a
+                  stock.
                 </p>
               )}
             </>
