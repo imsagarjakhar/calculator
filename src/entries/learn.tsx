@@ -4,6 +4,7 @@ import { LearnPage } from "../pages/LearnPage";
 import "../../bkp/custom-plan.css";
 import "../styles/design-system.css";
 import "../styles/learn.css";
+import "../styles/money-studio.css";
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>
     <LearnPage />

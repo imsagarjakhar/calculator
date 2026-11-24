@@ -79,7 +79,7 @@ test("clean routes support navigation, reloads, browser history and old bookmark
   page,
 }, info) => {
   await page.goto(appPath("/"));
-  await expect(page.locator("h1:visible")).toContainText("Financial planning.");
+  await expect(page.locator("h1:visible")).toContainText("Make it to payday.");
   await page
     .getByText("Is this an AI financial planner?", { exact: true })
     .click();
@@ -134,7 +134,7 @@ test("search engines can read content, links and consistent metadata without Jav
   try {
     await staticPage.goto(appPath("/"));
     await expect(staticPage.locator("#welcomeTitle")).toContainText(
-      "Financial planning",
+      "Make it to payday.",
     );
     await expect(staticPage.locator("#financialPlanningTitle")).toHaveText(
       "How to do financial planning, step by step",

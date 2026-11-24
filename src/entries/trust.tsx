@@ -4,6 +4,7 @@ import { TrustPage, type TrustRoute } from "../pages/TrustPage";
 import "../../bkp/custom-plan.css";
 import "../styles/design-system.css";
 import "../styles/trust.css";
+import "../styles/money-studio.css";
 
 const page = document.documentElement.dataset.page as TrustRoute;
 createRoot(document.getElementById("root")!).render(

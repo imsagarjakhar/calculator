@@ -28,6 +28,9 @@ export function PlannerNavigation({
         ← All planners
       </a>
       <span className="planner-site-name">Financial AI Planner</span>
+      <a className="studio-library-link" href={plannerHref("all-calculators")}>
+        Calculator library
+      </a>
       <SiteSearch />
       {children}
     </nav>

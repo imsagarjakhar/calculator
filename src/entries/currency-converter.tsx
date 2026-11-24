@@ -4,6 +4,7 @@ import { CurrencyPage } from "../pages/CurrencyPage";
 import "../../bkp/custom-plan.css";
 import "../styles/design-system.css";
 import "../styles/currency-converter.css";
+import "../styles/money-studio.css";
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>
     <CurrencyPage />

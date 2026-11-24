@@ -1,0 +1,9 @@
+.money-town {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 300 / 154;
+  background: #e7e9ff;
+  image-rendering: pixelated;
+  pointer-events: none;
+}

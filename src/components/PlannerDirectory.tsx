@@ -204,8 +204,8 @@ export function ExploreDirectory() {
       id="explore"
     >
       <div className="planner-directory-heading">
-        <h2 id="exploreDirectoryTitle">Learn something. Use it today.</h2>
-        <p>Clear explanations, worked examples and useful everyday tools.</p>
+        <h2 id="exploreDirectoryTitle">Explore money</h2>
+        <p>Lessons, worked examples and market tools.</p>
       </div>
       <div className="planner-choices tool-directory-grid">
         {discoveryRoutes.map((route) => {
@@ -226,7 +226,7 @@ export function PlannerDirectory() {
   return (
     <section className="tool-directory" aria-labelledby="toolDirectoryTitle">
       <div className="planner-directory-heading" id="planners">
-        <h2 id="toolDirectoryTitle">Put your own numbers to work.</h2>
+        <h2 id="toolDirectoryTitle">Your planning desk</h2>
         <p>
           Choose a planner for your next decision, or{" "}
           <a href={plannerHref("all-calculators")}>

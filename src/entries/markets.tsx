@@ -4,6 +4,7 @@ import { MarketsPage } from "../pages/MarketsPage";
 import "../../bkp/custom-plan.css";
 import "../styles/design-system.css";
 import "../styles/markets.css";
+import "../styles/money-studio.css";
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>
     <MarketsPage />

@@ -4,6 +4,7 @@ import { GuidesPage } from "../pages/GuidesPage";
 import "../../bkp/custom-plan.css";
 import "../styles/design-system.css";
 import "../styles/worked-guides.css";
+import "../styles/money-studio.css";
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>
     <GuidesPage />

@@ -28,7 +28,7 @@ try {
   for (const [page, info] of Object.entries(searchPages)) {
     if (process.argv[2] && page !== process.argv[2]) continue;
     const title =
-      page === "home" ? "Financial planning.\nA clearer future." : info.name;
+      page === "home" ? "Make it to payday.\nPlay Payday Quest." : info.name;
     await tab.setContent(`<!doctype html><html lang="en"><head><meta charset="utf-8"><style>
       @font-face{font-family:Newsreader;src:url(data:font/ttf;base64,${font.toString("base64")})}
       *{box-sizing:border-box}body{margin:0;width:1200px;height:630px;background:#f8faf5;color:#203b32;font-family:'Segoe UI',sans-serif;padding:56px 68px;overflow:hidden}

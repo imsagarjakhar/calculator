@@ -7,10 +7,8 @@ test("finance guide teaches with currency-aware visuals, search, quizzes and key
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(base);
   await page
-    .getByRole("link", {
-      name: "New to SIP or SWP? Learn the basics →",
-      exact: true,
-    })
+    .locator("#explore")
+    .getByRole("link", { name: /Learn finance/ })
     .click();
   await expect(page).toHaveURL(/\/learn\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(

@@ -1,3 +1,4 @@
+import { PaydayQuest } from "../components/PaydayQuest";
 import { SiteSearch } from "../components/SiteSearch";
 import {
   ExploreDirectory,
@@ -147,57 +148,21 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             </svg>
           </button>
         </div>
-        <div className="welcome-hero">
-          <div className="welcome-intro">
-            <h1 id="welcomeTitle" tabIndex={-1}>
-              Financial planning.
-              <br />
-              <em>A clearer future.</em>
-            </h1>
-            <p>Understand money. Explore the markets. Plan your next step.</p>
-            <div className="welcome-actions">
-              <a href={plannerHref("guides")} className="primary">
-                Start with an example <span aria-hidden="true">→</span>
-              </a>
-              <a href="#explore">
-                Explore the tools <span aria-hidden="true">↓</span>
-              </a>
-            </div>
-            <p className="welcome-privacy">
-              Your numbers stay private. No account needed.
-            </p>
-            <a className="home-learn-link" href={plannerHref("learn")}>
-              New to SIP or SWP? Learn the basics →
-            </a>
-          </div>
-          <aside
-            className="starting-point"
-            aria-labelledby="startingPointTitle"
-          >
-            <h2 id="startingPointTitle">A clearer place to start.</h2>
-            <a href={plannerHref("learn")}>
-              <span>
-                Make sense of money
-                <small>SIP, SWP and the words behind your plan</small>
-              </span>
-              <span aria-hidden="true">→</span>
-            </a>
-            <a href={plannerHref("guides")}>
-              <span>
-                See an example
-                <small>Follow the question, numbers and result</small>
-              </span>
-              <span aria-hidden="true">→</span>
-            </a>
-            <a href={plannerHref("markets")}>
-              <span>
-                Explore global markets
-                <small>Prices, performance and historical charts</small>
-              </span>
-              <span aria-hidden="true">→</span>
-            </a>
-          </aside>
-        </div>
+        <PaydayQuest />
+        <nav className="money-shortcuts" aria-label="Quick start">
+          <a href={plannerHref("salary-budget")}>
+            <small>Budget</small>
+            <strong>Plan my payday</strong>
+          </a>
+          <a href={plannerHref("growth")}>
+            <small>Invest</small>
+            <strong>Project my savings</strong>
+          </a>
+          <a href={plannerHref("guides")} aria-label="Start with an example">
+            <small>Learn</small>
+            <strong>Start with an example</strong>
+          </a>
+        </nav>
         <ExploreDirectory />
         <PlannerDirectory />
         <FinancialPlanningGuide />

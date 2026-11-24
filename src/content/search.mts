@@ -68,7 +68,7 @@ export const searchPages = {
   home: {
     title: "Finance Guides & Financial Planning Tools | Financial AI Planner",
     description:
-      "Learn finance with worked examples, explore exchange rates and market data, and use private calculators for budgeting, investing and retirement planning.",
+        "Play Payday Quest to explore your financial habits, then use worked examples and private calculators for budgeting, investing and retirement planning.",
     name: "Financial AI Planner",
   },
   growth: {

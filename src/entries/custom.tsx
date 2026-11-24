@@ -7,6 +7,7 @@ import "../../bkp/chart-hover.css";
 import "../../bkp/table-layout.css";
 import "../../bkp/planner-header.css";
 import "../styles/design-system.css";
+import "../styles/money-studio.css";
 normalizePlannerUrl();
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>

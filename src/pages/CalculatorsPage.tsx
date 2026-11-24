@@ -415,76 +415,83 @@ export function CalculatorsPage() {
               <a href="#home-loan-emi">Estimate a home loan EMI</a>
             </nav>
           </div>
-          <div className="ledger-filters">
-            <label>
-              Find a calculator
-              <input
-                type="search"
-                placeholder="Search SIP, stamp duty, fuel…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </label>
-            <label>
-              Browse by category
-              <select value={group} onChange={(e) => setGroup(e.target.value)}>
-                {["All categories", ...categories.map((c) => c.name)].map(
-                  (n) => (
-                    <option key={n}>{n}</option>
-                  ),
-                )}
-              </select>
-            </label>
-          </div>
-          <p className="ledger-count" role="status">
-            {matches} {matches === 1 ? "entry" : "entries"}
-          </p>
-          {filtered.map((c) => {
-            const preview = group === "All categories" && !query.trim();
-            return (
-              <section className="ledger-group" key={c.name}>
-                <div className="ledger-section-title">
-                  <div>
-                    <h2>{c.name}</h2>
-                    <p>{c.detail}</p>
-                  </div>
-                  {preview && c.tools.length > 4 && (
-                    <button
-                      onClick={() => {
-                        setGroup(c.name);
-                        window.scrollTo(0, 0);
-                      }}
-                    >
-                      View all {c.tools.length}
-                    </button>
+          <div className="studio-directory-layout">
+            <aside className="ledger-filters">
+              <label>
+                Find a calculator
+                <input
+                  type="search"
+                  placeholder="Search SIP, stamp duty, fuel…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </label>
+              <label>
+                Browse by category
+                <select
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
+                >
+                  {["All categories", ...categories.map((c) => c.name)].map(
+                    (n) => (
+                      <option key={n}>{n}</option>
+                    ),
                   )}
+                </select>
+              </label>
+            </aside>
+            <div className="studio-directory-list">
+              <p className="ledger-count" role="status">
+                {matches} {matches === 1 ? "entry" : "entries"}
+              </p>
+              {filtered.map((c) => {
+                const preview = group === "All categories" && !query.trim();
+                return (
+                  <section className="ledger-group" key={c.name}>
+                    <div className="ledger-section-title">
+                      <div>
+                        <h2>{c.name}</h2>
+                        <p>{c.detail}</p>
+                      </div>
+                      {preview && c.tools.length > 4 && (
+                        <button
+                          onClick={() => {
+                            setGroup(c.name);
+                            window.scrollTo(0, 0);
+                          }}
+                        >
+                          View all {c.tools.length}
+                        </button>
+                      )}
+                    </div>
+                    <div className="ledger-grid">
+                      {(preview ? c.tools.slice(0, 4) : c.tools).map((t) => (
+                        <a
+                          key={"id" in t ? t.id : t.title}
+                          href={"id" in t ? "#" + t.id : plannerHref(t.route)}
+                        >
+                          {t.title}
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+              {!matches && (
+                <div className="ledger-empty">
+                  <h2>No matching calculators</h2>
+                  <button
+                    onClick={() => {
+                      setQuery("");
+                      setGroup("All categories");
+                    }}
+                  >
+                    Clear filters
+                  </button>
                 </div>
-                <div className="ledger-grid">
-                  {(preview ? c.tools.slice(0, 4) : c.tools).map((t) => (
-                    <a
-                      key={"id" in t ? t.id : t.title}
-                      href={"id" in t ? "#" + t.id : plannerHref(t.route)}
-                    >
-                      {t.title}
-                    </a>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-          {!matches && (
-            <div className="ledger-empty">
-              <h2>No matching calculators</h2>
-              <button
-                onClick={() => {
-                  setQuery("");
-                  setGroup("All categories");
-                }}
-              >
-                Clear filters
-              </button>
+              )}
             </div>
-          )}
+          </div>
         </>
       )}
     </main>

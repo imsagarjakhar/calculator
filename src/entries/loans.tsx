@@ -8,6 +8,7 @@ import "../styles/loans.css";
 
 import "../../bkp/planner-header.css";
 import "../styles/design-system.css";
+import "../styles/money-studio.css";
 
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>

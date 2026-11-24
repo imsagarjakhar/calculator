@@ -8,6 +8,7 @@ import "../../bkp/table-layout.css";
 import "../../bkp/bucket-plan.css";
 import "../../bkp/planner-header.css";
 import "../styles/design-system.css";
+import "../styles/money-studio.css";
 normalizePlannerUrl();
 createRoot(document.getElementById("root")!).render(
   <AppBoundary>

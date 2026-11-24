@@ -1,27 +1,11 @@
 # Financial AI Planner design
 
-A warm light theme presents the product as a calm financial workbook.
-The homepage helps visitors choose a calculator; calculators prioritize entering,
-comparing and saving a plan. Existing routes, model behavior and integrations are
-preserved.
+The homepage opens with Payday Quest, a five-decision game about everyday money habits. Its illustrated town uses a local pixel-art canvas. Players can review their choices and compare outcomes on replay.
 
-- Newsreader, self-hosted under its SIL Open Font License, supplies the editorial
-  headings and wordmark. Segoe UI supplies controls and readable body copy.
-- Warm ivory backgrounds, white surfaces, dark forest headings and green actions give the
-  homepage and shared calculator shell one visual voice. Chart colors retain their categories with darker strokes for light surfaces.
-- The planner directory is a visual shelf: two larger tinted entries for salary
-  budgeting and loan decisions, followed by six compact white tool cards. Use
-  short descriptions, consistent authored line icons, and clear actions. Budget
-  categories and the repay/invest choice provide a conceptual preview without
-  invented financial results. Avoid gradients, uppercase labels and icon tiles.
-- The homepage pairs an introduction with three real starting questions. All
-  planners remain available in the directory, followed by the guide and FAQ.
-- At narrow widths, sections stack in reading order. Keep every planner reachable,
-  controls touchable, focus visible and data tables independently scrollable.
-- Shared styles live in `src/styles/design-system.css`, imported after each
-  entry's existing styles. Shared headers and navigation inherit these rules.
-- Production CSP permits same-origin fonts only; no third-party font service is
-  needed at runtime. Offline reports retain their existing self-contained styles.
+- Ink navy anchors the site, violet identifies navigation and links, and lime highlights game actions. Financial charts keep their category and status colours.
+- Segoe UI supplies headings and controls. Self-hosted Newsreader adds an editorial accent to the hero.
+- The homepage groups real-world planning shortcuts beneath the game. The calculator library puts search and category selection alongside results on wide screens and above them on phones.
+- The shared theme lives in `src/styles/money-studio.css`, loaded after the component styles. Payday Quest supports keyboard interaction, textual feedback and reduced motion. Game decisions stay in memory for the current visit.
 
 Verification: desktop at 1440px and mobile at 390px and 320px; run `npm run check`
 for models, security, production build and desktop/mobile browser coverage.
