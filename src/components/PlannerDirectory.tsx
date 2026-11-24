@@ -227,7 +227,13 @@ export function PlannerDirectory() {
     <section className="tool-directory" aria-labelledby="toolDirectoryTitle">
       <div className="planner-directory-heading" id="planners">
         <h2 id="toolDirectoryTitle">Put your own numbers to work.</h2>
-        <p>Choose a planner for your next decision.</p>
+        <p>
+          Choose a planner for your next decision, or{" "}
+          <a href={plannerHref("all-calculators")}>
+            browse the full calculator library
+          </a>
+          .
+        </p>
       </div>
       <div className="planner-choices has-custom has-freedom tool-directory-grid tool-planners-grid">
         {tools

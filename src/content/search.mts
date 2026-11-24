@@ -1,5 +1,10 @@
 export const siteUrl = "https://intimetec.org";
 export const searchPages = {
+  "all-calculators": {
+    title: "Calculator Library for Indian Finance | Financial AI Planner",
+    description: "Browse and search financial calculators for investments, tax, loans, government schemes, insurance, business, property and everyday household expenses.",
+    name: "Calculator library",
+  },
   markets: {
     title: "Global Stock Markets, Indices & Performance | Financial AI Planner",
     description:

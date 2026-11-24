@@ -93,6 +93,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
             onClick={() => setMenuOpen(false)}
           >
             <a href="#planners">The planners</a>
+            <a href={plannerHref("all-calculators")}>All calculators</a>
             <a href={plannerHref("guides")}>Planning guide</a>
             <a href={plannerHref("learn")}>Learn finance</a>
             <a href={plannerHref("currency-converter")}>Convert currency</a>

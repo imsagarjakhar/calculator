@@ -135,6 +135,7 @@ for (const [page, info] of Object.entries(searchPages)) {
   );
   if (
     page !== "home" &&
+    page !== "all-calculators" &&
     page !== "markets" &&
     !isLearningPage(page) &&
     !isTrustPage(page)
@@ -144,6 +145,7 @@ for (const [page, info] of Object.entries(searchPages)) {
       /<input\b[^>]*type="number"/,
       `Calculator content isn't prerendered: ${page}`,
     );
+  if (page === "all-calculators") assert.match(html, /type="search"/, "Missing calculator directory search");
   const graphs = [
     ...head.matchAll(
       /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,

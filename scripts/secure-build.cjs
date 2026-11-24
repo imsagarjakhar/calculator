@@ -19,6 +19,7 @@ for (const page of [
   "loan-payoff/index.html",
   "learn/index.html",
   "guides/index.html",
+  "all-calculators/index.html",
   "currency-converter/index.html",
   "markets/index.html",
   "about/index.html",

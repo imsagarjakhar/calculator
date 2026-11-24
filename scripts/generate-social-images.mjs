@@ -26,6 +26,7 @@ try {
   });
   await tab.route("https://**", (route) => route.abort());
   for (const [page, info] of Object.entries(searchPages)) {
+    if (process.argv[2] && page !== process.argv[2]) continue;
     const title =
       page === "home" ? "Financial planning.\nA clearer future." : info.name;
     await tab.setContent(`<!doctype html><html lang="en"><head><meta charset="utf-8"><style>

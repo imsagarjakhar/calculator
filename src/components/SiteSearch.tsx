@@ -107,6 +107,7 @@ const ignored = new Set([
 export function searchWebsite(
   query: string,
   posts: VlogSummary[] = [],
+  calculators: Entry[] = [],
 ): Entry[] {
   const q = normalize(query);
   if (!q) return [];
@@ -114,6 +115,7 @@ export function searchWebsite(
   if (!words.length) return [];
   const all: Entry[] = [
     ...entries,
+    ...calculators,
     ...posts.map((post) => ({
       title: post.title,
       description: post.summary,
@@ -149,6 +151,31 @@ export function SiteSearch() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [posts, setPosts] = useState<VlogSummary[]>([]);
+  const [calculators, setCalculators] = useState<Entry[]>([]);
+  useEffect(() => {
+    if (!open || calculators.length) return;
+    void import("../calculators/catalog")
+      .then(({ categories }) =>
+        setCalculators(
+          categories.flatMap((category) =>
+            category.tools.flatMap((t) =>
+              "id" in t
+                ? [
+                    {
+                      title: t.title,
+                      description: t.description,
+                      href: plannerHref("all-calculators") + "#" + t.id,
+                      kind: category.name,
+                      aliases: t.id.replaceAll("-", " "),
+                    },
+                  ]
+                : [],
+            ),
+          ),
+        ),
+      )
+      .catch(() => {});
+  }, [open, calculators.length]);
   const [feedState, setFeedState] = useState("idle");
   useEffect(() => {
     if (!open || feedState !== "idle") return;
@@ -168,7 +195,7 @@ export function SiteSearch() {
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, []);
-  const results = searchWebsite(query, posts);
+  const results = searchWebsite(query, posts, calculators);
   return (
     <div
       className="site-search"
