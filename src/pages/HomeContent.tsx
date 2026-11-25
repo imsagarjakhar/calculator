@@ -1,13 +1,8 @@
-import { ToolScene } from "../components/ToolScene";
 import { InvestmentHero } from "../components/InvestmentHero";
 import { JourneyHeader } from "../components/JourneyHeader";
-import {
-  ExploreDirectory,
-  PlannerDirectory,
-} from "../components/PlannerDirectory";
+import { ExploreDirectory } from "../components/PlannerDirectory";
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { PlannerNavigation } from "../components/PlannerNavigation";
-import { plannerHref } from "../runtime/routes";
 import { useEffect, useState } from "react";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
 export function HomeContent({ active = true }: { active?: boolean }) {
@@ -40,25 +35,7 @@ export function HomeContent({ active = true }: { active?: boolean }) {
       >
         <JourneyHeader home showCurrency account={<VlogAccountButton />} />
         <InvestmentHero />
-        <nav className="money-shortcuts" aria-label="Quick start">
-          <a href={plannerHref("salary-budget")}>
-            <ToolScene kind="salary" />
-            <small>Budget</small>
-            <strong>Plan my payday</strong>
-          </a>
-          <a href={plannerHref("growth")}>
-            <ToolScene kind="growth" />
-            <small>Invest</small>
-            <strong>Project my savings</strong>
-          </a>
-          <a href={plannerHref("guides")} aria-label="Start with an example">
-            <ToolScene kind="custom" />
-            <small>Learn</small>
-            <strong>Start with an example</strong>
-          </a>
-        </nav>
         <ExploreDirectory />
-        <PlannerDirectory />
         <FinancialPlanningGuide />
         <section className="welcome-faq" aria-labelledby="planningQuestions">
           <h2 id="planningQuestions">Questions, answered.</h2>

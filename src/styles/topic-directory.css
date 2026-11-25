@@ -1,0 +1,100 @@
+#homeScreen .topic-directory {
+  color: #192c21;
+  text-align: left;
+  border-top: 1px solid #c7d1bd;
+  padding: 22px 0;
+  margin: 0 0 32px;
+}
+.topic-directory h2 {
+  margin: 0 0 20px;
+  font: 740 clamp(2rem, 4vw, 3.6rem) / 1 var(--font-ui);
+  letter-spacing: -0.06em;
+}
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.topic-tile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 16px;
+  border: 1px solid #cfd9c8;
+  background: #fffefa;
+  overflow: hidden;
+}
+.topic-art {
+  display: grid;
+  place-items: center;
+  height: 82px;
+  background: #e1ead5;
+}
+.topic-art.sand {
+  background: #f2e0ba;
+}
+.topic-art.mint {
+  background: #dceae4;
+}
+.topic-art .tool-scene {
+  height: 70px;
+  width: auto;
+}
+.topic-copy {
+  padding: 18px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.topic-copy h3 {
+  font: 730 clamp(1.1rem, 2vw, 1.5rem) / 1.12 var(--font-ui);
+  letter-spacing: -0.035em;
+  color: inherit;
+  margin: 0;
+}
+.topic-copy p {
+  font: 400 0.91rem/1.5 var(--font-ui);
+  color: #455549;
+  margin: 9px 0 14px;
+  max-width: 57ch;
+}
+.topic-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+#homeScreen .topic-links a {
+  display: inline-flex;
+  align-items: center;
+  color: #205d3c;
+  font: 600 0.81rem/1.35 var(--font-ui);
+  background: #f0f4e9;
+  border-radius: 6px;
+  padding: 7px 10px;
+  text-decoration: none;
+}
+#homeScreen .topic-links a:is(:hover, :focus-visible) {
+  background: #e2ecd8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 750px) {
+  .topic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 500px) {
+  .topic-grid {
+    grid-template-columns: 1fr;
+  }
+  .topic-art {
+    height: 65px;
+  }
+  .topic-art .tool-scene {
+    height: 60px;
+  }
+  .topic-copy {
+    padding: 15px;
+  }
+}

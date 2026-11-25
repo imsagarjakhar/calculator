@@ -438,6 +438,9 @@ test("all five calculators load with consistent controls, editable dates and res
     await page.goto(appPath(route));
     await expect(page.locator("h1:visible")).toContainText(heading);
     const toolbar = page.getByRole("group", {name:"Plan reports"});
+    await expect(page.locator(".report-actions-title:visible")).toHaveCount(0);
+    await expect(page.locator(".planner-context:visible")).toHaveCount(1);
+    await expect(toolbar.locator("button > svg")).toHaveCount(2);
     for (const name of ["Import report", "Download report"]) {
       await expect(toolbar.getByRole("button", {name, exact:true})).toBeVisible();
     }

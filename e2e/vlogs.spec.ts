@@ -89,7 +89,7 @@ test("blogs are loaded at runtime, searchable and readable without login", async
   await page
     .locator(".vlog-choice")
     .screenshot({ path: info.outputPath("vlog-entry.png") });
-  await page.getByRole("link", { name: /View all blogs/ }).click();
+  await page.locator("#explore").getByRole("link", { name: "Blog", exact: true }).click();
   await expect(page).toHaveURL(/#vlogs$/);
   await expect(page.locator("#homeScreen")).toBeHidden();
   await expect(page.locator(".vlog-message")).toHaveCount(7);
@@ -371,7 +371,7 @@ test("publisher logs in, publishes, edits and removes posts without redeploying 
   );
   expect(storage).not.toContain(password);
   expect(storage).not.toContain(session);
-  await page.getByRole("link", { name: /View all blogs/ }).click();
+  await page.locator("#explore").getByRole("link", { name: "Blog", exact: true }).click();
   await page.getByRole("button", { name: "+ Add blog", exact: true }).click();
   await page.getByLabel("Title", { exact: true }).fill("My first finance blog");
   await page

@@ -28,9 +28,6 @@ try {
   const { searchPages, canonicalUrl } = await server.ssrLoadModule(
     "/src/content/search.mts",
   );
-  const { PlannerNavigation } = await server.ssrLoadModule(
-    "/src/components/PlannerNavigation.tsx",
-  );
   const pages = {
     "all-calculators": "CalculatorsPage",
     markets: "MarketsPage",
@@ -65,7 +62,6 @@ try {
         ? createElement(
             "main",
             { className: "planner-page" },
-            createElement(PlannerNavigation),
             element,
           )
         : element;

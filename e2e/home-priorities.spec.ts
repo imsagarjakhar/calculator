@@ -1,44 +1,49 @@
 import { test, expect } from "./test";
 const base = process.env.VITE_BASE_PATH || "/";
-test("homepage leads with original learning resources and everyday tools before planners", async ({
+test("homepage groups planner and resource links into six topics below the investment hero", async ({
   page,
 }) => {
   await page.goto(base);
-  const discovery = page.locator(".discovery-directory .tool-card");
+  const grid = page.getByRole("region", { name: "Explore money" });
+  await expect(grid.getByRole("heading", { level: 3 })).toHaveText([
+    "Investment",
+    "Retirement",
+    "Learning & Blog",
+    "Calculators & Currency Converter",
+    "Loan Repayment",
+    "Salary Planning",
+  ]);
+  const links = grid.getByRole("link");
+  await expect(links).toHaveCount(14);
   expect(
-    await discovery.evaluateAll((links) =>
-      links.map((link) => link.getAttribute("href")),
+    await links.evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute("href")),
     ),
   ).toEqual(
-    ["learn", "guides", "markets", "currency-converter", "#vlogs"].map(
-      (route) => (route.startsWith("#") ? route : `${base}${route}/`),
-    ),
+    [
+      "growth/",
+      "markets/",
+      "freedom/",
+      "bucket-plan/",
+      "survival/",
+      "learn/",
+      "guides/",
+      "#vlogs",
+      "all-calculators/",
+      "currency-converter/",
+      "loan-payoff/",
+      "all-calculators/#home-loan-emi",
+      "salary-budget/",
+      "custom-plan/",
+    ].map((route) => base + route),
   );
-  await expect(page.locator(".tool-planners-grid .tool-card")).toHaveCount(7);
-  await expect(page.locator(".salary-choice")).not.toHaveClass(/tool-feature/);
-  await expect(page.locator(".loan-choice")).not.toHaveClass(/tool-feature/);
-  await expect(page.locator(".discovery-directory .tool-feature")).toHaveCount(
-    2,
-  );
-  expect(
-    await page
-      .locator("#explore")
-      .evaluate(
-        (el) =>
-          !!(
-            el.compareDocumentPosition(document.getElementById("planners")!) &
-            Node.DOCUMENT_POSITION_FOLLOWING
-          ),
-      ),
-  ).toBe(true);
+  await expect(page.locator(".investment-hero + #explore")).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  const screenshots = page.locator(".discovery-directory");
-  await expect(screenshots).toBeVisible();
-  await page.getByRole("link", { name: "Start with an example" }).click();
+  await grid.getByRole("link", { name: "Worked examples" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Five money questions. Worked through.",
   );
