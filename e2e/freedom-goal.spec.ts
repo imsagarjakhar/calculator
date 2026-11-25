@@ -45,7 +45,7 @@ test("freedom offers corpus percentage and monthly income with matching annual c
     .getByRole("button", { name: "Use corpus percentage", exact: true })
     .click();
   await page
-    .getByRole("combobox", { name: "Plan currency", exact: true })
+    .getByRole("combobox", { name: "Your currency", exact: true })
     .selectOption("USD");
   await expect(page.locator("#withdrawalPreview")).toContainText("$6,000");
   const pending = page.waitForEvent("download");

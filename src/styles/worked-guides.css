@@ -1,5 +1,5 @@
 .worked-guides {
-  color: #254638;
+  color: var(--studio-ink);
 }
 .worked-guides .worked-guide-hero {
   display: block;
@@ -7,7 +7,7 @@
   max-width: 950px;
 }
 .worked-kicker {
-  color: #176b52;
+  color: var(--studio-accent);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -24,7 +24,7 @@
 .worked-guide-hero > p:not(.worked-kicker) {
   font-size: 15px;
   line-height: 1.8;
-  color: #52685e;
+  color: var(--studio-muted);
 }
 .worked-guide-meta {
   display: flex;
@@ -47,7 +47,7 @@
   border-radius: 8px;
   padding: 10px;
   background: white;
-  color: #254638;
+  color: var(--studio-ink);
 }
 .worked-guide-hero p.worked-note {
   font-size: 12px;
@@ -67,7 +67,7 @@
   border: 1px solid #d0ddd3;
   border-radius: 13px;
   background: #f0f5ef;
-  color: #254638;
+  color: var(--studio-ink);
   text-decoration: none;
   line-height: 1.6;
 }
@@ -129,13 +129,13 @@
 .worked-ledger .worked-total {
   font-weight: 700;
   font-size: 16px;
-  color: #176b52;
+  color: var(--studio-accent);
 }
 .worked-takeaway {
   margin: 24px 0;
-  background: #edf3e9;
+  background: var(--studio-tint);
   padding: 20px;
-  border-left: 3px solid #176b52;
+  border-left: 3px solid var(--studio-accent);
   border-radius: 0 12px 12px 0;
   font-size: 13px;
   line-height: 1.8;
@@ -143,13 +143,13 @@
 }
 .worked-takeaway strong {
   display: block;
-  color: #254638;
+  color: var(--studio-ink);
   margin-bottom: 8px;
 }
 .worked-tool-link {
   display: inline-block;
   margin: 6px 20px 12px 0;
-  color: #176b52;
+  color: var(--studio-accent);
   font-size: 13px;
   font-weight: 600;
 }
@@ -164,19 +164,19 @@
   gap: 16px;
   padding: 20px;
   border-radius: 12px;
-  background: #edf3e9;
+  background: var(--studio-tint);
   margin: 22px 0;
 }
 .worked-metrics span {
   display: block;
   font-size: 11px;
   line-height: 1.7;
-  color: #52685e;
+  color: var(--studio-muted);
 }
 .worked-metrics strong {
   display: block;
   margin-top: 7px;
-  color: #176b52;
+  color: var(--studio-accent);
   font-size: 22px;
   overflow-wrap: anywhere;
 }
@@ -192,11 +192,11 @@
   display: grid;
   place-items: center;
   font-size: 11px;
-  color: #254638;
+  color: var(--studio-ink);
   flex: 1;
 }
 .worked-money-bar span:first-child {
-  background: #176b52;
+  background: var(--studio-accent);
   color: #fff;
   flex: none;
 }
@@ -212,7 +212,7 @@
 .worked-table-wrap caption {
   text-align: left;
   padding: 0 0 12px;
-  color: #52685e;
+  color: var(--studio-muted);
   line-height: 1.7;
 }
 .worked-table-wrap th,
@@ -223,7 +223,7 @@
   line-height: 1.6;
 }
 .worked-table-wrap thead {
-  background: #edf3e9;
+  background: var(--studio-tint);
 }
 .worked-choice-explainer {
   display: grid;
@@ -251,7 +251,7 @@
   border: 1px solid #b8cbbf;
   border-radius: 8px;
   background: #fff;
-  color: #176b52;
+  color: var(--studio-accent);
 }
 .worked-editorial {
   max-width: 810px;

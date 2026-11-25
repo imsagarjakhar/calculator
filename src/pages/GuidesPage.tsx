@@ -26,7 +26,7 @@ export function GuidesPage() {
     rate6 = debtExample(6);
   return (
     <main className="planner-page worked-guides">
-      <PlannerNavigation />
+      <PlannerNavigation current="Worked examples" showCurrency />
       <header className="worked-guide-hero">
         <p className="worked-kicker">THE NUMBERS, EXPLAINED</p>
         <h1>Five money questions. Worked through.</h1>

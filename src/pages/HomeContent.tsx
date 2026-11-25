@@ -1,5 +1,5 @@
-import { PaydayQuest } from "../components/PaydayQuest";
-import { SiteSearch } from "../components/SiteSearch";
+import { InvestmentHero } from "../components/InvestmentHero";
+import { JourneyHeader } from "../components/JourneyHeader";
 import {
   ExploreDirectory,
   PlannerDirectory,
@@ -7,36 +7,9 @@ import {
 import { FinancialPlanningGuide } from "../components/FinancialPlanningGuide";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import { plannerHref } from "../runtime/routes";
-import { useEffect, useRef, useState } from "react";
-import { currencies, selectCurrency, useCurrency } from "../runtime/currency";
+import { useEffect, useState } from "react";
 import { VlogProvider, VlogAccountButton, VlogFeed } from "../components/Vlogs";
 export function HomeContent({ active = true }: { active?: boolean }) {
-  const currency = useCurrency();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (!menuOpen) return;
-    headerRef.current
-      ?.querySelector<HTMLAnchorElement>("#home-main-navigation a")
-      ?.focus();
-    const outside = (event: PointerEvent) => {
-      if (!headerRef.current?.contains(event.target as Node))
-        setMenuOpen(false);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-        menuButtonRef.current?.focus();
-      }
-    };
-    document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape);
-    return () => {
-      document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("keydown", escape);
-    };
-  }, [menuOpen]);
   const [vlogsOpen, setVlogsOpen] = useState(
     () => typeof window !== "undefined" && window.location.hash === "#vlogs",
   );
@@ -64,91 +37,8 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         aria-labelledby="welcomeTitle"
         hidden={vlogsOpen}
       >
-        <div className="welcome-topbar home-header" ref={headerRef}>
-          <a
-            className="home-wordmark"
-            href={plannerHref("home")}
-            aria-label="Financial AI Planner home"
-          >
-            <svg
-              viewBox="0 0 32 32"
-              width="30"
-              height="30"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M4 25V15l8 5V7l8 5V4l8 5v16H4Z"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Financial AI Planner
-          </a>
-          <nav
-            id="home-main-navigation"
-            className="home-nav"
-            aria-label="Main navigation"
-            data-open={menuOpen}
-            onClick={() => setMenuOpen(false)}
-          >
-            <a href="#planners">The planners</a>
-            <a href={plannerHref("all-calculators")}>All calculators</a>
-            <a href={plannerHref("guides")}>Planning guide</a>
-            <a href={plannerHref("learn")}>Learn finance</a>
-            <a href={plannerHref("currency-converter")}>Convert currency</a>
-            <a href={plannerHref("markets")}>Global markets</a>
-            <a href="#vlogs">Blog</a>
-          </nav>
-          <SiteSearch />
-          <label
-            className="planner-currency home-currency"
-            htmlFor="home-currency"
-          >
-            <select
-              id="home-currency"
-              aria-label="Your currency"
-              title="Used across planners and examples. Amounts aren’t converted. The SIP planner resets contribution amounts when currency changes."
-              value={currency}
-              onChange={(e) => selectCurrency(e.target.value)}
-            >
-              {currencies.map(([code, symbol]) => (
-                <option key={code} value={code}>
-                  {code} — {symbol}
-                </option>
-              ))}
-            </select>
-          </label>
-          <VlogAccountButton />
-          <button
-            className="home-menu-toggle"
-            type="button"
-            ref={menuButtonRef}
-            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={menuOpen}
-            aria-controls="home-main-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path
-                d={
-                  menuOpen ? "m6 6 12 12M6 18 18 6" : "M4 6h16M4 12h16M4 18h16"
-                }
-              />
-            </svg>
-          </button>
-        </div>
-        <PaydayQuest />
+        <JourneyHeader home showCurrency account={<VlogAccountButton />} />
+        <InvestmentHero />
         <nav className="money-shortcuts" aria-label="Quick start">
           <a href={plannerHref("salary-budget")}>
             <small>Budget</small>
@@ -233,12 +123,11 @@ export function HomeContent({ active = true }: { active?: boolean }) {
       </section>
       {vlogsOpen && (
         <section className="welcome vlog-directory" aria-label="Blog">
-          <PlannerNavigation homeHref="#">
-            <VlogAccountButton />
-          </PlannerNavigation>
+          <PlannerNavigation current="Blog" homeHref="#" account={<VlogAccountButton />} />
           <VlogFeed />
         </section>
       )}
     </VlogProvider>
   );
 }
+

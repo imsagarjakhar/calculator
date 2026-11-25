@@ -1,11 +1,11 @@
 # Financial AI Planner design
 
-The homepage opens with Payday Quest, a five-decision game about everyday money habits. Its illustrated town uses a local pixel-art canvas. Players can review their choices and compare outcomes on replay.
+The homepage opens with SIP and SWP controls beside a gradient balance card and a monthly cash-flow projection chart.
 
-- Ink navy anchors the site, violet identifies navigation and links, and lime highlights game actions. Financial charts keep their category and status colours.
-- Segoe UI supplies headings and controls. Self-hosted Newsreader adds an editorial accent to the hero.
-- The homepage groups real-world planning shortcuts beneath the game. The calculator library puts search and category selection alongside results on wide screens and above them on phones.
-- The shared theme lives in `src/styles/money-studio.css`, loaded after the component styles. Payday Quest supports keyboard interaction, textual feedback and reduced motion. Game decisions stay in memory for the current visit.
+- All public pages use the homepage’s warm cream canvas, near-black Segoe UI typography and green controls. Financial charts keep their category and status colours.
+- The shared header keeps Invest, Learn Finance, Calculators, Blog and Global Markets visible at every width. Search, currency and page-specific controls occupy a separate row.
+- The homepage groups real-world planning shortcuts beneath the calculator. The calculator library puts search and category selection alongside results on wide screens and above them on phones.
+- Shared colors and typefaces live in `src/styles/design-system.css`. The shared page and card treatments live in `src/styles/money-studio.css`. The hero styles live in investment-hero.css. The sliders support keyboard input and use the shared financial lesson model.
 
 Verification: desktop at 1440px and mobile at 390px and 320px; run `npm run check`
 for models, security, production build and desktop/mobile browser coverage.

@@ -35,7 +35,7 @@ function MarketsContent() {
   };
   return (
     <main className="planner-page markets-page">
-      <PlannerNavigation />
+      <PlannerNavigation current="Global Markets" />
       <MarketWorkspace
         open={workspaceOpen}
         close={() => setWorkspaceOpen(false)}

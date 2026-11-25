@@ -100,7 +100,7 @@ test("converter is discoverable through the header, directory and footer", async
   const menu = page.getByRole("button", { name: "Open navigation" });
   if (await menu.isVisible()) await menu.click();
   await expect(
-    page.locator(".home-nav").getByRole("link", { name: "Convert currency" }),
+    page.locator(".home-header").getByRole("link", { name: "Convert currency" }),
   ).toHaveAttribute("href", base + "currency-converter/");
   await expect(
     page

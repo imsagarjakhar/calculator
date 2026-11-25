@@ -6,8 +6,8 @@
   padding: 22px;
   border: 1px solid #cbdcd2;
   border-radius: 14px;
-  background: #eef4ea;
-  color: #254638;
+  background: var(--studio-tint);
+  color: var(--studio-ink);
 }
 .planner-worked-example > span {
   display: grid;
@@ -17,7 +17,7 @@
   flex-shrink: 0;
   border-radius: 50%;
   background: #fff;
-  color: #176b52;
+  color: var(--studio-accent);
 }
 .planner-worked-example h2 {
   font-size: 18px;
@@ -26,29 +26,29 @@
 .planner-worked-example p {
   font-size: 12px;
   line-height: 1.8;
-  color: #52685e;
+  color: var(--studio-muted);
   margin: 0 0 8px;
 }
 .planner-worked-example a {
   font-size: 12px;
   line-height: 1.8;
-  color: #176b52;
+  color: var(--studio-accent);
   font-weight: 600;
 }
 .home-worked-guides {
   margin: 45px 0;
   padding: 28px 0;
-  border-block: 1px solid #d5dfd6;
+  border-block: 1px solid var(--studio-rule);
 }
 .home-worked-guides h2 {
   font-size: clamp(26px, 3vw, 36px);
   margin: 10px 0;
-  color: #254638;
+  color: var(--studio-ink);
 }
 .home-worked-guides p {
   font-size: 13px;
   line-height: 1.8;
-  color: #52685e;
+  color: var(--studio-muted);
 }
 .home-worked-grid {
   display: grid;
@@ -60,8 +60,8 @@
   padding: 24px;
   background: #eff4ec;
   border-radius: 14px;
-  border: 1px solid #d5dfd6;
-  color: #254638;
+  border: 1px solid var(--studio-rule);
+  color: var(--studio-ink);
   text-decoration: none;
 }
 .home-worked-grid > a:hover {
@@ -79,7 +79,7 @@
 .home-worked-grid strong,
 .home-worked-all {
   font-size: 12px;
-  color: #176b52;
+  color: var(--studio-accent);
 }
 @media (max-width: 700px) {
   .home-worked-grid {

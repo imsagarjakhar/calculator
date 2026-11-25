@@ -38,7 +38,7 @@ function Contact() {
 export function TrustPage({ page }: { page: TrustRoute }) {
   return (
     <main className="planner-page trust-page">
-      <PlannerNavigation />
+      <PlannerNavigation current={{about:"About",contact:"Contact",methodology:"Methodology",privacy:"Privacy"}[page]} />
       <header className="trust-header">
         <p className="trust-kicker">
           {page === "about"

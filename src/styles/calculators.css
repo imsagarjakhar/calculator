@@ -1,7 +1,7 @@
 body {
   margin: 0;
   background: #f5f7f2;
-  color: #183e36;
+  color: var(--studio-ink);
 }
 .ledger,
 .ledger * {
@@ -65,7 +65,7 @@ body {
 }
 .ledger-nav {
   min-height: 76px;
-  border-bottom: 1px solid #c8d5c8;
+  border-bottom: 1px solid var(--studio-rule);
 }
 .ledger-nav a:first-child {
   font: 500 1.55rem var(--font-editorial);
@@ -73,7 +73,7 @@ body {
 }
 .ledger-hero {
   margin-top: 2rem;
-  background: #183e36;
+  background: var(--studio-ink);
   color: #fafaf1;
   padding: clamp(1.75rem, 5vw, 4rem);
   border-radius: 20px;
@@ -160,7 +160,7 @@ body {
 }
 .ledger-group {
   padding: 1.65rem 0;
-  border-top: 1px solid #c8d5c8;
+  border-top: 1px solid var(--studio-rule);
 }
 .ledger-group p {
   margin: 0.25rem 0 0;
@@ -210,7 +210,7 @@ body {
   gap: 1rem;
 }
 .ledger-results {
-  background: #e0eee1;
+  background: var(--studio-tint);
   border: 1px solid #c2d5c5;
   border-radius: 16px;
   padding: clamp(1.25rem, 3vw, 2rem);
@@ -247,7 +247,7 @@ body {
 .ledger-schedule {
   background: white;
   padding: 1.25rem;
-  border: 1px solid #c8d5c8;
+  border: 1px solid var(--studio-rule);
   border-radius: 16px;
 }
 .ledger-table {
@@ -270,7 +270,7 @@ body {
 .ledger-table th {
   position: sticky;
   top: 0;
-  background: #e0eee1;
+  background: var(--studio-tint);
 }
 .ledger-output-actions {
   margin-bottom: 0;
@@ -289,7 +289,7 @@ body {
   }
   .ledger-hero {
     background: white;
-    color: #183e36;
+    color: var(--studio-ink);
     padding: 1rem 0;
   }
   .ledger-hero p,

@@ -10,7 +10,7 @@ export const BucketPage = memo(function BucketPage() {
   return (
     <div ref={ref}>
       <main className="planner-page">
-        <PlannerNavigation />
+        <PlannerNavigation current="Retirement buckets" showCurrency />
         <PlannerHeader kind="bucket" />
         <div className="bucket-workspace">
           <section className="card setup-card" aria-labelledby="setupTitle">

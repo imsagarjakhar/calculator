@@ -84,7 +84,7 @@ export function HomePage() {
       className={screen === "home" ? undefined : "planner-page"}
       onClick={navigate}
     >
-      <PlannerNavigation id="plannerNav" hidden={screen === "home"}>
+      <PlannerNavigation current={screen === "survival" ? "Retirement withdrawals" : "Investment growth"} showCurrency id="plannerNav" hidden={screen === "home"}>
         <div className="view-switch">
           <button
             type="button"

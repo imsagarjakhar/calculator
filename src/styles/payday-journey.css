@@ -1,0 +1,342 @@
+.payday-journey {
+  --indigo: #24194d;
+  --orange: #bc470d;
+  --lilac: #e9ddfa;
+  isolation: isolate;
+  color: var(--indigo);
+  text-align: left;
+  border-radius: 21px;
+  overflow: hidden;
+  margin: 1.15rem 0 1.5rem;
+  background: #f2eafd;
+  font-family: "Segoe UI", sans-serif;
+}
+.payday-journey * {
+  box-sizing: border-box;
+}
+.journey-scene {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: clamp(450px, 39vw, 575px);
+  background: #e6d5f4;
+}
+.journey-landscape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  z-index: -2;
+}
+.journey-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #efe3fbea 0%,
+    #efe3fbbf 31%,
+    #efe3fb28 57%,
+    transparent 75%
+  );
+  z-index: -1;
+}
+.journey-content {
+  width: min(55%, 610px);
+  padding: clamp(1.6rem, 3.7vw, 3.35rem);
+}
+.journey-content .journey-eyebrow {
+  color: #594073;
+  font:
+    700 0.88rem/1.4 "Segoe UI",
+    sans-serif;
+  margin: 0 0 0.65rem;
+}
+.journey-eyebrow span {
+  padding: 0 0.3rem;
+}
+.payday-journey #welcomeTitle {
+  font:
+    760 clamp(2.45rem, 4.8vw, 4.9rem) / 1.01 "Segoe UI",
+    sans-serif;
+  color: var(--indigo);
+  letter-spacing: -0.066em;
+  margin: 0;
+  max-width: 12ch;
+}
+.payday-journey #welcomeTitle em {
+  font: inherit;
+  display: inline;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: #ed792f;
+  text-decoration-thickness: 0.065em;
+  text-underline-offset: 0.1em;
+}
+.journey-content .journey-intro {
+  font:
+    500 clamp(1rem, 1.55vw, 1.19rem) / 1.45 "Segoe UI",
+    sans-serif;
+  color: #3a2b51;
+  max-width: 37ch;
+  margin: 1.05rem 0 1.25rem;
+}
+.journey-mission,
+.payday-journey .quest-play {
+  background: #fffcffed;
+  border: 1px solid #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px #36234d10;
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+  backdrop-filter: blur(6px);
+}
+.journey-mission fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.journey-mission legend {
+  font-size: 1.05rem;
+  font-weight: 750;
+  margin: 0 0 0.65rem;
+}
+.journey-mission fieldset > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.payday-journey button,
+.payday-journey .quest-end a {
+  font:
+    650 0.92rem/1.2 "Segoe UI",
+    sans-serif;
+  color: #34234e;
+  border: 1px solid #c2afd6;
+  background: white;
+  min-height: 42px;
+  border-radius: 9px;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  box-shadow: none;
+  text-decoration: none;
+}
+.journey-mission fieldset button[aria-pressed="true"],
+.payday-journey .quest-options button:hover:enabled {
+  background: #eaddf8;
+  border-color: #775795;
+  color: #2d1546;
+}
+.journey-mission > p {
+  margin: 0.7rem 0;
+  color: #574766;
+  font-size: 0.95rem;
+}
+.journey-mission > small {
+  display: block;
+  text-align: center;
+  color: #675874;
+  margin: 0.55rem 0 0;
+}
+.payday-journey .journey-start,
+.payday-journey .quest-play div[aria-live] button,
+.payday-journey .quest-end button:first-child {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+  font-weight: 700;
+}
+.payday-journey .journey-start {
+  width: 100%;
+  font-size: 1.05rem;
+  min-height: 46px;
+}
+.payday-journey button:hover:enabled {
+  border-color: #503366;
+}
+.payday-journey .journey-start:hover {
+  background: #a23a09;
+}
+.payday-journey.is-playing .journey-content {
+  width: min(64%, 700px);
+}
+.payday-journey.is-playing #welcomeTitle {
+  font-size: clamp(1.9rem, 3.2vw, 3rem);
+  max-width: none;
+  margin: 0 0 1rem;
+}
+.payday-journey .quest-play {
+  border-top: 0;
+}
+.payday-journey .quest-play h2 {
+  font:
+    700 clamp(1.15rem, 1.8vw, 1.48rem) / 1.3 "Segoe UI",
+    sans-serif;
+  color: var(--indigo);
+}
+.payday-journey .quest-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+}
+.payday-journey .quest-options button {
+  text-align: left;
+  justify-content: flex-start;
+  min-height: 44px;
+  background: white;
+}
+.payday-journey .quest-options button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.payday-journey .quest-balances {
+  font-size: 0.92rem;
+}
+.payday-journey .quest-play .mission-outcome {
+  background: #f1e9fa;
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+.journey-route {
+  background: #f1eafb;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem clamp(1rem, 3vw, 3rem);
+  border-top: 1px solid #d9cce9;
+}
+.journey-route h2 {
+  font:
+    750 clamp(1.15rem, 2vw, 1.7rem) / 1.15 "Segoe UI",
+    sans-serif;
+  letter-spacing: -0.04em;
+  color: var(--indigo);
+  margin: 0;
+  white-space: nowrap;
+}
+.journey-route ol {
+  display: flex;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.journey-route li {
+  position: relative;
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  text-align: center;
+  font-size: 0.84rem;
+}
+.journey-route li:before {
+  content: "";
+  position: absolute;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  top: 18px;
+  background: #bda8de;
+}
+.journey-route li:first-child:before {
+  display: none;
+}
+.journey-route li[data-reached="true"]:before {
+  background: #aa4b1d;
+}
+.journey-stop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  background: #e3d5f8;
+  color: #513672;
+  border: 1px solid #c7afe3;
+}
+.journey-route li[data-reached="true"] .journey-stop {
+  background: #ffddbc;
+  border-color: #d97738;
+}
+.journey-stop svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.journey-route li strong {
+  margin-top: 0.35rem;
+  text-transform: capitalize;
+}
+.journey-route small {
+  color: #655276;
+  font-size: 0.78rem;
+}
+@media (max-width: 720px) {
+  .payday-journey {
+    border-radius: 14px;
+    margin-top: 0.6rem;
+  }
+  .journey-scene {
+    display: block;
+    min-height: 0;
+    padding-top: clamp(150px, 39vw, 255px);
+  }
+  .journey-landscape {
+    height: clamp(185px, 49vw, 305px);
+    object-position: 75% center;
+  }
+  .journey-scene::before {
+    background: linear-gradient(0deg, #e6d5f4 0%, transparent 40%);
+    top: 0;
+    bottom: auto;
+    height: clamp(185px, 49vw, 305px);
+  }
+  .journey-content,
+  .payday-journey.is-playing .journey-content {
+    width: 100%;
+    padding: 1.1rem;
+  }
+  .payday-journey #welcomeTitle {
+    max-width: 100%;
+    font-size: clamp(2rem, 7vw, 3rem);
+  }
+  .journey-content .journey-intro {
+    margin: 0.65rem 0 1rem;
+  }
+  .journey-route {
+    display: block;
+    padding: 0.8rem;
+  }
+  .journey-route h2 {
+    margin-bottom: 0.65rem;
+  }
+  .journey-route li {
+    font-size: 0.77rem;
+  }
+  .journey-route li strong {
+    max-width: 8ch;
+    line-height: 1.15;
+  }
+  .journey-route small {
+    font-size: 0.72rem;
+  }
+  .journey-mission fieldset button {
+    flex: 1;
+    min-width: 0;
+    padding: 0.45rem;
+  }
+  .payday-journey.is-playing .journey-scene {
+    padding-top: 0;
+  }
+  .payday-journey.is-playing .journey-landscape {
+    opacity: 0.22;
+  }
+}

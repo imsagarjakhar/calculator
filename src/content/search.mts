@@ -68,7 +68,7 @@ export const searchPages = {
   home: {
     title: "Finance Guides & Financial Planning Tools | Financial AI Planner",
     description:
-        "Play Payday Quest to explore your financial habits, then use worked examples and private calculators for budgeting, investing and retirement planning.",
+        "Estimate monthly investments and withdrawals with the SIP and SWP calculator, then explore worked examples and private tools for budgeting and retirement.",
     name: "Financial AI Planner",
   },
   growth: {

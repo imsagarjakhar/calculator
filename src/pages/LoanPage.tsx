@@ -540,12 +540,11 @@ export function LoanPage() {
     : [];
   return (
     <main className="planner-page budget-app loan-app">
-      <PlannerNavigation />
+      <PlannerNavigation current="Loan payoff" showCurrency />
       <PlannerHeader
         kind="loan"
         controls={{
           currency: plan.currency,
-          onCurrency: (c) => update("currency", c),
           onImport: (file) => {
             void importFile(file);
           },

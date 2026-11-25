@@ -238,7 +238,7 @@ export function SiteSearch() {
       <input
         type="search"
         aria-label="Search website"
-        placeholder="Search anything…"
+        placeholder="Search"
         value={query}
         aria-controls={open ? id : undefined}
         onFocus={() => setOpen(true)}

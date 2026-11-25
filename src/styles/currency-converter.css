@@ -8,14 +8,14 @@
   text-align: center;
 }
 .currency-hero h1 {
-  font-family: Newsreader, Georgia, serif;
+  font-family: var(--font-ui);
   font-size: clamp(2.5rem, 5vw, 4rem);
   line-height: 1.06;
   letter-spacing: -0.035em;
   margin: 14px 0 20px;
 }
 .currency-hero > p {
-  color: #496459;
+  color: var(--studio-muted);
 }
 .currency-eyebrow {
   font-size: 0.8rem;
@@ -45,7 +45,7 @@
 .currency-badge {
   padding: 7px 12px;
   border-radius: 100px;
-  background: #edf4e9;
+  background: var(--studio-tint);
   color: #286148;
   font-size: 0.75rem;
 }
@@ -64,7 +64,7 @@
   border-radius: 11px;
   padding: 12px 14px;
   background: #f9fbf8;
-  color: #203b32;
+  color: var(--studio-ink);
   font: inherit;
 }
 .currency-card .currency-amount {
@@ -86,27 +86,27 @@
   padding: 0;
   border-radius: 12px;
   font-size: 1.6rem;
-  color: #176c50;
-  background: #edf4e9;
+  color: var(--studio-accent);
+  background: var(--studio-tint);
 }
 .currency-result {
   margin: 28px 0 20px;
   padding: 25px;
   border-radius: 16px;
-  background: #edf4e9;
-  color: #203b32;
+  background: var(--studio-tint);
+  color: var(--studio-ink);
   overflow-wrap: anywhere;
 }
 .currency-result > span,
 .currency-result small {
   font-size: 0.8rem;
-  color: #496459;
+  color: var(--studio-muted);
 }
 .currency-result output {
   display: block;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
   font-weight: 650;
-  color: #176c50;
+  color: var(--studio-accent);
   line-height: 1.25;
   margin: 12px 0 16px;
   font-variant-numeric: tabular-nums;
@@ -122,11 +122,11 @@
 .currency-source p,
 .currency-note {
   font-size: 0.8rem;
-  color: #496459;
+  color: var(--studio-muted);
   line-height: 1.7;
 }
 .currency-source a {
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .currency-source button {
@@ -155,7 +155,7 @@
   font-weight: 600;
 }
 .currency-explainer p {
-  color: #496459;
+  color: var(--studio-muted);
   font-size: 0.9rem;
   line-height: 1.8;
   max-width: 68ch;

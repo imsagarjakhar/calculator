@@ -20,7 +20,7 @@ export function usePlanner(...mounts: Mount[]) {
     }
     const root = ref.current;
     const selector = root.querySelector<HTMLSelectElement>(
-      ".planner-currency select",
+      ".planner-header .planner-currency select",
     );
     const sync = () => {
       const currency = preferredCurrency();

@@ -28,8 +28,8 @@ for (const item of [
         .click();
     const header = page.locator(".planner-header");
     await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
-    await header
-      .getByRole("combobox", { name: "Plan currency", exact: true })
+    await page
+      .getByRole("combobox", { name: "Your currency", exact: true })
       .selectOption("USD");
     await expect(page.getByLabel(item.label, { exact: true })).toHaveValue(
       item.initial,
@@ -37,7 +37,7 @@ for (const item of [
     await page.getByLabel(item.label, { exact: true }).fill("65000");
     await page.reload();
     await expect(
-      header.getByRole("combobox", { name: "Plan currency", exact: true }),
+      page.getByRole("combobox", { name: "Your currency", exact: true }),
     ).toHaveValue("USD");
     if (item.kind === "budget") {
       await expect(page.getByLabel(item.label, { exact: true })).toHaveValue(
@@ -73,7 +73,7 @@ for (const item of [
     page.once("dialog", (d) => d.accept());
     await header.getByRole("button", { name: "Reset", exact: true }).click();
     await expect(
-      header.getByRole("combobox", { name: "Plan currency", exact: true }),
+      page.getByRole("combobox", { name: "Your currency", exact: true }),
     ).toHaveValue(item.kind === "budget" ? "USD" : "INR");
     await expect(
       page.getByLabel(item.restoredLabel, { exact: true }),

@@ -1,3 +1,4 @@
+import { PlannerNavigation } from "../components/PlannerNavigation";
 import { useEffect, useState } from "react";
 import { categories } from "../calculators/catalog";
 import type { Calculator, Field } from "../calculators/model";
@@ -380,12 +381,7 @@ export function CalculatorsPage() {
   const matches = filtered.reduce((sum, c) => sum + c.tools.length, 0);
   return (
     <main className="ledger">
-      <header className="ledger-nav">
-        <a href={plannerHref("home")}>Financial AI Planner</a>
-        <a href={calc ? "#directory" : plannerHref("home")}>
-          {calc ? "All calculators" : "Home"}
-        </a>
-      </header>
+      <PlannerNavigation current={calc?.title ?? "Calculators"} parent={calc ? {label:"All calculators",href:"#directory"} : undefined} />
       {calc ? (
         <>
           <div className="ledger-hero">

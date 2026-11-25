@@ -15,19 +15,17 @@ html:has(.markets-page) {
 }
 .markets-hero h1 {
   font:
-    550 clamp(2.5rem, 5vw, 4.5rem) / 1.06 Newsreader,
-    Georgia,
-    serif;
+    550 clamp(2.5rem, 5vw, 4.5rem) / 1.06 var(--font-ui);
   letter-spacing: -0.035em;
   margin: 14px 0 22px;
 }
 .markets-hero > div > p:last-child {
-  color: #496459;
+  color: var(--studio-muted);
 }
 .markets-kicker {
   font-size: 0.75rem;
   letter-spacing: 0.09em;
-  color: #496459;
+  color: var(--studio-muted);
   margin: 0 0 10px;
 }
 .markets-globe {
@@ -42,7 +40,7 @@ html:has(.markets-page) {
   stroke-width: 1;
 }
 .markets-globe .markets-globe-trend {
-  stroke: #176c50;
+  stroke: var(--studio-accent);
   stroke-width: 3;
 }
 .market-toolbar {
@@ -51,9 +49,9 @@ html:has(.markets-page) {
   gap: 28px;
   flex-wrap: wrap;
   padding: 24px;
-  border: 1px solid #cedbd2;
+  border: 1px solid var(--studio-rule);
   border-radius: 16px;
-  background: #edf4e9;
+  background: var(--studio-tint);
   margin: 10px 0 40px;
 }
 .market-toolbar label {
@@ -70,7 +68,7 @@ html:has(.markets-page) {
   border-radius: 8px;
   background: #fff;
   padding: 10px 14px;
-  color: #203b32;
+  color: var(--studio-ink);
   font: inherit;
 }
 .market-delay {
@@ -85,7 +83,7 @@ html:has(.markets-page) {
 }
 .market-delay p {
   font-size: 0.8rem;
-  color: #496459;
+  color: var(--studio-muted);
   line-height: 1.6;
   margin: 8px 0 0;
 }
@@ -95,7 +93,7 @@ html:has(.markets-page) {
 .market-section {
   margin: 0 0 38px;
   padding: 26px;
-  border: 1px solid #d0ddd4;
+  border: 1px solid var(--studio-rule);
   border-radius: 18px;
   background: #fff;
   min-width: 0;
@@ -114,19 +112,19 @@ html:has(.markets-page) {
 }
 .market-section-heading > span {
   font-size: 0.8rem;
-  color: #496459;
+  color: var(--studio-muted);
   max-width: 34ch;
 }
 .market-help {
   font-size: 0.82rem;
-  color: #496459;
+  color: var(--studio-muted);
   line-height: 1.8;
   margin: 14px 0;
 }
 .indian-market-help {
   margin: 14px 0 18px;
   padding: 12px 14px;
-  border: 1px solid #d0ddd4;
+  border: 1px solid var(--studio-rule);
   border-radius: 10px;
   background: #f4f8f0;
   font-size: 0.82rem;
@@ -152,13 +150,13 @@ html:has(.markets-page) {
   padding: 8px 12px;
 }
 .indian-market-help a {
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .market-index-link {
   display: inline-block;
   margin-left: 12px;
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .market-view-switch,
@@ -172,15 +170,15 @@ html:has(.markets-page) {
   min-height: 44px;
   padding: 9px 14px;
   font-size: 0.8rem;
-  border: 1px solid #cedbd2;
+  border: 1px solid var(--studio-rule);
   background: #f8fbf6;
   color: #285d47;
 }
 .market-view-switch button[aria-pressed="true"],
 .market-periods button[aria-pressed="true"] {
   color: #fff;
-  background: #176c50;
-  border-color: #176c50;
+  background: var(--studio-accent);
+  border-color: var(--studio-accent);
 }
 .market-periods {
   margin-bottom: 20px;
@@ -202,7 +200,7 @@ html:has(.markets-page) {
   flex: 1 1 220px;
   min-width: 0;
   padding: 12px;
-  border: 1px solid #cedbd2;
+  border: 1px solid var(--studio-rule);
   border-radius: 8px;
   font: inherit;
 }
@@ -213,13 +211,13 @@ html:has(.markets-page) {
   display: inline;
   min-height: 44px;
   padding: 4px 8px;
-  color: #176c50;
-  background: #edf4e9;
+  color: var(--studio-accent);
+  background: var(--studio-tint);
   border: 0;
   text-decoration: underline;
 }
 .market-help a {
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .market-embed {
@@ -245,7 +243,7 @@ html:has(.markets-page) {
   border: 1px solid #c3d3ca;
   border-radius: 18px;
   background: #f8faf7;
-  color: #203b32;
+  color: var(--studio-ink);
   overflow: auto;
   box-shadow: 0 24px 90px #102f3240;
 }
@@ -261,14 +259,12 @@ html:has(.markets-page) {
   justify-content: space-between;
   gap: 16px;
   padding: 22px 26px;
-  border-bottom: 1px solid #d0ddd4;
+  border-bottom: 1px solid var(--studio-rule);
   background: #fff;
 }
 .market-workspace-heading h2 {
   font:
-    550 2rem/1.1 Newsreader,
-    Georgia,
-    serif;
+    550 2rem/1.1 var(--font-ui);
   margin: 0;
 }
 .market-workspace-heading .markets-kicker {
@@ -306,7 +302,7 @@ html:has(.markets-page) {
 }
 .market-watchlists {
   padding: 24px 20px;
-  border-left: 1px solid #d0ddd4;
+  border-left: 1px solid var(--studio-rule);
   background: #fff;
   min-width: 0;
 }
@@ -322,7 +318,7 @@ html:has(.markets-page) {
   margin: 0;
 }
 .watchlists-count {
-  background: #edf4e9;
+  background: var(--studio-tint);
   color: #285d47;
   padding: 6px 10px;
   border-radius: 20px;
@@ -358,10 +354,10 @@ html:has(.markets-page) {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  border: 1px solid #cedbd2;
+  border: 1px solid var(--studio-rule);
   border-radius: 8px;
   background: #fff;
-  color: #203b32;
+  color: var(--studio-ink);
   padding: 10px;
   min-height: 44px;
   font: inherit;
@@ -387,7 +383,7 @@ html:has(.markets-page) {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  color: #496459;
+  color: var(--studio-muted);
   font-size: 0.75rem;
   margin-top: 18px;
 }
@@ -407,7 +403,7 @@ html:has(.markets-page) {
   margin-bottom: 0;
 }
 .watchlist-management {
-  border-top: 1px solid #d0ddd4;
+  border-top: 1px solid var(--studio-rule);
   padding: 18px 0;
   margin-top: 20px;
 }
@@ -421,10 +417,10 @@ html:has(.markets-page) {
 }
 .watchlist-storage summary {
   cursor: pointer;
-  color: #496459;
+  color: var(--studio-muted);
 }
 .watchlists-account {
-  border-top: 1px solid #d0ddd4;
+  border-top: 1px solid var(--studio-rule);
   padding-top: 12px;
 }
 .watchlist-manage {
@@ -433,7 +429,7 @@ html:has(.markets-page) {
 }
 .watchlist-manage summary {
   cursor: pointer;
-  color: #176c50;
+  color: var(--studio-accent);
 }
 .watchlist-manage form button {
   margin: 8px 0;
@@ -470,27 +466,27 @@ html:has(.markets-page) {
 }
 .watchlist-symbol span {
   font-size: 0.65rem;
-  color: #496459;
+  color: var(--studio-muted);
 }
 .watchlist-symbol[aria-pressed="true"] {
-  border-color: #176c50;
-  background: #edf4e9;
+  border-color: var(--studio-accent);
+  background: var(--studio-tint);
 }
 .watchlist-save {
   display: grid;
   gap: 8px;
   padding-top: 15px;
   margin-top: 18px;
-  border-top: 1px solid #d0ddd4;
+  border-top: 1px solid var(--studio-rule);
 }
 .watchlist-save > span,
 .watchlist-notice {
   font-size: 0.8rem;
-  color: #176c50;
+  color: var(--studio-accent);
 }
 .watchlist-save .primary {
   color: #fff;
-  background: #176c50;
+  background: var(--studio-accent);
 }
 .market-watchlists .market-help {
   font-size: 0.73rem;
@@ -513,7 +509,7 @@ html:has(.markets-page) {
   }
   .market-watchlists {
     border-left: 0;
-    border-top: 1px solid #d0ddd4;
+    border-top: 1px solid var(--studio-rule);
   }
   .market-workspace-chart {
     padding: 18px 10px;
@@ -533,25 +529,25 @@ html:has(.markets-page) {
   text-align: center;
   padding: 5px 0;
   font-size: 12px;
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .market-reading-note {
-  background: #edf4e9;
-  border-left: 3px solid #176c50;
+  background: var(--studio-tint);
+  border-left: 3px solid var(--studio-accent);
   border-radius: 0 12px 12px 0;
   padding: 24px;
   margin-bottom: 25px;
 }
 .market-country-fallback {
   padding: 32px;
-  border: 1px solid #cedbd2;
+  border: 1px solid var(--studio-rule);
   border-radius: 16px;
   background: #fff;
   margin: 0 0 32px;
 }
 .market-country-fallback p {
-  color: #496459;
+  color: var(--studio-muted);
   line-height: 1.8;
   max-width: 65ch;
 }
@@ -559,7 +555,7 @@ html:has(.markets-page) {
   min-height: 580px;
 }
 .market-country-fallback a {
-  color: #176c50;
+  color: var(--studio-accent);
   text-decoration: underline;
 }
 .market-fallback-indices {
@@ -570,7 +566,7 @@ html:has(.markets-page) {
 }
 .market-reading-note p {
   font-size: 0.85rem;
-  color: #496459;
+  color: var(--studio-muted);
   line-height: 1.8;
   margin-bottom: 0;
 }
@@ -588,13 +584,13 @@ html:has(.markets-page) {
 }
 .market-notes p {
   max-width: 85ch;
-  color: #496459;
+  color: var(--studio-muted);
   font-size: 0.9rem;
   line-height: 1.8;
 }
 .market-notes a {
   text-decoration: underline;
-  color: #176c50;
+  color: var(--studio-accent);
 }
 @media (max-width: 650px) {
   .markets-page .markets-hero {

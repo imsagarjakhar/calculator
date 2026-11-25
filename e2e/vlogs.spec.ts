@@ -138,7 +138,7 @@ test("blogs are loaded at runtime, searchable and readable without login", async
     page.getByRole("button", { name: "Edit", exact: true }),
   ).toHaveCount(0);
   expect(errors).toEqual([]);
-  await page.getByRole("link", { name: "← All planners", exact: true }).click();
+  await page.getByRole("link", { name: "All planners", exact: true }).click();
   await expect(page.locator("#homeScreen")).toBeVisible();
   await expect(page.locator(".vlog-message")).toHaveCount(0);
   await page.goBack();

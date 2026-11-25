@@ -1,0 +1,30 @@
+.pay-challenge{box-sizing:border-box;margin:1.1rem 0 1.35rem;border:1px solid #d9cfe4;border-radius:18px;overflow:hidden;background:#fff;color:#2b2041;text-align:left;font:1rem/1.4 "Segoe UI",sans-serif}
+.pay-challenge *{box-sizing:border-box}
+.pay-challenge .pay-title{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.15rem clamp(1rem,3vw,2.6rem);margin:0;text-align:left;background:#ecddf3 linear-gradient(90deg,#efe4f9 20%,#efe4f9ec 52%,#efe4f92b 85%);position:relative;isolation:isolate}
+.pay-title:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#f0e5fa 15%,#f0e5faf2 47%,transparent 90%),url('/art/payday-journey.webp') right 40%/cover no-repeat}
+.pay-challenge .pay-title h1{font:760 clamp(1.9rem,3.7vw,3.35rem)/1.05 "Segoe UI",sans-serif;letter-spacing:-.06em;margin:0;color:#261c46}
+.pay-title p{font-size:.9rem;font-weight:700;color:#674181;margin:0 0 .3rem}
+.pay-title>span{white-space:nowrap;border:1px solid #d6c9de;border-radius:20px;padding:.38rem .7rem;background:#fffcffef;color:#493657;font-size:.83rem;font-weight:700}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr}
+.pay-controls,.pay-outlook{padding:clamp(1.1rem,2.2vw,1.9rem) clamp(1rem,3vw,2.6rem);min-width:0}
+.pay-outlook{background:#faf8fc;border-left:1px solid #e1d9e8}
+.pay-challenge h2{font:720 clamp(1.15rem,1.8vw,1.5rem)/1.2 "Segoe UI",sans-serif;letter-spacing:-.035em;margin:0;color:#2b2041}
+.pay-controls>p,.pay-outlook p{margin:.45rem 0 .8rem;color:#594e65;font-size:.95rem;max-width:55ch}
+.pay-slider label,.pay-total,.pay-trend figcaption,.pay-axis,.pay-fixed,.pay-buttons{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.pay-slider label{font-size:.94rem;font-weight:650}.pay-slider label strong{color:var(--tone)}
+.pay-slider input[type=range]{display:block;appearance:none;cursor:pointer;width:100%;height:28px;margin:0 0 .35rem;padding:0;border:0;box-shadow:none;border-radius:0;background:transparent}
+.pay-slider input::-webkit-slider-runnable-track{height:7px;border-radius:9px;background:linear-gradient(to right,var(--tone) var(--fill),#eae4ef var(--fill))}
+.pay-slider input::-moz-range-track{height:7px;border-radius:9px;background:#eae4ef}.pay-slider input::-moz-range-progress{height:7px;border-radius:9px;background:var(--tone)}
+.pay-slider input::-webkit-slider-thumb{appearance:none;width:20px;height:20px;margin-top:-6.5px;border:3px solid var(--tone);border-radius:50%;background:white;box-shadow:0 2px 4px #291b3c22}
+.pay-slider input::-moz-range-thumb{width:15px;height:15px;border:3px solid var(--tone);border-radius:50%;background:white}
+.pay-slider input:disabled{opacity:.55;cursor:default}
+.pay-allocation{display:flex;height:7px;background:#ede9f0;border-radius:8px;overflow:hidden;margin:.8rem 0 .4rem}
+.pay-fixed,.pay-total{font-size:.95rem}.pay-total strong{color:#14665c;font-variant-numeric:tabular-nums}
+.pay-challenge button{margin-top:.8rem;border:1px solid #bfaecc;border-radius:9px;background:#fff;color:#3f2c50;min-height:42px;padding:.55rem 1rem;cursor:pointer;font:700 .93rem "Segoe UI",sans-serif}
+.pay-challenge button.pay-next{background:#ac410e;color:white;border-color:#ac410e}.pay-next:hover{filter:brightness(.92)}
+.pay-buttons span{color:#17675d;font-size:.9rem}
+.pay-stat{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:.85rem 0}.pay-stat span,.pay-trend figcaption,.pay-axis,.pay-key,.pay-settings label{color:#60546d;font-size:.82rem}
+.pay-stat strong{display:block;color:#2d2241;font-size:clamp(1.2rem,2.2vw,1.85rem);line-height:1.2;font-variant-numeric:tabular-nums}
+.pay-trend{margin:0}.pay-trend svg{display:block;width:100%;height:110px;overflow:visible}.pay-key{display:flex;gap:1rem;margin:.35rem 0}.pay-key span:before{content:"";display:inline-block;width:15px;border-bottom:3px solid #8051a5;margin-right:.35rem;vertical-align:middle}.pay-key:has(span+span) span:first-child:before{border-bottom-style:dashed}.pay-key span+span:before{border-color:#19766c}
+.pay-outlook details{border-top:1px solid #ded6e5;padding-top:.5rem;margin-top:.6rem}.pay-outlook summary{color:#574266;cursor:pointer;font-size:.86rem;font-weight:650}.pay-settings{display:flex;flex-wrap:wrap;gap:.8rem;margin:.6rem 0}.pay-settings label{display:grid;gap:.2rem}.pay-settings select{background:#fff;border:1px solid #cabdd4;border-radius:5px;color:#372940;padding:.35rem;font:inherit}.pay-outlook p.pay-difference{color:#245c55;margin:.5rem 0}
+@media(max-width:740px){.pay-grid{grid-template-columns:1fr}.pay-outlook{border-left:none;border-top:1px solid #e1d9e8}.pay-challenge .pay-title{align-items:flex-start;flex-direction:row}.pay-title>span{font-size:.75rem}.pay-trend svg{height:95px}.pay-challenge .pay-title h1{font-size:clamp(1.6rem,6vw,2.4rem)}}

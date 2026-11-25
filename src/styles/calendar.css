@@ -20,7 +20,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--accent, #176b52);
+  color: var(--accent, var(--studio-accent));
   border-radius: 7px;
 }
 .planner-date-open:hover {
@@ -40,15 +40,13 @@
   max-height: calc(100dvh - 28px);
   overflow: auto;
   padding: 26px;
-  border: 1px solid #ced9d3;
+  border: 1px solid var(--studio-rule);
   border-radius: 20px;
-  background: #f5f6f3;
-  color: #27566d;
+  background: var(--studio-surface);
+  color: var(--studio-ink);
   box-shadow: 0 24px 90px #0009;
   font:
-    15px/1.5 Arial,
-    Helvetica,
-    sans-serif;
+    15px/1.5 var(--font-ui);
 }
 .planner-calendar::backdrop {
   background: #f9faf8b8;
@@ -61,7 +59,7 @@
   gap: 14px;
 }
 .planner-calendar .eyebrow {
-  color: #176b52;
+  color: var(--studio-accent);
   font-size: 10px;
   margin: 0 0 6px;
 }
@@ -72,22 +70,22 @@
 }
 .planner-calendar #plannerCalendarHelp {
   font-size: 12px;
-  color: #405969;
+  color: var(--studio-muted);
   margin: 16px 0 20px;
 }
 .planner-calendar button {
   cursor: pointer;
-  border: 1px solid #ced9d3;
+  border: 1px solid var(--studio-rule);
   border-radius: 9px;
-  color: #27566d;
-  background: #f5f6f3;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
   min-height: 42px;
   padding: 8px 12px;
   font: inherit;
 }
 .planner-calendar button:hover:not(:disabled) {
   border-color: #94ad9f;
-  background: #f5f6f3;
+  background: var(--studio-surface);
 }
 .planner-calendar button:disabled {
   opacity: 0.35;
@@ -121,7 +119,7 @@
   display: block;
   min-width: 0;
   flex: 1;
-  color: #405969;
+  color: var(--studio-muted);
   font-size: 11px;
 }
 .planner-calendar-controls input,
@@ -133,14 +131,12 @@
   margin: 4px 0 0;
   padding: 10px 8px;
   height: 42px;
-  border: 1px solid #ced9d3;
+  border: 1px solid var(--studio-rule);
   border-radius: 9px;
-  background: #f9faf8;
-  color: #27566d;
+  background: var(--studio-paper);
+  color: var(--studio-ink);
   font:
-    15px Arial,
-    Helvetica,
-    sans-serif;
+    15px var(--font-ui);
 }
 .planner-calendar-period {
   font-size: 15px;
@@ -171,7 +167,7 @@
 .planner-calendar-weekdays {
   text-align: center;
   font-size: 11px;
-  color: #405969;
+  color: var(--studio-muted);
   margin-bottom: 8px;
 }
 .planner-calendar button[aria-current="date"] {
@@ -188,12 +184,12 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  border-top: 1px solid #ced9d3;
+  border-top: 1px solid var(--studio-rule);
   margin-top: 22px;
   padding-top: 18px;
 }
 .planner-calendar .planner-calendar-today {
-  color: #176b52;
+  color: var(--studio-accent);
 }
 @media (max-width: 380px) {
   .planner-calendar {

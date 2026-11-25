@@ -18,17 +18,17 @@
   display: flex;
   gap: 22px;
   align-items: center;
-  background: #f5f6f3;
+  background: var(--studio-surface);
 }
 .vlog-user {
   color: var(--muted);
   font-size: 12px;
 }
 .planner-choices .vlog-choice {
-  background: linear-gradient(120deg, #f5f6f3, #f5f6f3);
+  background: linear-gradient(120deg, var(--studio-surface), var(--studio-surface));
 }
 .vlog-choice .choice-icon {
-  color: #176b52;
+  color: var(--studio-accent);
 }
 .vlog-error {
   padding: 14px 16px;
@@ -53,15 +53,13 @@
   max-height: calc(100dvh - 28px);
   overflow: auto;
   padding: 28px;
-  background: #f5f6f3;
-  border: 1px solid #ced9d3;
+  background: var(--studio-surface);
+  border: 1px solid var(--studio-rule);
   border-radius: 20px;
-  color: #27566d;
+  color: var(--studio-ink);
   box-shadow: 0 24px 90px #0009;
   font:
-    15px/1.5 Arial,
-    Helvetica,
-    sans-serif;
+    15px/1.5 var(--font-ui);
 }
 .vlog-modal-wide {
   width: min(760px, calc(100vw - 28px));
@@ -79,7 +77,7 @@
 }
 .vlog-modal-heading .eyebrow {
   font-size: 10px;
-  color: #176b52;
+  color: var(--studio-accent);
   margin: 0 0 8px;
 }
 .vlog-modal h2 {
@@ -100,7 +98,7 @@
   margin-top: 22px;
 }
 .vlog-form label {
-  color: #405969;
+  color: var(--studio-muted);
   font-size: 12px;
 }
 .vlog-form input,
@@ -109,15 +107,13 @@
   width: 100%;
   display: block;
   margin-top: 7px;
-  border: 1px solid #ced9d3;
+  border: 1px solid var(--studio-rule);
   border-radius: 9px;
   padding: 12px;
-  background: #f9faf8;
-  color: #27566d;
+  background: var(--studio-paper);
+  color: var(--studio-ink);
   font:
-    16px/1.5 Arial,
-    Helvetica,
-    sans-serif;
+    16px/1.5 var(--font-ui);
 }
 .vlog-form textarea {
   resize: vertical;
@@ -132,7 +128,7 @@
 }
 .vlog-helper,
 .vlog-byline {
-  color: #405969;
+  color: var(--studio-muted);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -143,7 +139,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  border-top: 1px solid #ced9d3;
+  border-top: 1px solid var(--studio-rule);
   padding-top: 20px;
 }
 .vlog-form-actions button {

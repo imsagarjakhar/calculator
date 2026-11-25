@@ -1,24 +1,16 @@
-/* The arcade palette carries through the planning and reading workspaces. */
-:root {
-  --studio-ink: #20203d;
-  --studio-blue: #4432bf;
-  --studio-lime: #dbfa79;
-  --studio-lilac: #e7e4ff;
-  --studio-paper: #f8f7fc;
-  --studio-rule: #ccc9dd;
-  --font-editorial: "Newsreader", Georgia, serif;
-  --font-ui: "Segoe UI", Arial, sans-serif;
-}
+/* Shared homepage palette for every public route. */
+
 body {
+  font-family: var(--font-ui);
   background: var(--studio-paper);
   color: var(--studio-ink);
 }
 ::selection {
-  background: #dcf69c;
-  color: #25223d;
+  background: #d7ebcd;
+  color: var(--studio-ink);
 }
 :where(button, a, input, select, summary):focus-visible {
-  outline: 3px solid #7550db;
+  outline: 3px solid var(--studio-accent);
   outline-offset: 3px;
 }
 .welcome.welcome {
@@ -40,7 +32,7 @@ body {
 }
 .home-wordmark svg {
   padding: 4px;
-  background: var(--studio-blue);
+  background: var(--studio-accent);
   color: white;
   border-radius: 7px;
 }
@@ -76,7 +68,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--studio-blue);
+  color: var(--studio-accent);
   margin: 0 0 1.2rem;
 }
 .quest-kicker span {
@@ -91,7 +83,7 @@ body {
 .quest-hero #welcomeTitle em {
   display: block;
   font: italic 525 1.14em/0.98 var(--font-editorial);
-  color: var(--studio-blue);
+  color: var(--studio-accent);
   letter-spacing: -0.065em;
 }
 .quest-hero .quest-deck {
@@ -116,7 +108,7 @@ body {
   border: 1.5px solid var(--studio-ink);
   border-radius: 8px;
   font: 700 0.95rem/1.25 var(--font-ui);
-  background: white;
+  background: var(--studio-surface);
   color: var(--studio-ink);
   text-decoration: none;
   cursor: pointer;
@@ -128,7 +120,7 @@ body {
 .quest-actions button,
 .quest-play > div > button,
 .quest-invite button {
-  background: var(--studio-lime);
+  background: var(--studio-highlight);
   box-shadow: 2px 3px 0 var(--studio-ink);
 }
 .quest-hero button:hover:enabled,
@@ -150,7 +142,7 @@ body {
   margin: 0 0.35rem;
 }
 .quest-console {
-  background: white;
+  background: var(--studio-surface);
   border: 2px solid var(--studio-ink);
   border-radius: 19px;
   overflow: hidden;
@@ -202,7 +194,7 @@ body {
   align-items: center;
 }
 .quest-console > header strong span {
-  color: var(--studio-lime);
+  color: var(--studio-highlight);
 }
 .quest-console > header > span {
   font: 500 0.85rem var(--font-ui);
@@ -231,7 +223,7 @@ body {
 .quest-play {
   padding: 1rem 1.25rem 1.35rem;
   border-top: 2px solid var(--studio-ink);
-  background: white;
+  background: var(--studio-surface);
 }
 .quest-play h2 {
   font: 700 clamp(1.13rem, 2vw, 1.45rem) / 1.25 var(--font-ui);
@@ -270,7 +262,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border: 1.5px solid var(--studio-ink);
-  background: white;
+  background: var(--studio-surface);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -285,10 +277,10 @@ body {
   border-left: 1px solid var(--studio-rule);
 }
 .money-shortcuts a:hover {
-  background: var(--studio-lilac);
+  background: var(--studio-tint);
 }
 .money-shortcuts small {
-  color: var(--studio-blue);
+  color: var(--studio-accent);
 }
 .money-shortcuts strong {
   font: 650 clamp(1rem, 2vw, 1.45rem) var(--font-ui);
@@ -305,7 +297,7 @@ body {
   gap: 1rem;
 }
 .welcome .planner-choices.tool-directory-grid .tool-card.choice {
-  background: white;
+  background: var(--studio-surface);
   border: 1px solid var(--studio-rule);
   border-radius: 12px;
   box-shadow: none;
@@ -315,14 +307,14 @@ body {
     background 0.16s ease;
 }
 .welcome .planner-choices.tool-directory-grid .tool-card.choice:hover {
-  border-color: var(--studio-blue);
-  background: #f2efff;
+  border-color: var(--studio-accent);
+  background: var(--studio-tint);
 }
 .welcome .planner-choices .tool-card.learn-choice {
-  background: #e8e4ff;
+  background: var(--studio-tint);
 }
 .welcome .planner-choices .tool-card.guides-choice {
-  background: #eff7d8;
+  background: #f4f2de;
 }
 .welcome .tool-directory .tool-card-heading strong {
   font-family: var(--font-ui);
@@ -333,11 +325,11 @@ body {
 .welcome .tool-card .tool-icon,
 .welcome .tool-card .choice-link,
 .welcome .planning-guide a {
-  color: var(--studio-blue);
+  color: var(--studio-accent);
 }
 .welcome .planning-example.planning-example,
 .welcome .home-data-notice {
-  background: var(--studio-lilac);
+  background: var(--studio-tint);
   border-color: var(--studio-rule);
   color: var(--studio-ink);
 }
@@ -346,7 +338,9 @@ body {
   --ink: var(--studio-ink);
   --bg: var(--studio-paper);
   --line: var(--studio-rule);
-  --muted: #57536a;
+  --muted: var(--studio-muted);
+  --card: var(--studio-surface);
+  --accent: var(--studio-accent);
 }
 .planner-page
   :is(
@@ -359,10 +353,10 @@ body {
   ),
 .ledger .ledger-hero {
   box-sizing: border-box;
-  background: #eae7ff;
+  background: var(--studio-hero);
   color: var(--studio-ink);
-  border: 1px solid #c8c2ec;
-  border-top: 5px solid var(--studio-blue);
+  border: 1px solid var(--studio-rule);
+  border-top: 1px solid var(--studio-rule);
   border-radius: 14px;
   padding: clamp(1.25rem, 3vw, 2.7rem);
   margin: 1.35rem 0;
@@ -394,23 +388,23 @@ body {
   h1
   em {
   font-family: var(--font-editorial);
-  color: var(--studio-blue);
+  color: var(--studio-accent);
 }
 .planner-page .planner-header.planner-header .eyebrow,
 .planner-page .trust-kicker,
 .ledger .ledger-hero span {
-  color: #4739a2;
+  color: var(--studio-accent);
 }
 .planner-page .planner-header.planner-header .planner-toolbar {
-  background: #fff;
+  background: var(--studio-surface);
   border: 1px solid var(--studio-rule);
   border-radius: 10px;
   box-shadow: none;
 }
 .planner-page .planner-header.planner-header .planner-toolbar button.primary,
 .planner-page .market-workspace-launch.primary {
-  background: var(--studio-blue);
-  border-color: var(--studio-blue);
+  background: var(--studio-accent);
+  border-color: var(--studio-accent);
   color: white;
 }
 .planner-page
@@ -425,7 +419,7 @@ body {
   ) {
   border-color: var(--studio-rule);
   border-radius: 12px;
-  box-shadow: 0 3px 0 #24213d0a;
+  box-shadow: 0 3px 0 #183d2e0a;
 }
 .planner-page
   :is(
@@ -433,25 +427,25 @@ body {
     .planner-header .planner-toolbar button,
     .planner-header .planner-currency select
   ) {
-  border-color: #c7c3d9;
+  border-color: var(--studio-rule);
   color: var(--studio-ink);
 }
 .planner-page .planner-navigation .planner-home-link:hover {
-  background: var(--studio-lilac);
-  color: var(--studio-blue);
+  background: var(--studio-tint);
+  color: var(--studio-accent);
 }
 .ledger .ledger-results,
 .ledger .ledger-table th {
-  background: #e8e5ff;
+  background: var(--studio-tint);
   color: var(--studio-ink);
   border-color: var(--studio-rule);
 }
 .ledger .ledger-hero p,
 .ledger .ledger-shortcuts a {
-  color: #44405c;
+  color: var(--studio-muted);
 }
 .ledger .ledger-shortcuts {
-  border-color: #a9a0d5;
+  border-color: var(--studio-rule);
 }
 .ledger .ledger-filters,
 .ledger .ledger-inputs,
@@ -459,12 +453,12 @@ body {
   border-color: var(--studio-rule);
 }
 .ledger .ledger-grid a {
-  border-left: 4px solid #aaa0f2;
+  border-left: 4px solid #8dae78;
   color: var(--studio-ink);
 }
 .ledger .ledger-grid a:hover,
 .ledger button:hover {
-  background: var(--studio-lilac);
+  background: var(--studio-tint);
 }
 .ledger .ledger-group h2,
 .ledger .ledger-inputs h2,
@@ -475,25 +469,25 @@ body {
 }
 .ledger button,
 .ledger .ledger-shortcuts a {
-  color: #3c328f;
+  color: var(--studio-accent);
 }
 .ledger .ledger-filters {
-  background: #fff;
+  background: var(--studio-surface);
   border-bottom: 3px solid var(--studio-ink);
 }
 .ledger .ledger-results dl div {
-  border-color: #c4bddb;
+  border-color: var(--studio-rule);
 }
 body .site-footer {
   background: var(--studio-ink);
-  color: #efecff;
-  border-top: 4px solid var(--studio-lime);
+  color: #faf7f1;
+  border-top: 4px solid var(--studio-highlight);
 }
 body .site-footer :is(a, summary, strong) {
   color: #fff;
 }
 body .site-footer :is(p, details) {
-  color: #d2cfe0;
+  color: #dee9da;
 }
 @media (max-width: 760px) {
   .quest-hero {
@@ -568,7 +562,7 @@ body .site-footer :is(p, details) {
   border: 0;
   border-radius: 4px;
   overflow: hidden;
-  accent-color: var(--studio-blue);
+  accent-color: var(--studio-accent);
   background: #e7e3ef;
 }
 .studio-directory-layout {
@@ -613,7 +607,7 @@ body .site-footer :is(p, details) {
     position: static;
   }
   .ledger .ledger-hero {
-    background: white;
+    background: var(--studio-surface);
     border: 0;
   }
 }
@@ -621,11 +615,11 @@ body .site-footer :is(p, details) {
   background: #e7e3ef;
 }
 .quest-progress::-webkit-progress-value {
-  background: var(--studio-blue);
+  background: var(--studio-accent);
 }
 .studio-library-link {
   font: 650 0.86rem var(--font-ui);
-  color: var(--studio-blue);
+  color: var(--studio-accent);
   text-decoration: underline;
   text-underline-offset: 3px;
   white-space: nowrap;
@@ -644,7 +638,7 @@ body .site-footer :is(p, details) {
 .welcome.vlog-directory .vlog-card {
   border: 1px solid var(--studio-rule);
   border-radius: 14px;
-  background: white;
+  background: var(--studio-surface);
 }
 .planner-page
   :is(
@@ -654,13 +648,13 @@ body .site-footer :is(p, details) {
     .market-reading-note,
     .budget-guideline
   ) {
-  background: #f0edff;
-  border-color: #ccc5e8;
+  background: var(--studio-tint);
+  border-color: var(--studio-rule);
   color: var(--studio-ink);
 }
 .planner-page
   :is(.worked-kicker, .currency-eyebrow, .markets-kicker, .learn-full-name) {
-  color: var(--studio-blue);
+  color: var(--studio-accent);
 }
 .planner-page
   :is(
@@ -680,13 +674,13 @@ body .site-footer :is(p, details) {
 }
 .planner-page .budget-step,
 .planner-page .trust-header nav a[aria-current="page"] {
-  background: var(--studio-blue);
+  background: var(--studio-accent);
   color: white;
-  border-color: var(--studio-blue);
+  border-color: var(--studio-accent);
 }
 .planner-page .currency-result strong,
 .planner-page .worked-takeaway strong {
-  color: var(--studio-blue);
+  color: var(--studio-accent);
 }
 .vlog-directory .planner-navigation {
   border-bottom: 2px solid var(--studio-ink);
@@ -722,7 +716,7 @@ body .site-footer :is(p, details) {
 }
 .site-footer .site-footer-inner details {
   grid-column: 1/-1;
-  border-top: 1px solid #636078;
+  border-top: 1px solid #536456;
   padding-top: 0.8rem;
 }
 .site-footer .site-footer-inner nav a,
@@ -738,4 +732,22 @@ body .site-footer :is(p, details) {
   .planner-navigation .studio-library-link {
     margin-left: auto;
   }
+}
+.vlog-directory .vlog-section-heading {
+  padding: clamp(1.25rem,3vw,2.7rem);
+  background: var(--studio-hero);
+  border: 1px solid var(--studio-rule);
+  border-radius: 14px;
+}
+.vlog-directory #vlogsTitle {
+  font: 740 clamp(2rem,4vw,4.1rem)/1.02 var(--font-ui);
+  letter-spacing: -.065em;
+  color: var(--studio-ink);
+}
+.planner-page .planner-header.planner-header {
+  --ink:var(--studio-ink);
+  --muted:var(--studio-muted);
+  --accent:var(--studio-accent);
+  --line:var(--studio-rule);
+  --bg:var(--studio-paper);
 }

@@ -370,7 +370,7 @@ test("expense total warns once when spending crosses the salary limit", async ({
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await page
-    .getByRole("combobox", { name: "Plan currency", exact: true })
+    .getByRole("combobox", { name: "Your currency", exact: true })
     .selectOption("USD");
   await expect(total).toContainText("$51,000");
   await total.scrollIntoViewIfNeeded();
@@ -405,7 +405,7 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     ["INR", "rupee"],
   ]) {
     await page
-      .getByRole("combobox", { name: "Plan currency", exact: true })
+      .getByRole("combobox", { name: "Your currency", exact: true })
       .selectOption(currency);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       `A place for every ${name}. A plan for what’s next.`,

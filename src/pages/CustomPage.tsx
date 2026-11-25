@@ -10,7 +10,7 @@ export const CustomPage = memo(function CustomPage() {
   return (
     <div ref={ref}>
       <main className="planner-page">
-        <PlannerNavigation />
+        <PlannerNavigation current="Custom plan" showCurrency />
         <PlannerHeader kind="custom" />
 
         <p id="status" className="status" role="status"></p>

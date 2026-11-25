@@ -95,7 +95,7 @@ export function CurrencyPage() {
   }
   return (
     <main className="planner-page currency-page">
-      <PlannerNavigation />
+      <PlannerNavigation current="Currency converter" />
       <header className="currency-hero">
         <p className="currency-eyebrow">Across borders. In perspective.</p>
         <h1>

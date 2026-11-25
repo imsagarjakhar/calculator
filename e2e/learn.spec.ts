@@ -15,7 +15,7 @@ test("finance guide teaches with currency-aware visuals, search, quizzes and key
     "Made simple",
   );
   await page
-    .getByRole("combobox", { name: "Example currency", exact: true })
+    .getByRole("combobox", { name: "Your currency", exact: true })
     .selectOption("USD");
   await page
     .getByRole("slider", { name: "Assumed annual return", exact: true })

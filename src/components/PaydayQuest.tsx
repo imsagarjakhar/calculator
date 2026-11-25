@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MoneyTown } from "./MoneyTown";
+import "../styles/payday-journey.css";
 import { plannerHref } from "../runtime/routes";
 
 type Move = {
@@ -138,7 +138,32 @@ function applyMove(state: typeof opening, move: Move) {
     joy: state.joy + (move.joy ?? 0),
   };
 }
+const missions = [
+  {
+    label: "Build a buffer",
+    target: "Finish with 25 coins in reserve.",
+    achieved: (s: typeof opening) => s.savings >= 25,
+  },
+  {
+    label: "Make memories",
+    target: "Collect 7 memories this month.",
+    achieved: (s: typeof opening) => s.joy >= 7,
+  },
+  {
+    label: "Stay flexible",
+    target: "Keep 70 coins in your wallet.",
+    achieved: (s: typeof opening) => s.wallet >= 70,
+  },
+];
+const stopIcons = [
+  "M3 10l9-6 9 6H3zm2 9h14M7 12v5m5-5v5m5-5v5",
+  "M3 6h2l2 9h10l3-7H6m2 11h1m7 0h1",
+  "M14 6a5 5 0 0 0-6 6l-5 5 3 3 5-5a5 5 0 0 0 6-6l-3 3-3-3 3-3z",
+  "M3 10l9-6 9 6M5 11v8h14v-8m-9 8v-5h4v5",
+  "M5 20V4m0 1c5-3 9 3 15 0l-2 5 2 4c-6 3-10-3-15 0",
+];
 export function PaydayQuest() {
+  const [mission, setMission] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [choices, setChoices] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -198,170 +223,213 @@ export function PaydayQuest() {
           ? "You keep your options open."
           : "You balance plans with the moment.";
   return (
-    <section className="quest-hero" aria-labelledby="welcomeTitle">
-      <div className="quest-intro">
-        <p className="quest-kicker">
-          <span aria-hidden="true">✦</span> Financial habits game
-        </p>
-        <h1 id="welcomeTitle" tabIndex={-1}>
-          Make it to <em>payday.</em>
-        </h1>
-        <p className="quest-deck">
-          One month. 100 coins. Five everyday money decisions. Play your way
-          through town and see which financial habits show up.
-        </p>
-        <div className="quest-actions">
-          {!playing ? (
-            <button onClick={start}>
-              Play Payday Quest <span aria-hidden="true">▶</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                panel.current?.scrollIntoView({ block: "center" });
-                heading.current?.focus({ preventScroll: true });
-              }}
-            >
-              View {finished ? "my results" : "my game"}
-            </button>
-          )}
-          <a href={plannerHref("all-calculators")}>Browse calculators</a>
-        </div>
-        <p className="quest-meta">
-          About 2 minutes <span>·</span> No sign-up
-        </p>
-        <noscript>Enable JavaScript to play Payday Quest.</noscript>
-      </div>
-      <section
-        className="quest-console"
-        aria-label="Payday Quest game"
-        ref={panel}
-      >
-        <header>
-          <strong>
-            <span aria-hidden="true">✦</span> Payday Quest
-          </strong>
-          <span>
-            {finished
-              ? "Month complete"
-              : playing
-                ? "Day " + round.day
-                : "Town map"}
-          </span>
-        </header>
-        <MoneyTown turn={step} />
-        {!playing ? (
-          <div className="quest-invite">
-            <div>
-              <small>Your starting wallet</small>
-              <strong>100 coins</strong>
-            </div>
-            <button onClick={start} aria-label="Start Payday Quest">
-              Start game <span aria-hidden="true">▶</span>
-            </button>
-          </div>
-        ) : (
-          <div className="quest-play">
-            <progress
-              className="quest-progress"
-              aria-label="Decisions completed"
-              value={step}
-              max={rounds.length}
-            />
-            <div className="quest-balances">
-              <span>
-                Wallet <b>{balance.wallet}</b>
-              </span>
-              <span>
-                Reserve <b>{balance.savings}</b>
-              </span>
-              <span>
-                Memories <b>{balance.joy}</b>
-              </span>
-            </div>
-            {finished ? (
-              <>
-                <h2 ref={heading} tabIndex={-1}>
-                  {profile}
-                </h2>
-                <p>
-                  You finished with {state.wallet + state.savings} coins and{" "}
-                  {state.joy} memories.{" "}
-                  {state.savings > 0
-                    ? "You kept " + state.savings + " coins in reserve."
-                    : "Your remaining coins are in your wallet."}
-                </p>
-                <details>
-                  <summary>See my five decisions</summary>
-                  <ol>
-                    {choices.map((c, i) => (
-                      <li key={i}>
-                        {month[i].place} · {month[i].moves[c].label}
-                      </li>
-                    ))}
-                  </ol>
-                </details>
-                {previousMonth && (
-                  <p className="quest-comparison">
-                    Last time you ended with{" "}
-                    {previousMonth.wallet + previousMonth.savings} coins and{" "}
-                    {previousMonth.joy} memories.
-                  </p>
-                )}
-                <p className="quest-reflection">
-                  Which choice would you repeat on your next real payday?
-                </p>
-                <div className="quest-end">
-                  <button onClick={start}>Play again</button>
-                  <a href={plannerHref("salary-budget")}>Try my own budget</a>
-                </div>
-              </>
+    <section
+      className={"payday-journey" + (playing ? " is-playing" : "")}
+      aria-label="Payday Quest game"
+      ref={panel}
+    >
+      <div className="journey-scene">
+        <img
+          className="journey-landscape"
+          src={import.meta.env.BASE_URL + "art/payday-journey.webp"}
+          width="1983"
+          height="793"
+          alt=""
+          fetchPriority="high"
+        />
+        <div className="journey-content">
+          <p className="journey-eyebrow">
+            Payday Quest <span>·</span> Financial habits game
+          </p>
+          <h1 id="welcomeTitle" tabIndex={-1}>
+            {playing ? (
+              finished ? (
+                "Your payday recap"
+              ) : (
+                "Day " + round.day + " of 28"
+              )
             ) : (
               <>
-                <small>
-                  Decision {step + 1} of 5 · {round.place}
-                </small>
-                <h2 ref={heading} tabIndex={-1}>
-                  {round.prompt}
-                </h2>
-                {move ? (
-                  <div aria-live="polite">
-                    <p>
-                      {move.note}{" "}
-                      {balance.savings < state.savings
-                        ? "You drew " +
-                          (state.savings - balance.savings) +
-                          " coins from your reserve."
-                        : ""}
-                    </p>
-                    <button
-                      autoFocus
-                      onClick={() => {
-                        setChoices([...choices, selected!]);
-                        setSelected(null);
-                      }}
-                    >
-                      {step === 4 ? "See my habits" : "Next stop"}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="quest-options">
-                    {round.moves.map((m, i) => (
+                What’s your <em>money style?</em>
+              </>
+            )}
+          </h1>
+          {!playing ? (
+            <>
+              <p className="journey-intro">
+                Take 100 coins through five everyday decisions. See what you
+                spend, save and remember.
+              </p>
+              <div className="journey-mission">
+                <fieldset>
+                  <legend>Choose your goal</legend>
+                  <div>
+                    {missions.map((m, i) => (
                       <button
+                        type="button"
                         key={m.label}
-                        disabled={(m.cost ?? 0) > state.wallet + state.savings}
-                        onClick={() => setSelected(i)}
+                        aria-pressed={i === mission}
+                        onClick={() => setMission(i)}
                       >
                         {m.label}
                       </button>
                     ))}
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </section>
+                </fieldset>
+                <p aria-live="polite">{missions[mission].target}</p>
+                <button className="journey-start" onClick={start}>
+                  Play Payday Quest
+                </button>
+                <small>5 decisions · About 2 minutes</small>
+              </div>
+              <noscript>Enable JavaScript to play Payday Quest.</noscript>
+            </>
+          ) : (
+            <div className="quest-play">
+              <progress
+                className="quest-progress"
+                aria-label="Decisions completed"
+                value={step}
+                max={rounds.length}
+              />
+              <div className="quest-balances">
+                <span>
+                  Wallet <b>{balance.wallet}</b>
+                </span>
+                <span>
+                  Reserve <b>{balance.savings}</b>
+                </span>
+                <span>
+                  Memories <b>{balance.joy}</b>
+                </span>
+              </div>
+              {finished ? (
+                <>
+                  <h2 ref={heading} tabIndex={-1}>
+                    {profile}
+                  </h2>
+                  <p>
+                    You finished with {state.wallet + state.savings} coins and{" "}
+                    {state.joy} memories.{" "}
+                    {state.savings > 0
+                      ? "You kept " + state.savings + " coins in reserve."
+                      : "Your remaining coins are in your wallet."}
+                  </p>
+                  <p className="mission-outcome">
+                    <strong>
+                      {missions[mission].achieved(state)
+                        ? "Goal reached"
+                        : "Goal recap"}{" "}
+                      · {missions[mission].label}
+                    </strong>
+                    <br />
+                    {missions[mission].target}
+                  </p>
+                  <details>
+                    <summary>See my five decisions</summary>
+                    <ol>
+                      {choices.map((c, i) => (
+                        <li key={i}>
+                          {month[i].place} · {month[i].moves[c].label}
+                        </li>
+                      ))}
+                    </ol>
+                  </details>
+                  {previousMonth && (
+                    <p className="quest-comparison">
+                      Last time you ended with{" "}
+                      {previousMonth.wallet + previousMonth.savings} coins and{" "}
+                      {previousMonth.joy} memories.
+                    </p>
+                  )}
+                  <p className="quest-reflection">
+                    Which choice would you repeat on your next real payday?
+                  </p>
+                  <div className="quest-end">
+                    <button onClick={start}>Play again</button>
+                    <button
+                      onClick={() => {
+                        setPreviousMonth(state);
+                        setChoices([]);
+                        setSelected(null);
+                        setPlaying(false);
+                      }}
+                    >
+                      Choose a new goal
+                    </button>
+                    <a href={plannerHref("salary-budget")}>Try my own budget</a>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <small>
+                    Decision {step + 1} of 5 · {round.place} ·{" "}
+                    {missions[mission].label}
+                  </small>
+                  <h2 ref={heading} tabIndex={-1}>
+                    {round.prompt}
+                  </h2>
+                  {move ? (
+                    <div aria-live="polite">
+                      <p>
+                        {move.note}{" "}
+                        {balance.savings < state.savings
+                          ? "You drew " +
+                            (state.savings - balance.savings) +
+                            " coins from your reserve."
+                          : ""}
+                      </p>
+                      <button
+                        autoFocus
+                        onClick={() => {
+                          setChoices([...choices, selected!]);
+                          setSelected(null);
+                        }}
+                      >
+                        {step === 4 ? "See my habits" : "Next stop"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="quest-options">
+                      {round.moves.map((m, i) => (
+                        <button
+                          key={m.label}
+                          disabled={
+                            (m.cost ?? 0) > state.wallet + state.savings
+                          }
+                          onClick={() => setSelected(i)}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="journey-route">
+        <h2>Your month</h2>
+        <ol>
+          {rounds.map((r, i) => (
+            <li
+              key={r.day}
+              data-reached={playing && i <= step}
+              aria-current={playing && step === i ? "step" : undefined}
+            >
+              <span className="journey-stop">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d={stopIcons[i]} />
+                </svg>
+              </span>
+              <strong>{r.place.replace(/^The /, "")}</strong>
+              <small>Day {r.day}</small>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

@@ -183,9 +183,9 @@ test("home links reach markets and keep the currency converter accessible", asyn
   const menu = page.getByRole("button", { name: "Open navigation" });
   if (await menu.isVisible()) await menu.click();
   await expect(
-    page.locator(".home-nav").getByRole("link", { name: "Global markets" }),
+    page.locator(".home-header").getByRole("link", { name: "Global Markets" }),
   ).toHaveAttribute("href", base + "markets/");
   await expect(
-    page.locator(".home-nav").getByRole("link", { name: "Convert currency" }),
+    page.locator(".home-header").getByRole("link", { name: "Convert currency" }),
   ).toHaveAttribute("href", base + "currency-converter/");
 });

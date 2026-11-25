@@ -1,38 +1,49 @@
 import type { ReactNode } from "react";
 import { plannerHref } from "../runtime/routes";
-import { SiteSearch } from "./SiteSearch";
+import { JourneyHeader } from "./JourneyHeader";
 
 export function PlannerNavigation({
+  current,
+  parent,
   children,
   hidden = false,
   id,
   homeHref,
+  account,
+  showCurrency = false,
 }: {
+  current: string;
+  parent?: { label: string; href: string };
   children?: ReactNode;
   hidden?: boolean;
   id?: string;
   homeHref?: string;
+  account?: ReactNode;
+  showCurrency?: boolean;
 }) {
   return (
-    <nav
-      id={id}
-      className="planner-navigation"
-      aria-label="Financial planners"
-      hidden={hidden}
-    >
-      <a
-        href={homeHref ?? plannerHref("home")}
-        data-screen={homeHref === undefined ? "home" : undefined}
-        className="planner-home-link back-to-planners"
-      >
-        ← All planners
-      </a>
-      <span className="planner-site-name">Financial AI Planner</span>
-      <a className="studio-library-link" href={plannerHref("all-calculators")}>
-        Calculator library
-      </a>
-      <SiteSearch />
-      {children}
-    </nav>
+    <div id={id} className="planner-navigation journey-shell" hidden={hidden}>
+      <JourneyHeader showCurrency={showCurrency && !hidden} account={account} />
+      <div className="planner-context">
+        <nav className="planner-crumb" aria-label="Breadcrumb">
+          <a
+            className="back-to-planners"
+            href={homeHref ?? plannerHref("home")}
+            data-screen={homeHref === undefined ? "home" : undefined}
+          >
+            All planners
+          </a>
+          <span aria-hidden="true">/</span>
+          {parent && (
+            <>
+              <a href={parent.href}>{parent.label}</a>
+              <span aria-hidden="true">/</span>
+            </>
+          )}
+          <span aria-current="page">{current}</span>
+        </nav>
+        {children}
+      </div>
+    </div>
   );
 }

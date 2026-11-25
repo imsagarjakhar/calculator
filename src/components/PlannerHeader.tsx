@@ -6,8 +6,6 @@ import { budgetHeading, headerConfig, type PlannerKind } from "./headerConfig";
 type HeaderControls = {
   currency: string;
 
-  onCurrency: (currency: string) => void;
-
   onImport: (file: File | undefined) => void;
 
   onReport: () => void;
@@ -71,33 +69,23 @@ export function PlannerHeader({
         role="group"
         aria-label={`${kind} plan controls`}
       >
-        <div className="planner-toolbar-top">
-          <label className="planner-currency" htmlFor={config.currencyId}>
-            Plan currency
+        {/* Older planner controllers read and restore this form field by ID. */}
+        {!controls && (
+          <div className="planner-currency" hidden>
             <select
               id={config.currencyId}
-              value={controls?.currency}
-              onChange={
-                controls
-                  ? (e) => controls.onCurrency(e.target.value)
-                  : undefined
-              }
               form={config.currencyForm ?? undefined}
-              aria-describedby={config.currencyDescription ?? undefined}
+              aria-label="Stored plan currency"
             >
-              {currencies.map(([code, symbol]) => (
+              {currencies.map(([code]) => (
                 <option key={code} value={code}>
-                  {code} — {symbol}
+                  {code}
                 </option>
               ))}
             </select>
-          </label>
-
-          <span className="planner-toolbar-label">YOUR PLAN</span>
-        </div>
-
-        <p className="planner-currency-note">{config.note}</p>
-
+          </div>
+        )}
+        <h2 className="report-actions-title">Plan reports</h2>
         <div className="planner-toolbar-actions">
           <button
             id={importButton.id!}
@@ -134,7 +122,20 @@ export function PlannerHeader({
           >
             Download report
           </button>
+        </div>
 
+        <div className="planner-toolbar-utilities">
+          {utilities.map((button) => (
+            <button
+              key={button.id}
+              id={button.id!}
+              type="button"
+              onClick={controls?.onSaveJSON}
+              disabled={controls?.disabled}
+            >
+              {button.text}
+            </button>
+          ))}
           <button
             id={resetButton.id!}
             onClick={controls?.onReset}
@@ -147,22 +148,6 @@ export function PlannerHeader({
           </button>
         </div>
 
-        {utilities.length > 0 && (
-          <div className="planner-toolbar-utilities">
-            {utilities.map((button) => (
-              <button
-                key={button.id}
-                id={button.id!}
-                type="button"
-                onClick={controls?.onSaveJSON}
-                disabled={controls?.disabled}
-              >
-                {button.text}
-              </button>
-            ))}
-          </div>
-        )}
-
         {config.resetNote && (
           <p id={config.resetNote.id} className="planner-reset-note">
             {config.resetNote.text}
@@ -172,7 +157,9 @@ export function PlannerHeader({
         <details className="planner-currency-info">
           <summary>About currency</summary>
 
-          <p id={config.detailsId ?? undefined}>{config.details}</p>
+          <p id={config.detailsId ?? undefined}>
+            {config.note} {config.details}
+          </p>
         </details>
 
         {config.statuses.map((status) => (

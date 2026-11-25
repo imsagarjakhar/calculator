@@ -28,7 +28,7 @@ test("home currency follows every planner and all authored examples", async ({
     "bucket-plan",
   ]) {
     await page.goto(`${base}${route}/`);
-    await expect(page.locator(".planner-currency select:visible")).toHaveValue(
+    await expect(page.locator(".header-currency select:visible")).toHaveValue(
       "USD",
     );
     const visibleText = await page.locator("main").innerText();
@@ -40,7 +40,7 @@ test("home currency follows every planner and all authored examples", async ({
       ),
     ).toBe(true);
   }
-  await page.locator(".planner-currency select:visible").selectOption("SAR");
+  await page.locator(".header-currency select:visible").selectOption("SAR");
   await page.goto(base);
   await expect(page.getByLabel("Your currency", { exact: true })).toHaveValue(
     "SAR",

@@ -385,12 +385,11 @@ export function BudgetPage() {
   );
   return (
     <main className="planner-page budget-app">
-      <PlannerNavigation />
+      <PlannerNavigation current="Salary & budget" showCurrency />
       <PlannerHeader
         kind="budget"
         controls={{
           currency: plan.currency,
-          onCurrency: (c) => update("currency", c),
           onImport: (file) => {
             void importFile(file);
           },

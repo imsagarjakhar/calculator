@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlannerNavigation } from "../components/PlannerNavigation";
 import {
-  currencies,
   currencyMoney,
-  selectCurrency,
   useCurrency,
 } from "../runtime/currency";
 import { plannerHref } from "../runtime/routes";
@@ -171,22 +169,7 @@ export function LearnPage() {
   }
   return (
     <main className="planner-page learn-page">
-      <PlannerNavigation>
-        <label className="learn-currency">
-          Example currency
-          <select
-            aria-label="Example currency"
-            value={currency}
-            onChange={(e) => selectCurrency(e.target.value)}
-          >
-            {currencies.map(([c, s]) => (
-              <option key={c} value={c}>
-                {c} — {s}
-              </option>
-            ))}
-          </select>
-        </label>
-      </PlannerNavigation>
+      <PlannerNavigation current="Learn Finance" showCurrency />
       <header className="learn-hero">
         <div>
           <h1>
