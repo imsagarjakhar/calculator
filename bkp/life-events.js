@@ -24,9 +24,18 @@
     const find=s=>host.querySelector(s),field=name=>find('#'+prefix+'-'+name),submit=find('[type=submit]');
     function money(n){return new Intl.NumberFormat(ctx.currency==='INR'?'en-IN':'en-US',{style:'currency',currency:ctx.currency,maximumFractionDigits:0}).format(n);}
     function cancel(){editing=null;submit.textContent='Add expense';find('.event-cancel').hidden=true;field('amount').value='';field('name').value='';}
+    function updateTiming(){
+      const year=Number(field('year').value),month=Number(field('month').value);
+      const timing=mode==='survival'?'Expenses are paid at the start of their selected plan month.':mode==='freedom'?'Expenses are paid at month-end and included before and after freedom.':'Expenses are paid at the end of their selected month, after SIP and extra deposits.';
+      const valid=Number.isInteger(year)&&year>=1&&year<=120&&Number.isInteger(month)&&month>=1&&month<=12;
+      const age=valid&&mode!=='growth'?'Year '+year+', month '+month+' is approximately age '+(ctx.age+year-1+(month-1)/12).toFixed(1)+'. ':'';
+      find('.event-timing').textContent=age+timing;
+    }
+    field('year').addEventListener('input',updateTiming);
+    field('month').addEventListener('input',updateTiming);
     function render(){
       find('.event-currency').textContent=ctx.currency;
-      find('.event-timing').textContent=mode==='survival'?'Current age '+ctx.age+'. Year 5, month 1 is approximately age '+(ctx.age+4)+'. Expenses are paid at the start of their selected plan month.':mode==='freedom'?'Current age '+ctx.age+'. Year 5, month 1 is approximately age '+(ctx.age+4)+'. Expenses are paid at month-end and included before and after freedom.':'Expenses are paid at the end of their selected month, after SIP and extra deposits.';
+      updateTiming();
       const list=find('.event-list');list.replaceChildren();
       const items=load(mode,ctx.currency);
       if(!items.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='No life expenses yet. Add a goal or test an unexpected cost.';list.append(empty);}
@@ -40,7 +49,7 @@
         for(const action of ['Edit',e.enabled?'Pause':'Include','Remove']){
           const button=document.createElement('button');button.type='button';button.className='tiny ghost';button.textContent=action;button.setAttribute('aria-label',action+' '+e.name);
           button.onclick=()=>{
-            if(action==='Edit'){editing=index;field('type').value=categories.includes(e.category)?e.category:'Custom expense';field('name').value=e.name;field('amount').value=e.amount;field('year').value=e.year;field('month').value=e.month;field('basis').value=e.inflate?'today':'future';submit.textContent='Save expense';find('.event-cancel').hidden=false;field('name').focus();return;}
+            if(action==='Edit'){editing=index;field('type').value=categories.includes(e.category)?e.category:'Custom expense';field('name').value=e.name;field('amount').value=e.amount;field('year').value=e.year;field('month').value=e.month;field('basis').value=e.inflate?'today':'future';submit.textContent='Save expense';find('.event-cancel').hidden=false;updateTiming();field('name').focus();return;}
             const next=load(mode,ctx.currency);if(action==='Remove')next.splice(index,1);else next[index]={...next[index],enabled:!next[index].enabled};save(mode,ctx.currency,next);cancel();render();onChange();find('.event-status').textContent=action==='Remove'?'Expense removed.':'Scenario updated.';
           };actions.append(button);
         }row.append(actions);list.append(row);
