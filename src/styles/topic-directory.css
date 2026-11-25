@@ -79,11 +79,6 @@
   padding: 8px 4px;
   text-decoration: none;
 }
-.topic-links a span:first-child {
-  text-decoration: underline;
-  text-decoration-color: #93ae9a;
-  text-underline-offset: 3px;
-}
 .topic-arrow {
   font-size: 1.25rem;
   line-height: 1;
