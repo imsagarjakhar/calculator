@@ -1,0 +1,47 @@
+#growthScreen .projection-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(148px, 27%, 340px);
+  align-items: center;
+  gap: clamp(10px, 2vw, 30px);
+  position: relative;
+}
+#growthScreen .growth-art {
+  width: 100%;
+  align-self: center;
+  background: radial-gradient(ellipse at 52% 62%, #cadcb899, transparent 70%);
+}
+.growth-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.growth-art :is(.scene-deposit, .scene-gold) {
+  display: none;
+}
+#growthScreen:has(.tabs [data-type="FD"][aria-pressed="true"]) .scene-fund,
+#growthScreen:has(.tabs [data-type="Gold"][aria-pressed="true"]) .scene-fund {
+  display: none;
+}
+#growthScreen:has(.tabs [data-type="FD"][aria-pressed="true"]) .scene-deposit,
+#growthScreen:has(.tabs [data-type="Gold"][aria-pressed="true"]) .scene-gold {
+  display: inline;
+}
+#growthScreen .projection-heading .planner-header-status {
+  grid-column: 1/-1;
+}
+@media (max-width: 570px) {
+  #growthScreen .projection-heading {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  #growthScreen .growth-art {
+    justify-self: center;
+    width: min(65%, 190px);
+    margin-top: 8px;
+  }
+}
+@media print {
+  #growthScreen .projection-heading .growth-art {
+    display: none;
+  }
+}

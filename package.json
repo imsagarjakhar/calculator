@@ -20,6 +20,7 @@
     "test:budget": "node --experimental-strip-types --test scripts/budget.test.mjs",
     "test:vlogs": "node --test scripts/vlog-worker.test.mjs",
     "test:e2e": "node scripts/run-e2e.cjs",
+    "test:deploy": "node scripts/run-e2e.cjs --grep @deploy",
     "check": "npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {

@@ -1,3 +1,4 @@
+import { ToolScene } from "../components/ToolScene";
 import { InvestmentHero } from "../components/InvestmentHero";
 import { JourneyHeader } from "../components/JourneyHeader";
 import {
@@ -41,14 +42,17 @@ export function HomeContent({ active = true }: { active?: boolean }) {
         <InvestmentHero />
         <nav className="money-shortcuts" aria-label="Quick start">
           <a href={plannerHref("salary-budget")}>
+            <ToolScene kind="salary" />
             <small>Budget</small>
             <strong>Plan my payday</strong>
           </a>
           <a href={plannerHref("growth")}>
+            <ToolScene kind="growth" />
             <small>Invest</small>
             <strong>Project my savings</strong>
           </a>
           <a href={plannerHref("guides")} aria-label="Start with an example">
+            <ToolScene kind="custom" />
             <small>Learn</small>
             <strong>Start with an example</strong>
           </a>
@@ -123,11 +127,14 @@ export function HomeContent({ active = true }: { active?: boolean }) {
       </section>
       {vlogsOpen && (
         <section className="welcome vlog-directory" aria-label="Blog">
-          <PlannerNavigation current="Blog" homeHref="#" account={<VlogAccountButton />} />
+          <PlannerNavigation
+            current="Blog"
+            homeHref="#"
+            account={<VlogAccountButton />}
+          />
           <VlogFeed />
         </section>
       )}
     </VlogProvider>
   );
 }
-

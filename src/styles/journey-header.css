@@ -336,3 +336,110 @@ body .planner-navigation.journey-shell:not([hidden]) {
 .planner-page .planner-header.planner-header .planner-toolbar-utilities button {
   flex: 0 1 auto;
 }
+.projection-tools,
+.projection-files {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.projection-tools {
+  margin-left: auto;
+  gap: 10px;
+}
+.projection-files {
+  padding-left: 10px;
+  border-left: 1px solid var(--studio-rule);
+}
+.projection-files > button,
+.projection-options > summary {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cbd8c9;
+  border-radius: 10px;
+  background: #fffefa;
+  color: #28553b;
+  cursor: pointer;
+}
+.projection-files .download {
+  background: #185b3a;
+  color: white;
+  border-color: #185b3a;
+}
+.projection-files > button:hover:enabled,
+.projection-options > summary:hover {
+  background: #e6efdc;
+  color: #214b34;
+}
+.projection-files > button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.projection-files svg {
+  width: 19px;
+  height: 19px;
+}
+.projection-options {
+  position: relative;
+}
+.projection-options > summary {
+  list-style: none;
+  border-color: transparent;
+  background: transparent;
+  width: 32px;
+}
+.projection-options > summary::-webkit-details-marker {
+  display: none;
+}
+.projection-popover {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  width: min(250px, 75vw);
+  padding: 16px;
+  border-radius: 12px;
+  background: #fffefa;
+  border: 1px solid var(--studio-rule);
+  box-shadow: 0 7px 22px #16382322;
+  color: var(--studio-ink);
+  font: 500 0.86rem/1.5 var(--font-ui);
+}
+.projection-popover p {
+  margin: 5px 0 12px;
+}
+.projection-popover small {
+  display: block;
+  margin-top: 6px;
+}
+.planner-page .planner-header.projection-heading {
+  display: block;
+}
+.projection-heading .planner-header-status:empty {
+  display: none;
+}
+@media (max-width: 550px) {
+  .planner-context:has(.projection-tools) {
+    gap: 8px;
+  }
+  .projection-tools {
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .projection-files {
+    padding-left: 6px;
+  }
+}
+@media(max-width:550px){
+  .journey-shell .projection-tools{position:relative;flex-wrap:nowrap;justify-content:space-between;width:100%}
+  .journey-shell .projection-tools .view-switch{flex:0 1 auto;width:auto;min-width:0;margin:0}
+  .projection-options{position:static}
+  .projection-files>button{width:36px}
+}

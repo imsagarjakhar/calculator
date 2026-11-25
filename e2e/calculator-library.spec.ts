@@ -67,7 +67,7 @@ test("each calculator has a unique address and a usable example", () => {
   }
 });
 
-test("search, edit and revisit a calculator", async ({ page }, info) => {
+test("search, edit and revisit a calculator", { tag: "@deploy" }, async ({ page }, info) => {
   await page.goto(library);
   await page.screenshot({ path: info.outputPath("library.png") });
   await page.getByLabel("Find a calculator").fill("Andhra Pradesh");

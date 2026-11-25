@@ -1,15 +1,18 @@
+import { GrowthArtwork } from "../components/GrowthArtwork";
+import { ProjectionNavigation } from "../components/ProjectionNavigation";
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
 import { enableGrowthAssetsAndLoans } from "../runtime/features";
 import mount from "planner:controller:growth";
-export const GrowthPage = memo(function GrowthPage() {
+export const GrowthPage = memo(function GrowthPage({active=true}:{active?:boolean}={}) {
   const ref = usePlanner(mount);
   return (
     <div ref={ref}>
       <div id="growthScreen">
-        <PlannerHeader kind="growth" />
+        <ProjectionNavigation kind="growth" active={active} />
+        <PlannerHeader kind="growth"><GrowthArtwork /></PlannerHeader>
         <nav className="tabs" aria-label="Choose an investment scenario">
           <button type="button" data-type="FD" aria-pressed="false">
             Fixed Deposit

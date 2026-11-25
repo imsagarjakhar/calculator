@@ -184,13 +184,13 @@ export function LearnPage() {
         </div>
         <div className="learn-welcome-art">
           <MoneyScene topic="sip" playing={false} />
-          <span>Small steps. Clearer choices.</span>
+          
         </div>
       </header>
       <section className="learn-playground" aria-labelledby="learn-play-title">
         <div className="learn-section-heading">
-          <h2 id="learn-play-title">Five ideas. Try them for yourself.</h2>
-          <p>Pick a topic. Try it out.</p>
+          <h2 id="learn-play-title">Interactive lessons</h2>
+          <p>Choose a topic to explore its numbers.</p>
         </div>
         <div
           className="learn-topics"
@@ -476,11 +476,11 @@ export function LearnPage() {
         id="term-library"
         aria-labelledby="term-library-title"
       >
-        <div className="learn-section-heading">
+        <div className="dictionary-head"><div className="learn-section-heading">
           <div>
-            <h2 id="term-library-title">A little dictionary for your money.</h2>
+            <h2 id="term-library-title">Finance dictionary</h2>
             <p>
-              Everyday explanations for the words you’ll meet in our planners.
+              Find a money term, read its meaning and open a worked example.
             </p>
           </div>
           <label className="learn-search">
@@ -508,6 +508,7 @@ export function LearnPage() {
             </button>
           ))}
         </div>
+        </div>
         <p className="learn-result-count" role="status">
           {shown.length} {shown.length === 1 ? "term" : "terms"}
           {query ? ` matching “${query}”` : " to explore"}
@@ -515,6 +516,7 @@ export function LearnPage() {
         <div className="learn-term-grid">
           {shown.map((term) => (
             <article className="learn-term" key={term.name}>
+              <span className="term-category">{term.category}</span>
               <h3>{term.name}</h3>
               {term.full && (
                 <span className="learn-term-full">{term.full}</span>

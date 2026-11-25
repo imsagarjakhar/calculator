@@ -1,3 +1,4 @@
+import { ProjectionNavigation } from "../components/ProjectionNavigation";
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -53,11 +54,12 @@ const survivalFields = [
     initial: 100,
   },
 ] as const;
-export const SurvivalPage = memo(function SurvivalPage() {
+export const SurvivalPage = memo(function SurvivalPage({active=true}:{active?:boolean}={}) {
   const ref = usePlanner(mount);
   return (
     <div ref={ref}>
       <div id="survivalScreen">
+        <ProjectionNavigation kind="survival" active={active} />
         <PlannerHeader kind="survival" />
         <div className="layout">
           <section className="panel">

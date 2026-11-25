@@ -25,7 +25,7 @@ test("the primary header connects the five destinations", async ({ page }) => {
   }
 });
 
-test("projects deposits, withdrawals and fund depletion", async ({
+test("projects deposits, withdrawals and fund depletion", { tag: "@deploy" }, async ({
   page,
 }, info) => {
   await page.goto(base);

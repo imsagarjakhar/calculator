@@ -1,3 +1,4 @@
+@import "./site-footer.css";
 /* Shared homepage palette for every public route. */
 
 body {
@@ -478,17 +479,6 @@ body {
 .ledger .ledger-results dl div {
   border-color: var(--studio-rule);
 }
-body .site-footer {
-  background: var(--studio-ink);
-  color: #faf7f1;
-  border-top: 4px solid var(--studio-highlight);
-}
-body .site-footer :is(a, summary, strong) {
-  color: #fff;
-}
-body .site-footer :is(p, details) {
-  color: #dee9da;
-}
 @media (max-width: 760px) {
   .quest-hero {
     grid-template-columns: minmax(0, 1fr);
@@ -685,69 +675,411 @@ body .site-footer :is(p, details) {
 .vlog-directory .planner-navigation {
   border-bottom: 2px solid var(--studio-ink);
 }
-.site-footer .site-footer-inner {
-  max-width: 1240px;
-  text-align: left;
-  border: 0;
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 1rem 4rem;
-  padding-block: 1rem;
-}
-.site-footer .site-footer-brand {
-  font: 750 1.4rem var(--font-ui);
-  letter-spacing: -0.04em;
-}
-.site-footer .site-footer-inner > p {
-  grid-column: 1;
-  grid-row: 2;
-  margin: 0;
-  font-size: 0.94rem;
-}
-.site-footer .site-footer-inner nav {
-  justify-content: start;
-  align-content: start;
-  gap: 0.7rem 1.2rem;
-  margin: 0;
-}
-.site-footer .site-footer-inner nav:first-of-type {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
-.site-footer .site-footer-inner details {
-  grid-column: 1/-1;
-  border-top: 1px solid #536456;
-  padding-top: 0.8rem;
-}
-.site-footer .site-footer-inner nav a,
-.site-footer .site-footer-inner summary {
-  font-size: 0.875rem;
-}
 @media (max-width: 760px) {
-  .site-footer .site-footer-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
   .planner-navigation .studio-library-link {
     margin-left: auto;
   }
 }
 .vlog-directory .vlog-section-heading {
-  padding: clamp(1.25rem,3vw,2.7rem);
+  padding: clamp(1.25rem, 3vw, 2.7rem);
   background: var(--studio-hero);
   border: 1px solid var(--studio-rule);
   border-radius: 14px;
 }
 .vlog-directory #vlogsTitle {
-  font: 740 clamp(2rem,4vw,4.1rem)/1.02 var(--font-ui);
-  letter-spacing: -.065em;
+  font: 740 clamp(2rem, 4vw, 4.1rem) / 1.02 var(--font-ui);
+  letter-spacing: -0.065em;
   color: var(--studio-ink);
 }
 .planner-page .planner-header.planner-header {
-  --ink:var(--studio-ink);
-  --muted:var(--studio-muted);
-  --accent:var(--studio-accent);
-  --line:var(--studio-rule);
-  --bg:var(--studio-paper);
+  --ink: var(--studio-ink);
+  --muted: var(--studio-muted);
+  --accent: var(--studio-accent);
+  --line: var(--studio-rule);
+  --bg: var(--studio-paper);
+}
+/* Feature covers and compact tool cards share the same click target. */
+#homeScreen .tool-directory .tool-card.choice {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  gap: 0;
+  border-radius: 17px;
+  padding: clamp(17px, 2vw, 26px);
+  background: #fffefa;
+  border: 1px solid #d7dcd0;
+  box-shadow: 0 3px 12px #18372008;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+#homeScreen .tool-directory .tool-card.choice:is(:hover, :focus-visible) {
+  border-color: #679879;
+  box-shadow: 0 5px 17px #18372018;
+}
+#homeScreen .tool-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 0 0 10px;
+}
+#homeScreen .tool-card .tool-icon {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border-radius: 13px;
+  color: #235d41;
+  background: #e5efdc;
+}
+#homeScreen
+  :is(.currency-choice, .loan-choice, .custom-choice, .vlog-choice)
+  .tool-icon {
+  color: #755428;
+  background: #f7ead1;
+}
+#homeScreen .tool-directory .tool-card-heading strong {
+  font-size: clamp(1.1rem, 1.65vw, 1.42rem);
+  letter-spacing: -0.04em;
+  line-height: 1.16;
+}
+#homeScreen .tool-card .choice-copy {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #475349;
+  margin: 0;
+  max-width: 45ch;
+}
+#homeScreen .tool-card .choice-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e0e4d9;
+  margin-top: auto;
+  padding-top: 12px;
+  min-height: 0;
+  color: #165e3d;
+  font-weight: 650;
+  font-size: 0.84rem;
+}
+#homeScreen .tool-card .choice-copy {
+  padding-bottom: 17px;
+}
+#homeScreen .tool-open-arrow {
+  background: #edf4e8;
+  border: 0;
+  width: 28px;
+  height: 28px;
+}
+#homeScreen .tool-feature.choice {
+  padding-top: 0;
+}
+#homeScreen .tool-feature .tool-card-heading {
+  margin-top: 18px;
+}
+#homeScreen .tool-feature .tool-icon {
+  display: none;
+}
+#homeScreen .tool-directory .tool-feature strong {
+  font-size: clamp(1.45rem, 2.35vw, 2rem);
+}
+.directory-art {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  height: 122px;
+  flex: none;
+  margin: 0 calc(-1 * clamp(17px, 2vw, 26px));
+  background:
+    radial-gradient(ellipse at 70% 130%, #6a9e67 0%, transparent 65%), #204e3c;
+}
+.directory-art::before,
+.directory-art::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 160px;
+  height: 160px;
+  border: 1px solid #ffffff38;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 15px #ffffff12,
+    0 0 0 30px #ffffff0c;
+}
+.directory-art::before {
+  left: -76px;
+  top: 35px;
+}
+.directory-art::after {
+  right: -18px;
+  bottom: 38px;
+}
+.finance-book {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 105px;
+  height: 82px;
+  padding-left: 18px;
+  border-radius: 3px 9px 9px 3px;
+  border-left: 7px solid #b99d54;
+  box-shadow:
+    2px 4px 0 #e1d9b1,
+    3px 6px 0 #749578,
+    5px 10px 12px #0d2e3440;
+  background: #f2e8b2;
+  color: #284731;
+  transform: rotate(-11deg);
+  font: 750 20px/1 var(--font-ui);
+  letter-spacing: -1px;
+}
+.finance-book i {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  width: 9px;
+  height: 22px;
+  background: #4a7954;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
+}
+.guides-choice .directory-art {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 18px, #8b672818 18px 19px),
+    repeating-linear-gradient(90deg, transparent 0 18px, #8b672818 18px 19px),
+    #e8cf99;
+}
+.guides-choice .directory-art::before,
+.guides-choice .directory-art::after {
+  display: none;
+}
+.finance-sheet {
+  width: 138px;
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border-radius: 4px;
+  background: #fffdf4;
+  color: #45462a;
+  transform: rotate(7deg);
+  box-shadow:
+    -5px 4px 0 #eddeb7,
+    0 9px 15px #58492430;
+}
+.finance-sheet b {
+  font-size: 13px;
+}
+.finance-sheet i {
+  width: 85%;
+  height: 3px;
+  background: #dce1ce;
+}
+.finance-sheet i:nth-child(3) {
+  width: 60%;
+}
+.sheet-track {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+.sheet-track span {
+  background: #527952;
+  flex: 5;
+}
+.sheet-track span:nth-child(2) {
+  background: #98af72;
+  flex: 3;
+}
+.sheet-track span:last-child {
+  background: #dfad56;
+  flex: 2;
+}
+#homeScreen .money-shortcuts a {
+  position: relative;
+  padding-right: 38px;
+}
+#homeScreen .money-shortcuts a::after {
+  content: "↗";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d7051;
+}
+@media (prefers-reduced-motion: reduce) {
+  #homeScreen .tool-directory .tool-card.choice {
+    transition: none;
+  }
+}
+#homeScreen .tool-directory .tool-card.tool-feature {
+  padding-top: 0;
+}
+@media (min-width: 901px) {
+  #homeScreen
+    .tool-planners-grid
+    :is(.salary-choice, .loan-choice, .freedom-choice, .retirement-choice) {
+    grid-column: span 3;
+  }
+}
+#homeScreen .tool-directory .tool-card.choice {
+  padding-top: 0;
+}
+#homeScreen .tool-card .tool-card-heading {
+  margin-top: 17px;
+}
+#homeScreen .tool-card-heading .tool-icon {
+  display: none;
+}
+.tool-scene {
+  display: block;
+  width: 144px;
+  height: auto;
+  max-width: 100%;
+  flex: none;
+}
+#homeScreen .tool-scene-cover {
+  height: 106px;
+  background:
+    radial-gradient(ellipse at 64% 110%, #aecbb7, transparent 72%), #e3eee3;
+}
+#homeScreen .tool-scene-cover::before,
+#homeScreen .tool-scene-cover::after {
+  border-color: #53745426;
+  box-shadow:
+    0 0 0 13px #53745409,
+    0 0 0 28px #53745407;
+}
+#homeScreen
+  :is(.currency-choice, .survival-choice, .loan-choice)
+  .tool-scene-cover {
+  background:
+    radial-gradient(ellipse at 70% 110%, #ecc996, transparent 70%), #f4e8cc;
+}
+#homeScreen :is(.vlog-choice, .salary-choice) .tool-scene-cover {
+  background:
+    radial-gradient(ellipse at 64% 110%, #e1bd9d, transparent 70%), #f2e5d4;
+}
+#homeScreen :is(.custom-choice, .growth-choice) .tool-scene-cover {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 15px, #43684910 15px 16px),
+    repeating-linear-gradient(90deg, transparent 0 15px, #43684910 15px 16px),
+    #e2eacc;
+}
+#homeScreen .money-shortcuts a {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-content: center;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+}
+#homeScreen .money-shortcuts .tool-scene {
+  grid-row: span 2;
+  width: 48px;
+  height: 48px;
+  background: #edf2e5;
+  border-radius: 11px;
+}
+#homeScreen .money-shortcuts small,
+#homeScreen .money-shortcuts strong {
+  grid-column: 2;
+}
+#homeScreen .planning-steps {
+  gap: 12px;
+}
+#homeScreen .planning-steps > li {
+  border: 1px solid #d9ddcf;
+  background: #fffefa;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+#homeScreen .planning-steps summary {
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+#homeScreen .planning-steps summary::before {
+  font: 650 0.75rem var(--font-ui);
+  flex-basis: auto;
+  position: absolute;
+  left: 0;
+  top: 9px;
+  color: #4c6853;
+}
+#homeScreen .planning-steps .tool-scene {
+  width: 52px;
+  height: 48px;
+  background: #edf2e5;
+  border-radius: 10px;
+}
+#homeScreen .planning-steps li:nth-child(even) .tool-scene {
+  background: #f6ead2;
+}
+#homeScreen .planning-step-detail {
+  padding: 0 4px 17px;
+}
+@media (max-width: 640px) {
+  #homeScreen .tool-scene-cover {
+    height: 84px;
+  }
+  #homeScreen .tool-scene-cover .tool-scene {
+    height: 78px;
+  }
+  #homeScreen .planning-steps .tool-scene {
+    width: 42px;
+    height: 42px;
+  }
+}
+#homeScreen .planning-example {
+  background: linear-gradient(120deg, #fffdf6 45%, #e5edd7);
+  border: 1px solid #cbd6bf;
+  border-radius: 17px;
+}
+#homeScreen .planning-example-heading h3 {
+  font-weight: 710;
+  letter-spacing: -0.045em;
+}
+#homeScreen .planning-budget-bar {
+  height: 16px;
+  border-radius: 10px;
+}
+#homeScreen .planning-budget-split {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+#homeScreen .planning-budget-split > div {
+  border-radius: 10px;
+  background: #fffefa;
+  padding: 12px;
+  border-top: 3px solid #21744b;
+}
+#homeScreen .planning-budget-split > div:nth-child(2) {
+  border-color: #8fa97f;
+}
+#homeScreen .planning-budget-split > div:last-child {
+  border-color: #bba36f;
+}
+#homeScreen .welcome-faq details {
+  border: 1px solid #d9ddcf;
+  background: #fffefa;
+  border-radius: 11px;
+  margin: 8px 0;
+  padding: 12px 16px;
+}
+#homeScreen .home-data-notice {
+  background: #edf3e8;
+  border-radius: 15px;
+  border-left: 4px solid #518367;
+}
+@media (max-width: 500px) {
+  #homeScreen .planning-budget-split {
+    grid-template-columns: 1fr;
+  }
+  #homeScreen .planning-budget-split > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
 }

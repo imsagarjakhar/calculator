@@ -1,3 +1,4 @@
+import { ToolScene } from "./ToolScene";
 import { plannerHref } from "../runtime/routes";
 import { currencyMoney, useCurrency } from "../runtime/currency";
 import "../styles/planning-guide.css";
@@ -21,6 +22,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="custom" />
               <h3>
                 Know what you have
                 <small>What you own, owe, earn and spend.</small>
@@ -40,6 +42,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="salary" />
               <h3>
                 Give your salary a plan
                 <small>Cover your costs. Make room for goals.</small>
@@ -59,6 +62,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="retirement" />
               <h3>
                 Build an emergency cushion
                 <small>Keep a reserve for the unexpected.</small>
@@ -79,6 +83,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="loan" />
               <h3>
                 Compare debt and investing
                 <small>See where your extra money could go.</small>
@@ -100,6 +105,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="growth" />
               <h3>
                 Put a date on your goals
                 <small>Choose an amount and a timeline.</small>
@@ -120,6 +126,7 @@ export function FinancialPlanningGuide() {
         <li>
           <details>
             <summary>
+              <ToolScene kind="freedom" />
               <h3>
                 Look ahead to retirement
                 <small>Explore how savings could fund your life.</small>

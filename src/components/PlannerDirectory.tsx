@@ -1,3 +1,4 @@
+import { ToolScene } from "./ToolScene";
 import { plannerHref, type PlannerRoute } from "../runtime/routes";
 
 type Tool = {
@@ -12,7 +13,7 @@ const tools: Tool[] = [
   {
     route: "learn",
     style: "learn",
-    title: "Understand money. One idea at a time.",
+    title: "Learn the language of money.",
     copy: "Try visual lessons and plain-language explanations of SIP, SWP, interest and inflation.",
     action: "Learn finance",
     icon: "M3 4h7l2 2 2-2h7v16h-7l-2 2-2-2H3V4Zm9 2v16M6 8h2m-2 4h2m8-4h2m-2 4h2",
@@ -20,7 +21,7 @@ const tools: Tool[] = [
   {
     route: "guides",
     style: "guides",
-    title: "See the numbers worked through.",
+    title: "Follow a worked example.",
     copy: "Follow five original examples, from monthly bills to investing, debt and retirement.",
     action: "Explore worked examples",
     icon: "M6 3h12v18H6V3Zm3 4h6M9 11h2m3 0h1m-6 4h2m3 0h1",
@@ -157,29 +158,40 @@ function ToolCard({
       }
       className={`choice ${tool.style}-choice tool-card${featured ? " tool-feature" : ""}`}
     >
+      {featured ? (
+        <div className="directory-art" aria-hidden="true">
+          {tool.route === "learn" ? (
+            <div className="finance-book">
+              <span>
+                Finance
+                <br />
+                basics
+              </span>
+              <i />
+            </div>
+          ) : (
+            <div className="finance-sheet">
+              <b>Monthly budget</b>
+              <i />
+              <i />
+              <div className="sheet-track">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="directory-art tool-scene-cover" aria-hidden="true">
+          <ToolScene kind={tool.style} />
+        </div>
+      )}
       <span className="tool-card-heading">
         <ToolIcon path={tool.icon} />
         <strong>{tool.title}</strong>
       </span>
       <span className="choice-copy">{tool.copy}</span>
-      {tool.route === "learn" && (
-        <span className="tool-learning-preview" aria-hidden="true">
-          <span>SIP</span>
-          <span>SWP</span>
-          <span>EMI</span>
-          <span>Return</span>
-        </span>
-      )}
-      {tool.route === "guides" && (
-        <span
-          className="tool-learning-preview tool-guide-preview"
-          aria-hidden="true"
-        >
-          <span>A real question</span>
-          <span>→</span>
-          <span>A worked example</span>
-        </span>
-      )}
       <span className="choice-link">
         {tool.action}
         <span className="tool-open-arrow">

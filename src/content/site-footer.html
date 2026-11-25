@@ -1,30 +1,32 @@
 <div class="site-footer-inner">
-  <a class="site-footer-brand" href="{{base}}">Financial AI Planner</a>
-  <p>Financial planning calculators at intimetec.org. Explore SIP growth, loan repayments, retirement withdrawals and financial freedom in one private workspace.</p>
-  <nav aria-label="Calculator directory">
-    <a href="{{base}}all-calculators/">All calculators</a>
-    <a href="{{base}}markets/">Global stock markets</a>
-    <a href="{{base}}currency-converter/">Currency converter</a>
-    <a href="{{base}}guides/">Worked financial planning examples</a>
-    <a href="{{base}}learn/">Learn finance: terms &amp; examples</a>
-    <a href="{{base}}#financial-planning">Financial planning guide</a>
-    <a href="{{base}}salary-budget/">Salary &amp; budget planner</a>
-    <a href="{{base}}loan-payoff/">Loan payoff vs investing</a>
-    <a href="{{base}}bucket-plan/">Retirement bucket planner</a>
-    <a href="{{base}}growth/">SIP growth calculator</a>
-    <a href="{{base}}survival/">Retirement &amp; SWP calculator</a>
-    <a href="{{base}}custom-plan/">Monthly investment &amp; loan planner</a>
-    <a href="{{base}}freedom/">Financial freedom calculator</a>
+  <div class="footer-intro">
+    <a class="site-footer-brand" href="{{base}}"><svg aria-hidden="true" width="31" height="30" viewBox="0 0 34 32"><path fill="#a3cf99" d="M2 27C4 17 12 18 18 18c5 0 8-2 12-5-3 9-8 14-16 14H2Z"/><path fill="#e3cb84" d="M9 15C13 9 23 8 32 2c1 8-4 13-13 14-4 0-7-1-10-1Z"/></svg>Financial AI Planner</a>
+    <p>Plan your budget, investments and retirement in one private workspace.</p>
+  </div>
+  <nav class="footer-directory" aria-label="Calculator directory">
+    <div><h2>Plan your money</h2>
+      <a href="{{base}}salary-budget/">Salary &amp; budget</a>
+      <a href="{{base}}loan-payoff/">Loan payoff vs investing</a>
+      <a href="{{base}}growth/">SIP growth</a>
+      <a href="{{base}}custom-plan/">Monthly investment plan</a>
+    </div>
+    <div><h2>Retirement</h2>
+      <a href="{{base}}survival/">Retirement withdrawals</a>
+      <a href="{{base}}bucket-plan/">Retirement buckets</a>
+      <a href="{{base}}freedom/">Financial freedom</a>
+    </div>
+    <div><h2>Learn &amp; explore</h2>
+      <a href="{{base}}all-calculators/">All calculators</a>
+      <a href="{{base}}learn/">Learn finance</a>
+      <a href="{{base}}guides/">Worked examples</a>
+      <a href="{{base}}#financial-planning">Financial planning guide</a>
+      <a href="{{base}}markets/">Global markets</a>
+      <a href="{{base}}currency-converter/">Currency converter</a>
+    </div>
   </nav>
-  <nav aria-label="Website information">
-    <a href="{{base}}about/">About</a>
-    <a href="{{base}}contact/">Contact &amp; corrections</a>
-    <a href="{{base}}methodology/">Calculation methods</a>
-    <a href="{{base}}privacy/">Privacy &amp; cookies</a>
-  </nav>
-  <details>
-    <summary>How Financial AI Planner calculates your projections</summary>
-    <p>Results use the investment amounts, dates, expected returns and inflation you enter. SIP projections compound assumed returns; loan estimates use principal, interest and repayment terms; retirement models subtract withdrawals and planned costs. Review each calculator's detailed schedule and model notes to understand its timing and assumptions.</p>
-    <p>These are educational scenarios, not guaranteed returns or personalised investment advice. Taxes, fees and market changes can affect real outcomes. Calculations run in your browser without a database or account. Save a report or JSON plan to keep a portable copy.</p>
+  <details class="footer-method"><summary>How projections are calculated</summary>
+    <p>Each planner uses the amounts, dates and rates you enter. SIP projections compound the assumed return, loan estimates use your repayment terms, and retirement plans deduct withdrawals and planned costs. Each calculator includes its assumptions and schedule.</p>
+    <p>Taxes, fees and market changes can affect outcomes. Calculations run in your browser. Download a report to keep a copy of your plan.</p>
   </details>
+  <nav class="footer-legal" aria-label="Website information"><a href="{{base}}about/">About</a><a href="{{base}}contact/">Contact &amp; corrections</a><a href="{{base}}methodology/">Calculation methods</a><a href="{{base}}privacy/">Privacy &amp; cookies</a></nav>
 </div>

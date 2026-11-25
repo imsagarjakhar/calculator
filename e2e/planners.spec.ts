@@ -430,17 +430,30 @@ test("bucket month picker updates the plan and stays within mobile viewport", as
   await expect(input).toHaveValue("2027-07");
 });
 
-test("all five calculators load with consistent controls, editable dates and responsive layouts", async ({
+test("all five calculators load with consistent controls, editable dates and responsive layouts", { tag: "@deploy" }, async ({
   page,
 }, info) => {
   for (const [route, heading] of routes) {
     await page.goto(appPath(route));
     await expect(page.locator("h1:visible")).toContainText(heading);
-    const toolbar = page.locator(".planner-toolbar:visible");
-    await expect(toolbar.locator(".planner-toolbar-actions button")).toHaveText(
-      ["Import report", "Download report", "Reset"],
-    );
-    await expect(toolbar.locator("select option")).toHaveText([
+    const compact = route === "/growth/" || route === "/survival/";
+    const toolbar = page.locator(compact ? "#plannerNav .projection-files" : ".planner-toolbar:visible");
+    for (const name of ["Import report", "Download report"]) {
+      await expect(toolbar.getByRole("button", {name, exact:true})).toBeVisible();
+    }
+    if (compact) await toolbar.getByLabel("Plan options").click();
+    await expect(toolbar.getByRole("button",{name:"Reset",exact:true})).toBeVisible();
+    if (compact) {
+      const options = toolbar.getByLabel("Plan options");
+      const reset = toolbar.getByRole("button", {name:"Reset",exact:true});
+      await page.getByRole("navigation", { name: "Breadcrumb" }).locator("[aria-current=page]").click();
+      await expect(reset).toBeHidden();
+      await options.click();
+      await page.keyboard.press("Escape");
+      await expect(reset).toBeHidden();
+      await expect(options).toBeFocused();
+    }
+    await expect(page.getByRole("combobox", {name:"Your currency",exact:true}).locator("option")).toHaveText([
       "INR — ₹",
       "SAR — ر.س",
       "USD — $",
@@ -554,6 +567,7 @@ test("disabled Growth assets and loans stay out of projections without deleting 
   expect(reportText).not.toMatch(
     /net wealth|existing assets|current loans|remaining debt|EMIs paid|Available to withdraw/i,
   );
+  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
   await page.locator("#reset").click();
   expect(
     await page.evaluate(() =>
@@ -565,7 +579,7 @@ test("disabled Growth assets and loans stay out of projections without deleting 
   await expect(page.locator("#loanForm")).toBeVisible();
 });
 
-test("Growth matches the existing engine, persists edits, survives navigation, exports and imports", async ({
+test("Growth matches the existing engine, persists edits, survives navigation, exports and imports", { tag: "@deploy" }, async ({
   page,
 }) => {
   await page.goto(appPath("/growth/"));
@@ -599,6 +613,7 @@ test("Growth matches the existing engine, persists edits, survives navigation, e
   expect((await downloadText(page, "#exportMonthly")).filename).toMatch(
     /\.csv$/,
   );
+  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
   await page.locator("#reset").click();
   await expect(page.locator("#monthly")).toHaveValue("2000");
   await upload(page, "#growthImportFile", report.text);
@@ -651,6 +666,7 @@ test("Survival imports an old dated plan, preserves its date, and resets through
   );
   expect(restored.inputs.swp).toBe(1600);
   expect(restored.projectionStart).toContain("2024-02-29");
+  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
   await page.locator("#survivalResetTop").click();
   await expect(page.locator("#s-currency")).toHaveValue("INR");
   await expect(page.locator("#s-swp")).toHaveValue("50000");
