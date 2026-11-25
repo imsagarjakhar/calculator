@@ -134,7 +134,7 @@ test("privacy notice follows page content and salary ignores stored drafts", asy
   await expect(
     page.getByLabel("Take-home salary (INR)", { exact: true }),
   ).toHaveValue("");
-  await page.locator('.planner-header input[type="file"]').setInputFiles(path!);
+  await page.locator('.projection-files input[type="file"]').setInputFiles(path!);
   await expect(
     page.getByLabel("Take-home salary (INR)", { exact: true }),
   ).toHaveValue("60000");

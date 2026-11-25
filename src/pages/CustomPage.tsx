@@ -1,5 +1,4 @@
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
-import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -10,7 +9,7 @@ export const CustomPage = memo(function CustomPage() {
   return (
     <div ref={ref}>
       <main className="planner-page">
-        <PlannerNavigation current="Custom plan" showCurrency />
+
         <PlannerHeader kind="custom" />
 
         <p id="status" className="status" role="status"></p>

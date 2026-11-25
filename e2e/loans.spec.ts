@@ -66,6 +66,7 @@ test("loan planner compares fair paths, provides a guide and restores exported p
   await expect(page.locator(".loan-schedule > details")).toHaveCount(24);
   await page.getByRole("button", { name: /Your money & loans/ }).click();
   const downloadEvent = page.waitForEvent("download");
+  await page.getByLabel("Plan options").click();
   await page.getByRole("button", { name: "Save JSON" }).click();
   const download = await downloadEvent;
   const file = (await download.path())!;
@@ -339,6 +340,7 @@ test("three choices compare investments, faster repayment and asset sale with ho
     ),
   ).toBe(true);
   const pending = page.waitForEvent("download");
+  await page.getByLabel("Plan options").click();
   await page.getByRole("button", { name: "Save JSON", exact: true }).click();
   const file = await (await pending).path();
   const exported = JSON.parse(await readFile(file!, "utf8"));
@@ -413,6 +415,7 @@ test("original loan inputs calculate EMI and remaining balance, restore reports 
   );
   const emiText = await first.getByTestId("loan-calculated-emi").textContent();
   const event = page.waitForEvent("download");
+  await page.getByLabel("Plan options").click();
   await page.getByRole("button", { name: "Save JSON", exact: true }).click();
   const file = (await (await event).path())!;
   const exported = JSON.parse(await readFile(file, "utf8"));
@@ -527,6 +530,7 @@ test("rental assets update monthly funding and the main repayment and wealth gra
     "₹10,000",
   );
   const downloadEvent = page.waitForEvent("download");
+  await page.getByLabel("Plan options").click();
   await page.getByRole("button", { name: "Save JSON", exact: true }).click();
   const exported = JSON.parse(
     await readFile((await (await downloadEvent).path())!, "utf8"),

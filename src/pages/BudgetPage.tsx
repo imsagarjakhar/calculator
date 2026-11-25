@@ -1,5 +1,4 @@
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
-import { PlannerNavigation } from "../components/PlannerNavigation";
 import { preferredCurrency, usePlanCurrency } from "../runtime/currency";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { BudgetGrowthChart } from "../components/BudgetGrowthChart";
@@ -385,7 +384,7 @@ export function BudgetPage() {
   );
   return (
     <main className="planner-page budget-app">
-      <PlannerNavigation current="Salary & budget" showCurrency />
+
       <PlannerHeader
         kind="budget"
         controls={{

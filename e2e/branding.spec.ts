@@ -70,18 +70,20 @@ test("all calculator headers share branding, typography, colours and page spacin
   for (const [route, label] of routes) {
     await page.goto(`${base}${route}/`);
     const header = page.locator(".planner-header:visible");
+    const reports=page.getByRole("group",{name:"Plan reports"});
     await expect(header).toHaveCount(1);
     await expect(header.locator(".eyebrow")).toHaveText(
       `Financial AI Planner / ${label}`,
     );
     await expect(
-      header.getByRole("button", { name: "Import report", exact: true }),
+      reports.getByRole("button", { name: "Import report", exact: true }),
     ).toBeVisible();
     await expect(
-      header.getByRole("button", { name: "Download report", exact: true }),
+      reports.getByRole("button", { name: "Download report", exact: true }),
     ).toBeVisible();
+    await reports.getByLabel("Plan options").click();
     await expect(
-      header.getByRole("button", { name: "Reset", exact: true }),
+      reports.getByRole("button", { name: "Reset", exact: true }),
     ).toBeVisible();
     await expect(
       page.locator(".planner-navigation:visible .planner-site-name"),
@@ -112,17 +114,6 @@ test("all calculator headers share branding, typography, colours and page spacin
           "font-family",
           "font-weight",
           "line-height",
-        ]),
-        toolbar: css(".planner-toolbar", [
-          "background-image",
-          "padding",
-          "border-radius",
-        ]),
-        button: css(".primary", [
-          "background-color",
-          "color",
-          "min-height",
-          "font-size",
         ]),
         page: [main.maxWidth, main.paddingLeft, main.paddingRight],
       };

@@ -1,4 +1,3 @@
-import { ProjectionNavigation } from "../components/ProjectionNavigation";
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -59,8 +58,8 @@ export const SurvivalPage = memo(function SurvivalPage({active=true}:{active?:bo
   return (
     <div ref={ref}>
       <div id="survivalScreen">
-        <ProjectionNavigation kind="survival" active={active} />
-        <PlannerHeader kind="survival" />
+
+        <PlannerHeader active={active} kind="survival" />
         <div className="layout">
           <section className="panel">
             <div className="eyebrow">01 / YOUR STARTING POINT</div>

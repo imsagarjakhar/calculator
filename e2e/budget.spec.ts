@@ -2,7 +2,7 @@ import { test, expect, type Page } from "./test";
 import { initialBudget } from "../src/budget/model";
 const base = process.env.VITE_BASE_PATH || "/";
 async function importBudget(page: Page, plan: unknown) {
-  await page.locator('.planner-header input[type="file"]').setInputFiles({
+  await page.locator('.projection-files input[type="file"]').setInputFiles({
     name: "budget.json",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify({ plan })),
@@ -11,7 +11,7 @@ async function importBudget(page: Page, plan: unknown) {
 async function reopenWithReport(page: Page) {
   const download = page.waitForEvent("download");
   await page
-    .locator(".planner-header")
+    .locator(".projection-files")
     .getByRole("button", { name: "Download report", exact: true })
     .click();
   const path = await (await download).path();
@@ -19,7 +19,7 @@ async function reopenWithReport(page: Page) {
   await expect(
     page.getByLabel("Take-home salary (INR)", { exact: true }),
   ).toHaveValue("");
-  await page.locator('.planner-header input[type="file"]').setInputFiles(path!);
+  await page.locator('.projection-files input[type="file"]').setInputFiles(path!);
 }
 
 test("fresh budget starts at zero and waits for income before warning", async ({
@@ -54,8 +54,9 @@ test("fresh budget starts at zero and waits for income before warning", async ({
   );
   expect(snapshot.salary).toBe(2000);
   page.once("dialog", (d) => d.accept());
+  await page.getByLabel("Plan options").click();
   await page
-    .locator(".planner-header")
+    .locator(".projection-files")
     .getByRole("button", { name: "Reset", exact: true })
     .click();
   await expect(
@@ -477,6 +478,7 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     .click();
   await expect(bill).toHaveCount(0);
   const download = page.waitForEvent("download");
+  await page.getByLabel("Plan options").click();
   await page.getByRole("button", { name: "Save JSON" }).click();
   expect((await download).suggestedFilename()).toBe(
     "money-planner-monthly-budget.json",

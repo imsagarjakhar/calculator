@@ -47,6 +47,7 @@ const test = base.extend<{ consoleCheck: void }>({
   ],
 });
 async function downloadText(page: Page, selector: string) {
+  if (selector === "#exportPlan") await page.getByLabel("Plan options").click();
   const pending = page.waitForEvent("download");
   await page.locator(selector).click();
   const download = await pending;
@@ -436,14 +437,13 @@ test("all five calculators load with consistent controls, editable dates and res
   for (const [route, heading] of routes) {
     await page.goto(appPath(route));
     await expect(page.locator("h1:visible")).toContainText(heading);
-    const compact = route === "/growth/" || route === "/survival/";
-    const toolbar = page.locator(compact ? "#plannerNav .projection-files" : ".planner-toolbar:visible");
+    const toolbar = page.getByRole("group", {name:"Plan reports"});
     for (const name of ["Import report", "Download report"]) {
       await expect(toolbar.getByRole("button", {name, exact:true})).toBeVisible();
     }
-    if (compact) await toolbar.getByLabel("Plan options").click();
+    await toolbar.getByLabel("Plan options").click();
     await expect(toolbar.getByRole("button",{name:"Reset",exact:true})).toBeVisible();
-    if (compact) {
+    {
       const options = toolbar.getByLabel("Plan options");
       const reset = toolbar.getByRole("button", {name:"Reset",exact:true});
       await page.getByRole("navigation", { name: "Breadcrumb" }).locator("[aria-current=page]").click();
@@ -737,6 +737,7 @@ test("Custom Plan restores browser data, updates live, records split investments
   await expect(firstSip).toHaveValue("");
   await expect(firstSip).toHaveAttribute("placeholder", "30000");
   await expect(firstSip).not.toHaveAttribute("readonly", "");
+  await page.getByLabel("Plan options").click();
   await page.locator("#resetPlan").click();
   await expect(page.locator("#defaultSip")).toHaveValue("20000");
   const reset = JSON.parse((await downloadText(page, "#exportPlan")).text);
@@ -769,6 +770,7 @@ test("Freedom responds to returns, retains values across reloads, and explains i
   await page.locator("#f-expectedReturn").fill("10");
   const report = (await downloadText(page, "#freedomReport")).text;
   expect(Report.read(report, "freedom").inputs.monthlyInvestment).toBe(60000);
+  await page.getByLabel("Plan options").click();
   await page.locator("#freedomResetTop").click();
   await upload(page, "#freedomImportFile", report);
   await expect(page.locator("#f-monthlyInvestment")).toHaveValue("60000");
@@ -807,6 +809,7 @@ test("Buckets retain annual returns, refill inspection, playback, history and em
   const snapshot = Report.read(html, "buckets");
   expect(snapshot.inputs.refillMonths).toBe(24);
   expect(snapshot.events).toHaveLength(1);
+  await page.getByLabel("Plan options").click();
   await page.locator("#bucketReset").click();
   await expect(page.locator("#bucketEvents")).not.toContainText("Medical bill");
   await upload(page, "#bucketImportFile", html);

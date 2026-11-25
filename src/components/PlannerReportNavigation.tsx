@@ -1,16 +1,41 @@
 import { useEffect, useRef } from "react";
 import { PlannerNavigation } from "./PlannerNavigation";
-import { headerConfig } from "./headerConfig";
+import { headerConfig, type PlannerKind } from "./headerConfig";
 
-type Projection = "growth" | "survival";
+export type ReportControls = {
+  currency: string;
 
-export function ProjectionNavigation({
+  onImport: (file: File | undefined) => void;
+
+  onReport: () => void;
+
+  onReset: () => void;
+
+  onSaveJSON: () => void;
+
+  disabled?: boolean;
+};
+
+const names: Record<PlannerKind, string> = {
+  growth: "Investment growth",
+  survival: "Retirement withdrawals",
+  bucket: "Retirement buckets",
+  custom: "Custom plan",
+  freedom: "Financial freedom",
+  loan: "Loan payoff",
+  budget: "Salary & budget",
+};
+export function PlannerReportNavigation({
   kind,
   active,
+  controls,
 }: {
-  kind: Projection;
+  kind: PlannerKind;
   active: boolean;
+  controls?: ReportControls;
 }) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const projection = kind === "growth" || kind === "survival";
   const options = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const menu = options.current;
@@ -38,32 +63,32 @@ export function ProjectionNavigation({
     };
   }, [active]);
   const config = headerConfig[kind];
-  const [upload, download, reset] = config.buttons;
+  const [upload, download, reset, ...utilities] = config.buttons;
   return (
     <PlannerNavigation
-      current={
-        kind === "growth" ? "Investment growth" : "Retirement withdrawals"
-      }
-      id={active ? "plannerNav" : undefined}
+      current={names[kind]}
+      id={projection && active ? "plannerNav" : undefined}
       showCurrency={active}
     >
       <div className="projection-tools">
-        <div className="view-switch" role="group" aria-label="Planner view">
-          <button
-            type="button"
-            data-screen="growth"
-            aria-pressed={kind === "growth"}
-          >
-            Growth
-          </button>
-          <button
-            type="button"
-            data-screen="survival"
-            aria-pressed={kind === "survival"}
-          >
-            Survival
-          </button>
-        </div>
+        {projection && (
+          <div className="view-switch" role="group" aria-label="Planner view">
+            <button
+              type="button"
+              data-screen="growth"
+              aria-pressed={kind === "growth"}
+            >
+              Growth
+            </button>
+            <button
+              type="button"
+              data-screen="survival"
+              aria-pressed={kind === "survival"}
+            >
+              Survival
+            </button>
+          </div>
+        )}
         <div
           className="projection-files"
           role="group"
@@ -76,6 +101,14 @@ export function ProjectionNavigation({
               type="button"
               aria-label={action.text}
               title={action.text}
+              disabled={i === 1 && controls?.disabled}
+              onClick={
+                controls
+                  ? i === 0
+                    ? () => fileInput.current?.click()
+                    : controls.onReport
+                  : undefined
+              }
               className={i === 1 ? "download" : undefined}
             >
               <svg
@@ -99,6 +132,15 @@ export function ProjectionNavigation({
           <input
             type="file"
             id={config.fileId}
+            ref={fileInput}
+            onChange={
+              controls
+                ? (e) => {
+                    controls.onImport(e.target.files?.[0]);
+                    e.target.value = "";
+                  }
+                : undefined
+            }
             accept=".html,.htm,.json,text/html,application/json"
             aria-label={`Choose saved ${kind} report`}
             hidden
@@ -111,12 +153,38 @@ export function ProjectionNavigation({
                 ))}
               </svg>
             </summary>
-            <div className="projection-popover">
+            <div
+              className="projection-popover"
+              onClick={(e) => {
+                if (
+                  e.target instanceof Element &&
+                  e.target.closest("button") &&
+                  options.current
+                ) {
+                  options.current.open = false;
+                  options.current.querySelector("summary")?.focus();
+                }
+              }}
+            >
               <strong>About currency</strong>
-              <p>{config.note}</p>
+              <p id={config.detailsId ?? undefined} title={config.details}>
+                {config.note}
+              </p>
+              {utilities.map((button) => (
+                <button
+                  key={button.id}
+                  type="button"
+                  id={button.id}
+                  disabled={controls?.disabled}
+                  onClick={controls?.onSaveJSON}
+                >
+                  {button.text}
+                </button>
+              ))}
               <button
                 type="button"
                 id={reset.id}
+                onClick={controls?.onReset}
                 title={reset.title ?? undefined}
                 aria-describedby={reset.description ?? undefined}
               >

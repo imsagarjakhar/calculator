@@ -1,5 +1,4 @@
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
-import { PlannerNavigation } from "../components/PlannerNavigation";
 import { memo, type ReactNode } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
 import { usePlanner } from "../runtime/usePlanner";
@@ -23,7 +22,7 @@ export const FreedomPage = memo(function FreedomPage() {
   return (
     <div ref={ref}>
       <main className="planner-page">
-        <PlannerNavigation current="Financial freedom" showCurrency />
+
         <PlannerHeader kind="freedom" />
         <p className="freedom-intro">
           Choose a monthly income or a withdrawal rate. See what your savings

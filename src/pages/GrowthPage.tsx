@@ -1,5 +1,4 @@
 import { GrowthArtwork } from "../components/GrowthArtwork";
-import { ProjectionNavigation } from "../components/ProjectionNavigation";
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
 import { memo } from "react";
 import { PlannerHeader } from "../components/PlannerHeader";
@@ -11,8 +10,8 @@ export const GrowthPage = memo(function GrowthPage({active=true}:{active?:boolea
   return (
     <div ref={ref}>
       <div id="growthScreen">
-        <ProjectionNavigation kind="growth" active={active} />
-        <PlannerHeader kind="growth"><GrowthArtwork /></PlannerHeader>
+
+        <PlannerHeader active={active} kind="growth"><GrowthArtwork /></PlannerHeader>
         <nav className="tabs" aria-label="Choose an investment scenario">
           <button type="button" data-type="FD" aria-pressed="false">
             Fixed Deposit

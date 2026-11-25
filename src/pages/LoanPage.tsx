@@ -1,5 +1,4 @@
 import { WorkedExampleLink } from "../components/WorkedExampleLink";
-import { PlannerNavigation } from "../components/PlannerNavigation";
 import { DateInput } from "../components/DateInput";
 import {
   originalLoanSchedule,
@@ -540,7 +539,7 @@ export function LoanPage() {
     : [];
   return (
     <main className="planner-page budget-app loan-app">
-      <PlannerNavigation current="Loan payoff" showCurrency />
+
       <PlannerHeader
         kind="loan"
         controls={{
