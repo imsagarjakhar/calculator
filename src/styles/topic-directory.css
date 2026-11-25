@@ -47,37 +47,53 @@
   flex-direction: column;
 }
 .topic-copy h3 {
-  font: 730 clamp(1.1rem, 2vw, 1.5rem) / 1.12 var(--font-ui);
+  font: 700 clamp(1.25rem, 2vw, 1.5rem) / 1.18 var(--font-ui);
   letter-spacing: -0.035em;
   color: inherit;
   margin: 0;
 }
 .topic-copy p {
-  font: 400 0.91rem/1.5 var(--font-ui);
+  font: 400 0.875rem/1.5 var(--font-ui);
   color: #455549;
   margin: 9px 0 14px;
   max-width: 57ch;
 }
 .topic-links {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
   margin-top: auto;
 }
 #homeScreen .topic-links a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  box-sizing: border-box;
   color: #205d3c;
-  font: 600 0.81rem/1.35 var(--font-ui);
-  background: #f0f4e9;
-  border-radius: 6px;
-  padding: 7px 10px;
+  font: 600 0.875rem/1.35 var(--font-ui);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #d6dfcf;
+  border-radius: 0;
+  padding: 8px 4px;
   text-decoration: none;
 }
-#homeScreen .topic-links a:is(:hover, :focus-visible) {
-  background: #e2ecd8;
+.topic-links a span:first-child {
   text-decoration: underline;
+  text-decoration-color: #93ae9a;
   text-underline-offset: 3px;
+}
+.topic-arrow {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+#homeScreen .topic-links a:is(:hover, :focus-visible) {
+  background: #eff4e9;
+}
+#homeScreen .topic-links a:focus-visible {
+  outline: 2px solid #205d3c;
+  outline-offset: -2px;
 }
 @media (max-width: 750px) {
   .topic-grid {

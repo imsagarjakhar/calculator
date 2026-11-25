@@ -145,7 +145,8 @@ export function ExploreDirectory() {
                         : undefined
                     }
                   >
-                    {label}
+                    <span>{label}</span>
+                    <span aria-hidden="true" className="topic-arrow">→</span>
                   </a>
                 ))}
               </div>
