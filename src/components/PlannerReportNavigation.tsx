@@ -11,8 +11,6 @@ export type ReportControls = {
 
   onReset: () => void;
 
-  onSaveJSON: () => void;
-
   disabled?: boolean;
 };
 
@@ -129,6 +127,19 @@ export function PlannerReportNavigation({
               </svg>
             </button>
           ))}
+          <button
+            type="button"
+            id={reset.id}
+            aria-label={reset.text}
+            title={reset.title ?? reset.text}
+            aria-describedby={reset.description ?? undefined}
+            onClick={controls?.onReset}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 4v6h6M3.7 9a8.5 8.5 0 1 1-.2 6" />
+            </svg>
+          </button>
           <input
             type="file"
             id={config.fileId}
@@ -176,20 +187,10 @@ export function PlannerReportNavigation({
                   type="button"
                   id={button.id}
                   disabled={controls?.disabled}
-                  onClick={controls?.onSaveJSON}
                 >
                   {button.text}
                 </button>
               ))}
-              <button
-                type="button"
-                id={reset.id}
-                onClick={controls?.onReset}
-                title={reset.title ?? undefined}
-                aria-describedby={reset.description ?? undefined}
-              >
-                Reset
-              </button>
               {config.resetNote && (
                 <small id={config.resetNote.id}>{config.resetNote.text}</small>
               )}

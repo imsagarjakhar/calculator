@@ -205,26 +205,6 @@ export function BudgetPage() {
       setSaved("Browser saving unavailable · export a copy to keep your plan");
     }
   }, [plan]);
-  function exportPlan() {
-    const data = JSON.stringify(
-      {
-        plan,
-        monthlySummary: result,
-        assumptions:
-          "One-year outlook: 12 month-end contributions from zero. Goal: existing savings and the same monthly investment grow over the goal timeline, using one effective annual return. Annual contribution step-ups start in month 13 and need extra future income. The goal is not a second allocation. No tax, fees or inflation.",
-      },
-      null,
-      2,
-    );
-    const url = URL.createObjectURL(
-      new Blob([data], { type: "application/json" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "money-planner-monthly-budget.json";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
   function resetPlan() {
     if (
       window.confirm(
@@ -394,7 +374,6 @@ export function BudgetPage() {
           },
           onReport: report,
           onReset: resetPlan,
-          onSaveJSON: exportPlan,
         }}
       />
       <div className="budget-toolbar">

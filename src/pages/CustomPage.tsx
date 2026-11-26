@@ -455,7 +455,7 @@ export const CustomPage = memo(function CustomPage() {
               Download schedule CSV
             </button>
             <span className="helper">
-              CSV is for reviewing results. Use “Download report” or “Save JSON”
+              CSV is for reviewing results. Use “Download report”
               for a file you can import and edit.
             </span>
           </div>

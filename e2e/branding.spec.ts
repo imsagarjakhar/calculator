@@ -81,7 +81,7 @@ test("all calculator headers share branding, typography, colours and page spacin
     await expect(
       reports.getByRole("button", { name: "Download report", exact: true }),
     ).toBeVisible();
-    await reports.getByLabel("Plan options").click();
+
     await expect(
       reports.getByRole("button", { name: "Reset", exact: true }),
     ).toBeVisible();

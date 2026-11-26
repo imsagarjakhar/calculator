@@ -54,7 +54,7 @@ test("fresh budget starts at zero and waits for income before warning", async ({
   );
   expect(snapshot.salary).toBe(2000);
   page.once("dialog", (d) => d.accept());
-  await page.getByLabel("Plan options").click();
+
   await page
     .locator(".projection-files")
     .getByRole("button", { name: "Reset", exact: true })
@@ -478,10 +478,10 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
     .click();
   await expect(bill).toHaveCount(0);
   const download = page.waitForEvent("download");
-  await page.getByLabel("Plan options").click();
-  await page.getByRole("button", { name: "Save JSON" }).click();
+
+  await page.getByRole("button", { name: "Download report" }).click();
   expect((await download).suggestedFilename()).toBe(
-    "money-planner-monthly-budget.json",
+    "money-planner-monthly-budget.html",
   );
   expect(
     await page.evaluate(

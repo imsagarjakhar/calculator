@@ -1,6 +1,10 @@
 import { test, expect } from "./test";
 import { readFile } from "node:fs/promises";
 import { initialBudget } from "../src/budget/model";
+async function reportData(file: string) {
+  const html = await readFile(file, "utf8");
+  return JSON.parse(html.match(/<script id="money-planner-restore-data"[^>]*>([^<]+)<\/script>/)![1]);
+}
 const base = process.env.VITE_BASE_PATH || "/";
 test("loan planner compares fair paths, provides a guide and restores exported plans", async ({
   page,
@@ -66,11 +70,11 @@ test("loan planner compares fair paths, provides a guide and restores exported p
   await expect(page.locator(".loan-schedule > details")).toHaveCount(24);
   await page.getByRole("button", { name: /Your money & loans/ }).click();
   const downloadEvent = page.waitForEvent("download");
-  await page.getByLabel("Plan options").click();
-  await page.getByRole("button", { name: "Save JSON" }).click();
+
+  await page.getByRole("button", { name: "Download report" }).click();
   const download = await downloadEvent;
   const file = (await download.path())!;
-  const exported = JSON.parse(await readFile(file, "utf8"));
+  const exported = await reportData(file);
   expect(exported.plan.loans).toHaveLength(2);
   await page.getByLabel("Monthly repayment budget", { exact: true }).fill("1");
   await page.getByRole("button", { name: /Compare paths/ }).click();
@@ -340,10 +344,10 @@ test("three choices compare investments, faster repayment and asset sale with ho
     ),
   ).toBe(true);
   const pending = page.waitForEvent("download");
-  await page.getByLabel("Plan options").click();
-  await page.getByRole("button", { name: "Save JSON", exact: true }).click();
+
+  await page.getByRole("button", { name: "Download report", exact: true }).click();
   const file = await (await pending).path();
-  const exported = JSON.parse(await readFile(file!, "utf8"));
+  const exported = await reportData(file!);
   expect(exported.plan.assets[0].name).toBe("Shop");
   expect(exported.plan.emergency).toBe(100000);
   await page.reload();
@@ -415,10 +419,10 @@ test("original loan inputs calculate EMI and remaining balance, restore reports 
   );
   const emiText = await first.getByTestId("loan-calculated-emi").textContent();
   const event = page.waitForEvent("download");
-  await page.getByLabel("Plan options").click();
-  await page.getByRole("button", { name: "Save JSON", exact: true }).click();
+
+  await page.getByRole("button", { name: "Download report", exact: true }).click();
   const file = (await (await event).path())!;
-  const exported = JSON.parse(await readFile(file, "utf8"));
+  const exported = await reportData(file);
   expect(exported.plan.loans[0].originalAmount).toBe(240000);
   expect(exported.plan.loans[0].lastEmiMonth).toBe("2026-12");
   exported.plan.loans[0].balance = 1;
@@ -530,11 +534,19 @@ test("rental assets update monthly funding and the main repayment and wealth gra
     "₹10,000",
   );
   const downloadEvent = page.waitForEvent("download");
-  await page.getByLabel("Plan options").click();
-  await page.getByRole("button", { name: "Save JSON", exact: true }).click();
-  const exported = JSON.parse(
-    await readFile((await (await downloadEvent).path())!, "utf8"),
-  );
-  expect(exported.results[0].assetValue).toBe(3500000);
-  expect(exported.results[0].rentReceived).toBe(4000 * exported.plan.horizon);
+
+  await page.getByRole("button", { name: "Download report", exact: true }).click();
+  const html = await readFile((await (await downloadEvent).path())!, "utf8");
+  const monthlyRows = await page.evaluate((html) => {
+    const report = new DOMParser().parseFromString(html, "text/html");
+    const table = [...report.querySelectorAll("table")].find(table =>
+      table.tHead?.textContent?.includes("Retained asset value"));
+    const headers = [...(table?.tHead?.rows[0].cells ?? [])].map(cell => cell.textContent);
+    return [...(table?.tBodies[0].rows ?? [])].map(row => [
+      row.cells[headers.indexOf("Net asset earnings")].textContent,
+      row.cells[headers.indexOf("Retained asset value")].textContent,
+    ]);
+  }, html);
+  expect(monthlyRows.length).toBeGreaterThan(0);
+  for (const row of monthlyRows) expect(row).toEqual(["₹4,000", "₹35,00,000"]);
 });

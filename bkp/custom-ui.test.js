@@ -29,7 +29,7 @@ assert.ok(get('summary').innerHTML.includes('Projected net worth'),get('summary'
 // The redesigned summary contains seven requested cards and a category breakdown.
 assert.equal((get('summary').innerHTML.match(/data-metric=/g)||[]).length,7);
 for(const label of ['Projected net worth','Total investment by category','Combined XIRR','Inflation-adjusted net worth','Absolute return','Total loans &amp; remaining loans','Available for withdrawal'])assert.ok(get('summary').innerHTML.includes(label),label);
-assert.ok(get('summary').innerHTML.includes('Regular SIP'));assert.ok(get('summary').innerHTML.includes('Existing · Mutual fund'));assert.ok(!get('summary').innerHTML.includes('1 crore'));
+assert.ok(get('summary').innerHTML.includes('Regular SIP'));assert.ok(get('summary').innerHTML.includes('Existing Â· Mutual fund'));assert.ok(!get('summary').innerHTML.includes('1 crore'));
 saved.set('intimetec-custom-plan-v1',E.exportPlan(plan));vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
 // Header currency updates saved/results immediately, preserving amounts and draft forms.
 const originalSip=read().monthlySip;get('defaultSip').value='77777';get('assetName').value='Unsaved asset';
@@ -45,7 +45,7 @@ get('defaultSip').value=originalSip;get('assetName').value='';
 assert.equal(get('endMonth').value,'2027-09');
 assert.equal(get('endMonth').min,'2026-10');assert.equal(get('endMonth').max,'2086-09');
 get('endMonth').value='2026-10';get('endMonth').oninput();submit('settingsForm');
-assert.equal(read().months,1);assert.ok(get('durationHint').textContent.startsWith('1 month ·'));
+assert.equal(read().months,1);assert.ok(get('durationHint').textContent.startsWith('1 month Â·'));
 get('endMonth').value='2027-01';submit('settingsForm');assert.equal(read().months,4);
 const validDates=saved.get('intimetec-custom-plan-v1');
 for(const invalid of ['2026-09','2086-10','']){
@@ -73,9 +73,9 @@ p=read();assert.equal(p.overrides[0].flows[0].assetId,stock.id);assert.equal(E.p
 get('monthlyRows').listeners.change({target:{dataset:{sipMonth:'2026-11'},value:'30000'}});p=read();assert.equal(p.overrides[0].sip,30000);assert.equal(E.project(p).contributions,300000);
 clickAction('edit-flow','0');get('flowAmount').value=60000;submit('flowForm');p=read();assert.equal(p.overrides[0].flows.length,1);assert.equal(p.overrides[0].flows[0].amount,60000);
 const beforeRemove=saved.get('intimetec-custom-plan-v1');clickAction('remove-asset',stock.id);assert.equal(saved.get('intimetec-custom-plan-v1'),beforeRemove);assert.ok(get('error').textContent.includes('Reassign'));
-get('exportPlan').onclick();assert.ok(downloads.length);
+get('exportReport').onclick();assert.ok(downloads.length);
 async function checkFiles(){
- const exported=E.parse(await downloads[0].text());assert.deepEqual(exported,read());
+ const exported=Report.read(await downloads[0].text());assert.deepEqual(exported,read());
  get('exportCsv').onclick();const csv=await downloads[1].text();assert.ok(csv.includes('portfolioPayments'));assert.equal(csv.trim().split('\r\n').length,13);
  const before=saved.get('intimetec-custom-plan-v1');get('importFile').files=[{size:12,text:async()=>'{bad json'}];await get('importFile').onchange();assert.equal(saved.get('intimetec-custom-plan-v1'),before);assert.ok(get('error').textContent.includes('Import not applied'));
  exported.name='Future revision';exported.currency='EUR';exported.monthlySip=12345;const text=E.exportPlan(exported);get('importFile').files=[{size:text.length,text:async()=>text}];await get('importFile').onchange();assert.equal(get('importPreview').hidden,false);assert.equal(saved.get('intimetec-custom-plan-v1'),before,'Import must wait for the preview action');assert.ok(get('importDescription').textContent.includes('Future revision'));
@@ -120,7 +120,7 @@ async function checkFiles(){
  const validBaseline=saved.get('intimetec-custom-plan-v1'),validSummary=get('summary').innerHTML;
  for(const [id,value] of [['targetToday',''],['targetToday',-1],['defaultSip',''],['stepup',-1],['inflation',''],['endMonth','2026-05']]){
   const previousValue=get(id).value;live(id,value);
-  assert.equal(saved.get('intimetec-custom-plan-v1'),validBaseline);assert.equal(get('summary').innerHTML,validSummary);assert.equal(get('exportReport').disabled,true);assert.equal(get('exportPlan').disabled,true);assert.equal(get('exportCsv').disabled,true);
+  assert.equal(saved.get('intimetec-custom-plan-v1'),validBaseline);assert.equal(get('summary').innerHTML,validSummary);assert.equal(get('exportReport').disabled,true);assert.equal(get('exportCsv').disabled,true);
   assert.ok(get('settingsUpdateStatus').textContent.includes('last saved plan'));live(id,previousValue);
  }
  assert.equal(get('exportReport').disabled,false);assert.equal(get('error').hidden,true);
@@ -136,7 +136,7 @@ async function checkFiles(){
  const accounts=read().assets,stocks=accounts.find(a=>a.type==='Stocks'),gold=accounts.find(a=>a.type==='Gold ETF'),silver=accounts.find(a=>a.type==='Silver ETF');
  get('editMonth').value='2026-06';get('editMonth').onchange();get('flowType').value='investment';get('flowTarget').value=gold.id;get('flowAmount').value=5000;get('flowNote').value='Planned extra';submit('flowForm');
  for(const [asset,day,amount] of [[stocks.id,'05',30000],['core','07',25000],[gold.id,'09',10000],[silver.id,'11',5000]]){get('transactionDate').value='2026-06-'+day;get('transactionAsset').value=read().assets.find(a=>a.id===asset).name;get('transactionAmount').value=amount;get('transactionNote').value='Salary <split>';submit('transactionForm');assert.equal(get('transactionError').textContent,'');}
- assert.equal(read().transactions.length,4);assert.equal(E.project(read()).rows[0].recorded,70000);assert.equal(E.project(read()).rows[0].sip,0);assert.equal(E.project(read()).rows[0].extra,0);assert.equal(E.project(read()).rows[1].sip,75000);assert.ok(get('transactionRows').innerHTML.includes('&lt;split&gt;'));assert.ok(get('monthlyRows').innerHTML.includes('Recorded total · edit records below'));assert.equal(get('flowSubmit').disabled,true);
+ assert.equal(read().transactions.length,4);assert.equal(E.project(read()).rows[0].recorded,70000);assert.equal(E.project(read()).rows[0].sip,0);assert.equal(E.project(read()).rows[0].extra,0);assert.equal(E.project(read()).rows[1].sip,75000);assert.ok(get('transactionRows').innerHTML.includes('&lt;split&gt;'));assert.ok(get('monthlyRows').innerHTML.includes('Recorded total Â· edit records below'));assert.equal(get('flowSubmit').disabled,true);
  const monthInput=(month,recorded)=>get('monthlyRows').innerHTML.match(new RegExp('<input[^>]*data-'+(recorded?'recorded':'sip')+'-month="'+month+'"[^>]*>'))?.[0];
  assert.ok(monthInput('2026-06',true).includes('value="70000"'));assert.ok(monthInput('2026-06',true).includes('readonly'));assert.ok(!monthInput('2026-06',true).includes('75000'));assert.ok(!monthInput('2026-06',true).includes('disabled'));assert.ok(monthInput('2026-07',false).includes('placeholder="75000"'));
  get('transactionAssetFilter').value=gold.id;get('transactionAssetFilter').onchange();assert.ok(get('transactionTotals').textContent.startsWith('1 transaction'));get('transactionClearFilters').onclick();assert.ok(get('transactionTotals').textContent.startsWith('4 transactions'));
@@ -179,7 +179,7 @@ async function checkFiles(){
  // Reopening the page restores the cleared defaults, rather than the old portfolio.
  vm.runInContext(fs.readFileSync('custom-plan.js','utf8'),ctx);
  assert.equal(get('defaultSip').value,'20000');assert.equal(read().monthlySip,20000);assert.equal(read().transactions.length,0);assert.equal(read().loans.length,0);assert.equal(read().overrides.length,0);assert.equal(read().assets.length,1);assert.equal(read().assets[0].value,0);assert.ok(get('loanList').innerHTML.includes('No loans'));assert.ok(get('transactionRows').innerHTML.includes('No transactions'));
- assert.ok(get('assetList').innerHTML.includes('Monthly · ₹20,000 per occurrence'));assert.ok(get('assetList').innerHTML.includes('SIP occurrences: 120 · Total SIP: ₹24,00,000'));
- console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/JSON download, staged import/restore, and read-only Growth copying.');
+ assert.ok(get('assetList').innerHTML.includes('Monthly Â· â‚¹20,000 per occurrence'));assert.ok(get('assetList').innerHTML.includes('SIP occurrences: 120 Â· Total SIP: â‚¹24,00,000'));
+ console.log('Custom page handlers passed: editable assets/loans, monthly SIP and bonus updates, safe removal, CSV/HTML download, staged import/restore, and read-only Growth copying.');
 }
 checkFiles().catch(e=>{console.error(e);process.exitCode=1;});

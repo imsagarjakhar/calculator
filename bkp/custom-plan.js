@@ -53,7 +53,7 @@
  }
  function baselineStatus(valid){
   $('settingsUpdateStatus').textContent=valid?'Calculations update automatically. Valid changes are saved in this browser.':'Complete valid starting-plan inputs to update results. The figures below show your last saved plan.';
-  for(const id of ['exportPlan','exportReport','exportCsv'])$(id).disabled=!valid;
+  for(const id of ['exportReport','exportCsv'])$(id).disabled=!valid;
  }
  function readSettings(){
   for(const [id,name] of [['targetToday','Target amount in today’s value'],['defaultSip','Default monthly SIP'],['stepup','Annual SIP step-up'],['inflation','Expense inflation']])if($(id).value.trim()==='')throw new Error('Enter '+name+'.');
@@ -211,7 +211,6 @@
   if(kind==='asset'){assetEdit=id;$('assetName').value=entry.name;$('assetType').value=entry.type;if(!$('assetType').value)$('assetType').value='Other';$('assetValue').value=entry.value;$('assetReturn').value=entry.annualReturn;$('assetLiquid').value=entry.canWithdraw?'yes':'no';$('assetSubmit').textContent='Save asset';$('assetCancel').hidden=false;$('assetName').focus();}
   else{loanEdit=id;$('loanName').value=entry.name;$('loanMode').value=entry.balanceMode==='original'?'original':'current';$('loanBalance').value=entry.balance;$('loanRate').value=entry.annualRate;$('loanMonths').value=entry.remainingMonths;$('loanSource').value=entry.source;if(entry.balanceMode==='original'){$('loanOriginal').value=entry.originalAmount;$('loanYears').value=Math.floor(entry.totalMonths/12);$('loanExtraMonths').value=entry.totalMonths%12;$('loanStartDate').value=entry.startDate;$('loanCurrentDate').value=entry.currentDate;}$('loanSubmit').textContent='Save loan';$('loanCancel').hidden=false;setLoanMode();$('loanName').focus();}
  });
- $('exportPlan').onclick=()=>{download(E.exportPlan(plan),'application/json','Custom_plan_'+plan.startMonth+'.json');$('status').textContent='Plan file downloaded. Import this JSON later to continue editing. Starting-plan inputs update automatically. Asset, loan and cash-flow form entries must be saved first.';};
  $('exportReport').onclick=()=>{try{download(CustomReport.build(plan),'text/html;charset=utf-8','Custom_plan_report_'+plan.startMonth+'.html');$('status').textContent='Report downloaded. Open it in a browser to read or print. Import this original HTML report to continue editing. Only applied/saved changes are included.';error('');}catch(e){error('Report could not be created. '+e.message);}};
  $('resetPlan').onclick=()=>{
   if(apply(E.createPlan(),'Reset complete: monthly SIP 20,000; no loans, extra investments or recorded transactions.')){

@@ -66,13 +66,13 @@ for (const item of [
       page.getByRole("status").filter({ hasText: "was restored" }),
     ).toBeVisible();
     page.once("dialog", (d) => d.dismiss());
-    await header.getByLabel("Plan options").click();
+
     await header.getByRole("button", { name: "Reset", exact: true }).click();
     await expect(page.getByLabel(item.label, { exact: true })).toHaveValue(
       "65000",
     );
     page.once("dialog", (d) => d.accept());
-    await header.getByLabel("Plan options").click();
+
     await header.getByRole("button", { name: "Reset", exact: true }).click();
     await expect(
       page.getByRole("combobox", { name: "Your currency", exact: true }),

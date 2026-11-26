@@ -244,31 +244,6 @@ export function LoanPage() {
       setSaved("Browser saving unavailable · export a copy");
     }
   }, [plan, valid]);
-  function exportPlan() {
-    const url = URL.createObjectURL(
-      new Blob(
-        [
-          JSON.stringify(
-            {
-              plan,
-              results: comparison.results.map(({ rows, ...r }) => r),
-              decisions: compareDecisions(plan).map(
-                ({ rows, ...scenario }) => scenario,
-              ),
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      ),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "money-planner-loan-payoff.json";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
   async function importFile(file: File | undefined) {
     if (!file) return;
     try {
@@ -549,7 +524,6 @@ export function LoanPage() {
           },
           onReport: report,
           onReset: resetPlan,
-          onSaveJSON: exportPlan,
           disabled: !valid,
         }}
       />

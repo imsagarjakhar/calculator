@@ -40,7 +40,6 @@ function reactHeader(kind: string, title: string, description: string) {
         description: null,
       },
 
-      { id: `${kind}-json`, text: "Save JSON", title: null, description: null },
     ],
 
     fileId: `${kind}-file`,
@@ -208,15 +207,6 @@ export const headerConfig = {
         description: null,
       },
 
-      {
-        id: "exportPlan",
-
-        text: "Save JSON",
-
-        title: null,
-
-        description: null,
-      },
     ],
 
     fileId: "importFile",

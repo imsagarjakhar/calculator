@@ -47,7 +47,6 @@ const test = base.extend<{ consoleCheck: void }>({
   ],
 });
 async function downloadText(page: Page, selector: string) {
-  if (selector === "#exportPlan") await page.getByLabel("Plan options").click();
   const pending = page.waitForEvent("download");
   await page.locator(selector).click();
   const download = await pending;
@@ -440,7 +439,7 @@ test("all five calculators load with consistent controls, editable dates and res
     const toolbar = page.getByRole("group", {name:"Plan reports"});
     await expect(page.locator(".report-actions-title:visible")).toHaveCount(0);
     await expect(page.locator(".planner-context:visible")).toHaveCount(1);
-    await expect(toolbar.locator("button > svg")).toHaveCount(2);
+    await expect(toolbar.locator("button > svg")).toHaveCount(3);
     for (const name of ["Import report", "Download report"]) {
       await expect(toolbar.getByRole("button", {name, exact:true})).toBeVisible();
     }
@@ -448,12 +447,12 @@ test("all five calculators load with consistent controls, editable dates and res
     await expect(toolbar.getByRole("button",{name:"Reset",exact:true})).toBeVisible();
     {
       const options = toolbar.getByLabel("Plan options");
-      const reset = toolbar.getByRole("button", {name:"Reset",exact:true});
+      const popover = toolbar.locator(".projection-popover");
       await page.getByRole("navigation", { name: "Breadcrumb" }).locator("[aria-current=page]").click();
-      await expect(reset).toBeHidden();
+      await expect(popover).toBeHidden();
       await options.click();
       await page.keyboard.press("Escape");
-      await expect(reset).toBeHidden();
+      await expect(popover).toBeHidden();
       await expect(options).toBeFocused();
     }
     await expect(page.getByRole("combobox", {name:"Your currency",exact:true}).locator("option")).toHaveText([
@@ -570,7 +569,7 @@ test("disabled Growth assets and loans stay out of projections without deleting 
   expect(reportText).not.toMatch(
     /net wealth|existing assets|current loans|remaining debt|EMIs paid|Available to withdraw/i,
   );
-  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
+
   await page.locator("#reset").click();
   expect(
     await page.evaluate(() =>
@@ -616,7 +615,7 @@ test("Growth matches the existing engine, persists edits, survives navigation, e
   expect((await downloadText(page, "#exportMonthly")).filename).toMatch(
     /\.csv$/,
   );
-  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
+
   await page.locator("#reset").click();
   await expect(page.locator("#monthly")).toHaveValue("2000");
   await upload(page, "#growthImportFile", report.text);
@@ -669,7 +668,7 @@ test("Survival imports an old dated plan, preserves its date, and resets through
   );
   expect(restored.inputs.swp).toBe(1600);
   expect(restored.projectionStart).toContain("2024-02-29");
-  await page.getByLabel("Plan options", { exact: true }).filter({visible:true}).click();
+
   await page.locator("#survivalResetTop").click();
   await expect(page.locator("#s-currency")).toHaveValue("INR");
   await expect(page.locator("#s-swp")).toHaveValue("50000");
@@ -725,7 +724,7 @@ test("Custom Plan restores browser data, updates live, records split investments
   );
   await page.reload();
   await expect(firstSip).toHaveValue("15000");
-  const saved = JSON.parse((await downloadText(page, "#exportPlan")).text);
+  const saved = CustomReport.read((await downloadText(page, "#exportReport")).text);
   expect(saved.transactions).toHaveLength(2);
   expect(saved.monthlySip).toBe(30000);
   expect(
@@ -740,10 +739,10 @@ test("Custom Plan restores browser data, updates live, records split investments
   await expect(firstSip).toHaveValue("");
   await expect(firstSip).toHaveAttribute("placeholder", "30000");
   await expect(firstSip).not.toHaveAttribute("readonly", "");
-  await page.getByLabel("Plan options").click();
+
   await page.locator("#resetPlan").click();
   await expect(page.locator("#defaultSip")).toHaveValue("20000");
-  const reset = JSON.parse((await downloadText(page, "#exportPlan")).text);
+  const reset = CustomReport.read((await downloadText(page, "#exportReport")).text);
   expect(reset.transactions).toEqual([]);
   expect(reset.loans).toEqual([]);
   expect(reset.overrides).toEqual([]);
@@ -773,7 +772,7 @@ test("Freedom responds to returns, retains values across reloads, and explains i
   await page.locator("#f-expectedReturn").fill("10");
   const report = (await downloadText(page, "#freedomReport")).text;
   expect(Report.read(report, "freedom").inputs.monthlyInvestment).toBe(60000);
-  await page.getByLabel("Plan options").click();
+
   await page.locator("#freedomResetTop").click();
   await upload(page, "#freedomImportFile", report);
   await expect(page.locator("#f-monthlyInvestment")).toHaveValue("60000");
@@ -812,7 +811,7 @@ test("Buckets retain annual returns, refill inspection, playback, history and em
   const snapshot = Report.read(html, "buckets");
   expect(snapshot.inputs.refillMonths).toBe(24);
   expect(snapshot.events).toHaveLength(1);
-  await page.getByLabel("Plan options").click();
+
   await page.locator("#bucketReset").click();
   await expect(page.locator("#bucketEvents")).not.toContainText("Medical bill");
   await upload(page, "#bucketImportFile", html);
@@ -877,6 +876,6 @@ test("calculators continue working when browser storage is unavailable", async (
     "Browser saving unavailable",
   );
   expect(
-    JSON.parse((await downloadText(page, "#exportPlan")).text).monthlySip,
+    CustomReport.read((await downloadText(page, "#exportReport")).text).monthlySip,
   ).toBe(25000);
 });
