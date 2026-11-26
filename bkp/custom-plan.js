@@ -233,6 +233,14 @@
   const expenses=JSON.parse(localStorage.getItem('life-events-v1-growth-'+currency)||'[]');for(const e of expenses.filter(e=>e.enabled))changeFor(candidate,month(e.year,e.month)).flows.push({type:'expense',amount:e.amount,inflate:e.inflate,note:e.name});
   stage(candidate);
  }catch(e){error('Growth setup not copied. '+e.message);}};
- try{const saved=localStorage.getItem(KEY);if(saved)plan=E.parse(saved);}catch(e){storage=false;error('Saved Custom Plan could not be restored. You can import a plan file. '+e.message);}
- selected=plan.startMonth;result=E.project(plan);render();resetLoan();$('saveState').textContent=storage?'Private · browser saved':'Save a plan file to keep your changes';
+ let restoredPlan=false;
+ try{const saved=localStorage.getItem(KEY);if(saved){plan=E.parse(saved);restoredPlan=true;}}catch(e){storage=false;error('Saved Custom Plan could not be restored. You can import a plan file. '+e.message);}
+ if(typeof scope!=='undefined'&&!restoredPlan){plan.targetToday=0;plan.monthlySip=0;}
+ selected=plan.startMonth;result=E.project(plan);render();resetLoan();
+ if(typeof scope!=='undefined'){
+  const example=E.createPlan();
+  scope.setupExample({targetToday:example.targetToday,defaultSip:example.monthlySip},restoredPlan,updateSettings);
+  if(!restoredPlan)baselineStatus(false);
+ }
+ $('saveState').textContent=storage?'Private · browser saved':'Save a plan file to keep your changes';
 })();

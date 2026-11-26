@@ -91,7 +91,8 @@
     }
   }
   function restore(a){if(a.projectionStart!==undefined)projectionStart=readStart(a.projectionStart);for(const key of Object.keys(defaults))get('s-'+key).value=a[key]??defaults[key];}
-  try{const saved=JSON.parse(localStorage.getItem('corpus-survival-v1'));restore(saved&&typeof saved==='object'?{...defaults,...saved}:defaults);}catch{projectionStart=new Date();restore(defaults);}
+  let restoredPlan=false;
+  try{const saved=JSON.parse(localStorage.getItem('corpus-survival-v1'));restore(saved&&typeof saved==='object'?{...defaults,...saved}:defaults);restoredPlan=Boolean(saved);}catch{projectionStart=new Date();restore(defaults);}
   get('survivalForm').addEventListener('submit',event=>{event.preventDefault();update();});
   get('survivalForm').addEventListener('input',update);get('s-currency').addEventListener('change',update);
   get('survivalReset').onclick=()=>{projectionStart=new Date();restore(defaults);update();};
@@ -121,5 +122,6 @@
   document.querySelectorAll('[data-screen]').forEach(button=>button.onclick=()=>{const name=button.dataset.screen;history.pushState(null,'',name==='home'?location.pathname+location.search:'#'+name);showScreen(name,true);});
   window.addEventListener('popstate',()=>showScreen(location.hash.slice(1),true));
   eventsEditor=LifeEvents.mount(get('survivalLifeEvents'),'survival',{currency:get('s-currency').value,months:(Number(get('s-endAge').value)-Number(get('s-age').value))*12,inflation:Number(get('s-inflation').value),age:Number(get('s-age').value)},update);
+  if(typeof scope!=='undefined')scope.setupExample({'s-corpus':defaults.corpus,'s-swp':defaults.swp},restoredPlan,update);
   update();showScreen(location.hash.slice(1));
 })();

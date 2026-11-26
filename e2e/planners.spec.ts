@@ -336,6 +336,7 @@ test("styled calendars select dates and months, respect limits and always dismis
   page,
 }, info) => {
   await page.goto(appPath("/custom-plan/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await page.locator("#startMonth").fill("2024-01");
   await page.locator("#endMonth").fill("2025-12");
   const openEnd = page.locator("#endMonth").locator("..").getByRole("button");
@@ -410,6 +411,7 @@ test("bucket month picker updates the plan and stays within mobile viewport", as
   page,
 }, info) => {
   await page.goto(appPath("/bucket-plan/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   const input = page.locator("#b-startMonth");
   await input.locator("..").getByRole("button").click();
   const dialog = page.getByRole("dialog");
@@ -435,6 +437,13 @@ test("all five calculators load with consistent controls, editable dates and res
 }, info) => {
   for (const [route, heading] of routes) {
     await page.goto(appPath(route));
+    const firstAmount = page.locator({
+      "/growth/": "#monthly", "/survival/": "#s-corpus", "/custom-plan/": "#defaultSip",
+      "/freedom/": "#f-corpus", "/bucket-plan/": "#b-monthly",
+    }[route]);
+    await expect(firstAmount).toHaveValue("");
+    await page.getByRole("button", { name: "Load example plan", exact: true }).click();
+    await expect(firstAmount).not.toHaveValue("");
     await expect(page.locator("h1:visible")).toContainText(heading);
     const toolbar = page.getByRole("group", {name:"Plan reports"});
     await expect(page.locator(".report-actions-title:visible")).toHaveCount(0);
@@ -501,6 +510,7 @@ test("disabled Growth assets and loans stay out of projections without deleting 
     localStorage.setItem("growth-position-v1-INR", JSON.stringify(saved));
   }, position);
   await page.goto(appPath("/growth/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   for (const name of ["Fixed Deposit", "Gold", "Equity Mutual Fund"]) {
     await page.getByRole("button", { name, exact: true }).click();
     await expect(page.locator("#growthHoldings")).toBeHidden();
@@ -691,6 +701,7 @@ test("Custom Plan restores browser data, updates live, records split investments
     old,
   );
   await page.goto(appPath("/custom-plan/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await expect(page.locator("#planName")).toHaveValue("Existing plan");
   await page.locator("#defaultSip").fill("30000");
   await expect
@@ -759,6 +770,7 @@ test("Freedom responds to returns, retains values across reloads, and explains i
   page,
 }) => {
   await page.goto(appPath("/freedom/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await page
     .getByRole("button", { name: "Enter monthly income", exact: true })
     .click();
@@ -782,6 +794,7 @@ test("Buckets retain annual returns, refill inspection, playback, history and em
   page,
 }) => {
   await page.goto(appPath("/bucket-plan/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await page.locator("#b-startMonth").fill("2026-06");
   await page
     .locator("details")
@@ -852,6 +865,7 @@ test("production pages enforce CSP and SRI and retain the custom domain and old 
     "google.com, pub-7696234797118425, DIRECT, f08c47fec0942fa0",
   );
   await page.goto(appPath("/growth/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   const outgoing: string[] = [];
   page.on("request", (request) => {
     if (!request.url().startsWith(new URL(page.url()).origin))
@@ -871,6 +885,7 @@ test("calculators continue working when browser storage is unavailable", async (
     };
   });
   await page.goto(appPath("/custom-plan/"));
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await page.locator("#defaultSip").fill("25000");
   await expect(page.locator("#saveState")).toContainText(
     "Browser saving unavailable",

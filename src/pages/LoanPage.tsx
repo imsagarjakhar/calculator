@@ -656,7 +656,9 @@ export function LoanPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setPlan(example());
+                        if ((plan.repaymentBudget || plan.salary || plan.assets?.length || plan.emergency || plan.expenses || plan.lumpSum) &&
+                          !window.confirm("Replace your current loan inputs with an example plan?")) return;
+                        setPlan({ ...example(), currency: plan.currency });
                         setNotice(
                           "Example plan loaded. Replace its loans and budget with your own values.",
                         );

@@ -24,7 +24,7 @@
 
   for(const [key,[min,max]] of Object.entries(E.ranges)){
 
-   const input=$('f-'+key),n=input.value.trim()===''?(['salary','expenses'].includes(key)?0:NaN):Number(input.value),bad=!Number.isFinite(n)||n<min||n>max||(['age','targetAge','endAge'].includes(key)&&!Number.isInteger(n));
+   const input=$('f-'+key),n=input.value.trim()===''?((['salary','expenses'].includes(key)||(key==='retirementExpense'&&a.incomeMode==='corpus'))?0:NaN):Number(input.value),bad=!Number.isFinite(n)||n<min||n>max||(['age','targetAge','endAge'].includes(key)&&!Number.isInteger(n));
 
    input.setAttribute('aria-invalid',String(bad));if(bad)throw new Error('Enter '+labels[key]+' between '+min.toLocaleString()+' and '+max.toLocaleString()+(['age','targetAge','endAge'].includes(key)?' in whole years.':'.'));a[key]=n;
 
@@ -191,7 +191,8 @@
 
  }
 
- try{const saved=localStorage.getItem(KEY);if(saved){const raw=JSON.parse(saved);if(raw.expectedReturn===undefined||raw.monthlyInvestment===undefined||raw.investmentGrowth===undefined)migrationMessage=' Your saved plan now uses one expected return and an ongoing-income target. Please review the assumptions; the estimate may differ from the older drawdown calculation.';restore(E.migrate(raw));}else restore(fresh);}catch{restore(fresh);migrationMessage='';}
+ let restoredPlan=false;
+ try{const saved=localStorage.getItem(KEY);if(saved){const raw=JSON.parse(saved);if(raw.expectedReturn===undefined||raw.monthlyInvestment===undefined||raw.investmentGrowth===undefined)migrationMessage=' Your saved plan now uses one expected return and an ongoing-income target. Please review the assumptions; the estimate may differ from the older drawdown calculation.';restore(E.migrate(raw));restoredPlan=true;}else restore(fresh);}catch{restore(fresh);migrationMessage='';}
 
  $('freedomForm').addEventListener('submit',event=>{event.preventDefault();update();});$('freedomForm').addEventListener('input',event=>{
 
@@ -236,6 +237,10 @@
 
  }});
 
+ if(typeof scope!=='undefined'){
+  if(!restoredPlan){$('f-salary').value='';$('f-expenses').value='';$('f-retirementExpense').value='';}
+  scope.setupExample({'f-monthlyInvestment':fresh.monthlyInvestment,'f-corpus':fresh.corpus,'f-salary':fresh.salary,'f-expenses':fresh.expenses,'f-retirementExpense':fresh.retirementExpense},restoredPlan,update);
+ }
  update();
 
 })();

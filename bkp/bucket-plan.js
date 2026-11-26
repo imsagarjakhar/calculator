@@ -182,7 +182,8 @@
    CalculatorReport.download(html,'buckets',a.currency);$('bucketSave').textContent='Report downloaded. Open it offline or use Print → Save as PDF.';
   }catch(e){$('bucketError').textContent='Report could not be created. '+e.message;}
  }
- try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.version===1){const a=E.validate(saved.settings);events=E.validateEvents(saved.events,(a.endAge-a.age)*12);restore(a);}else restore(E.defaults);}catch{events=[];restore(E.defaults);}
+ let restoredPlan=false;
+ try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.version===1){const a=E.validate(saved.settings);events=E.validateEvents(saved.events,(a.endAge-a.age)*12);restore(a);restoredPlan=true;}else restore(E.defaults);}catch{events=[];restore(E.defaults);}
  $('bucketForm').addEventListener('input',update);$('bucketForm').addEventListener('change',update);$('bucketForm').addEventListener('submit',e=>{e.preventDefault();update();});$('b-currency').onchange=update;
  $('bucketReset').onclick=()=>{events=[];selectedMonth=0;selectedPhase=0;restore(E.defaults);$('emergencyForm').reset();$('eventRefill').value='immediate';$('extraWithdrawalPanel').hidden=true;$('extraReason').value='';$('extraAmount').value='';$('extraDate').value='';$('extraRefill').value='scheduled';$('extraWithdrawalError').textContent='';$('extraWithdrawalSaved').textContent='';$('eventError').textContent='';update();};
  $('bucketPrevious').onclick=()=>selectMonth(selectedMonth-1);$('bucketNext').onclick=()=>selectMonth(selectedMonth+1);$('bucketSlider').oninput=()=>selectMonth(Number($('bucketSlider').value));
@@ -234,5 +235,6 @@
   selectedMonth=Number.isInteger(saved.inspection?.month)&&saved.inspection.month>=0&&saved.inspection.month<projection.months?saved.inspection.month:0;
   update();selectedPhase=Math.max(0,projection.rows[selectedMonth].phases.findIndex(p=>p.key===saved.inspection?.phase));renderExplorer();
  }});
+ if(typeof scope!=='undefined')scope.setupExample({'b-corpus':E.defaults.corpus,'b-monthly':E.defaults.monthly,'b-emergency':E.defaults.emergency},restoredPlan,update);
  update();
 })();

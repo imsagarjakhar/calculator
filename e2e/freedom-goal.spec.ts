@@ -8,6 +8,7 @@ test("freedom offers corpus percentage and monthly income with matching annual c
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(`${base}freedom/`);
+  await page.getByRole("button", { name: "Load example plan", exact: true }).click();
   await expect(page.locator("#f-incomeMode")).toHaveValue("corpus");
   await expect(
     page.getByRole("slider", {

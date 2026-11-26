@@ -60,6 +60,12 @@ export function PlannerHeader({
         </div>
 
         {children}
+        {!controls && (
+          <div className="planner-example">
+            <span data-example-hint role="status">Enter your amounts or try an example.</span>
+            <button type="button" data-example-load>Load example plan</button>
+          </div>
+        )}
         {/* Older planner controllers read and restore this form field by ID. */}
         {!controls && (
           <div className="planner-currency" hidden>

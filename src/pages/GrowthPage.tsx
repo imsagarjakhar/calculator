@@ -37,14 +37,6 @@ export const GrowthPage = memo(function GrowthPage({active=true}:{active?:boolea
                   Equity Mutual Fund Calculator
                 </h2>
               </div>
-              <button
-                id="pptExample"
-                className="tiny ghost"
-                type="button"
-                title="Restore the presentation inputs and clear extra investments"
-              >
-                PPT example: 5%
-              </button>
             </div>
             <div className="controls">
               <label htmlFor="monthly">
@@ -57,7 +49,7 @@ export const GrowthPage = memo(function GrowthPage({active=true}:{active?:boolea
                   max="100000000"
                   step="1"
                   inputMode="decimal"
-                  defaultValue="2000"
+                  defaultValue=""
                 />
               </label>
               <label htmlFor="stepup">
@@ -108,7 +100,7 @@ export const GrowthPage = memo(function GrowthPage({active=true}:{active?:boolea
                   max="100000000000"
                   step="1"
                   inputMode="decimal"
-                  defaultValue="10000000"
+                  defaultValue=""
                 />
               </label>
               <label htmlFor="inflation">

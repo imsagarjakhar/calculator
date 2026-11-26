@@ -87,7 +87,7 @@ export const SurvivalPage = memo(function SurvivalPage({active=true}:{active?:bo
                       max={field.max}
                       step={field.unit === "years" ? 1 : "any"}
                       inputMode="decimal"
-                      defaultValue={field.initial}
+                      defaultValue={field.unit === "money" ? "" : field.initial}
                     />
                   </label>
                 ))}

@@ -7,6 +7,7 @@ export interface ControllerScope {
   clearInterval: typeof window.clearInterval;
   requestAnimationFrame: typeof window.requestAnimationFrame;
   cancelAnimationFrame: typeof window.cancelAnimationFrame;
+  setupExample: (amounts: Record<string, number>, restored: boolean, refresh: () => void) => void;
   dispose: () => void;
 }
 
@@ -90,6 +91,39 @@ export function createControllerScope(root: HTMLElement): ControllerScope {
     cancelAnimationFrame: (id) => {
       window.cancelAnimationFrame(id);
       frames.delete(id);
+    },
+    setupExample(amounts, restored, refresh) {
+      const button = root.querySelector<HTMLButtonElement>("[data-example-load]");
+      const hint = root.querySelector<HTMLElement>("[data-example-hint]");
+      if (!button || !hint) return;
+      const fields = Object.entries(amounts).map(([id, example]) => ({
+        input: root.querySelector<HTMLInputElement>("#" + CSS.escape(id))!,
+        example,
+      }));
+      const startEditing = () => root.classList.remove("planner-awaiting-input");
+      if (!restored) {
+        fields.forEach(({input}) => { input.value = ""; });
+        root.classList.add("planner-awaiting-input");
+        root.addEventListener("input", startEditing, { once: true });
+        root.addEventListener("click", startEditing, { once: true });
+        cleanups.push(() => {
+          root.removeEventListener("input", startEditing);
+          root.removeEventListener("click", startEditing);
+          startEditing();
+        });
+      }
+      else hint.textContent = "Your saved plan is open.";
+      const load = () => {
+        const empty = fields.filter(({input}) => input.value.trim() === "");
+        if (!empty.length && !window.confirm("Replace the displayed amounts with example values?")) return;
+        for (const {input, example} of empty.length ? empty : fields) input.value = String(example);
+        refresh();
+        hint.textContent = empty.length && empty.length < fields.length
+          ? "Empty amounts filled with examples. Your entries were kept."
+          : "Example amounts loaded. You can edit them.";
+      };
+      button.addEventListener("click", load);
+      cleanups.push(() => button.removeEventListener("click", load));
     },
     dispose() {
       for (const cleanup of cleanups.splice(0)) cleanup();
