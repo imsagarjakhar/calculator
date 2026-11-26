@@ -20,7 +20,7 @@ test("loan planner compares fair paths, provides a guide and restores exported p
     }),
   );
   await page.goto(base);
-  await page.getByRole("link", { name: /Compare my loan options/ }).click();
+  await page.locator("#explore").getByRole("link", { name: "Loan payoff planner", exact: true }).click();
   await expect(page).toHaveURL(/loan-payoff\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Pay it down",

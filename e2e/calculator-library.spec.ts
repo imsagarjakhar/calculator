@@ -39,6 +39,17 @@ test("each calculator has a unique address and a usable example", () => {
     }
   }
   expect(ids.size).toBeGreaterThanOrEqual(287);
+  const modes = categories.flatMap(c => c.tools)
+    .find(t => "id" in t && t.id === "percentage");
+  if (!modes || !("modes" in modes)) throw Error("Missing percentage calculator");
+  const calculate = (title: string, values: number[]) => {
+    const variant = modes.modes?.find(m => m.title === title);
+    if (!variant) throw Error("Missing mode " + title);
+    return variant.calculate(values);
+  };
+  expect(calculate("Percentage change", [0, 30])["Absolute change"]).toBe(30);
+  expect(() => calculate("One number as a percentage of another", [5, 0])).toThrow(/nonzero/);
+  expect(() => calculate("Recover the original value", [0, -100])).toThrow(/100% decrease/);
   const cases: [string, number[], string, number][] = [
     ["gst", [118, 18], "GST embedded (₹)", 18],
     ["pm-kisan", [2], "Expected remaining (₹)", 2000],

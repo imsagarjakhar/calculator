@@ -1,6 +1,7 @@
 (function(root){
  'use strict';
  const Growth=typeof module!=='undefined'&&module.exports?require('./growth-engine'):root.GrowthEngine;
+ const cashFlowRates=typeof module!=='undefined'&&module.exports?require('./cash-flow-returns'):root.CashFlowRates;
  const SCHEMA='money-planner-custom-plan',VERSION=1;
  const currencies=['INR','SAR','USD','AED','EUR','GBP'];
  const monthNumber=value=>{if(typeof value!=='string'||!/^\d{4}-(0[1-9]|1[0-2])$/.test(value))throw new Error('Use a valid month in YYYY-MM format.');const [year,month]=value.split('-').map(Number);if(year<2000||year>2250)throw new Error('Plan months must be between 2000 and 2250.');return year*12+month-1;};
@@ -108,18 +109,8 @@
   for(const entry of entries){const date=new Date(entry.date).getTime();if(!Number.isFinite(date)||!Number.isFinite(entry.amount))throw new Error('XIRR needs valid dates and finite amounts.');grouped.set(date,(grouped.get(date)||0)+entry.amount);}
   const flows=[...grouped].filter(([,amount])=>amount!==0).sort((a,b)=>a[0]-b[0]);
   if(flows.length<2||!flows.some(([,a])=>a<0)||!flows.some(([,a])=>a>0))return {rate:null,status:'unavailable'};
-  const scale=Math.max(...flows.map(([,a])=>Math.abs(a))),times=flows.map(([d])=>(d-flows[0][0])/86400000/365),amounts=flows.map(([,a])=>a/scale),last=times.at(-1);
-  const npv=logRate=>amounts.reduce((sum,amount,i)=>sum+amount*Math.exp(-logRate*times[i]-(logRate<0?-logRate*last:0)),0);
-  const roots=[],minimum=Math.log(1e-8),maximum=Math.log(1e6+1),steps=2048;
-  function addRoot(logRate){const rawRate=Math.expm1(logRate),rate=Math.abs(rawRate)<1e-10?0:rawRate;if(!roots.some(root=>Math.abs(root-rate)<1e-7*Math.max(1,Math.abs(rate))))roots.push(rate);}
-  let left=minimum,leftValue=npv(left);
-  for(let step=1;step<=steps;step++){
-   const right=minimum+(maximum-minimum)*step/steps,rightValue=npv(right);
-   if(leftValue===0)addRoot(left);
-   if(leftValue*rightValue<0){let lo=left,hi=right,lowValue=leftValue;for(let i=0;i<90;i++){const mid=(lo+hi)/2,value=npv(mid);if(value===0){lo=hi=mid;break;}if(Math.sign(value)===Math.sign(lowValue)){lo=mid;lowValue=value;}else hi=mid;}addRoot((lo+hi)/2);}
-   left=right;leftValue=rightValue;
-  }
-  if(leftValue===0)addRoot(left);
+  const times=flows.map(([date])=>(date-flows[0][0])/86400000/365);
+  const roots=cashFlowRates(flows.map(([,amount])=>amount),times,Math.log(1e-8),Math.log1p(1e6)).map(Math.expm1);
   return roots.length===1?{rate:roots[0],status:'available'}:{rate:null,status:roots.length>1?'multiple':'unavailable'};
  }
  function portfolioSummary(raw,projection){

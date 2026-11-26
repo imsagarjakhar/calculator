@@ -128,13 +128,18 @@ export const percentageModes: Mode[] = [
   mode(
     "One number as a percentage of another",
     [number("Part", 25), number("Whole", 200)],
-    ([a, b]) => ({ "Share (%)": (100 * a) / b }),
+    ([a, b]) => {
+      if (b === 0)
+        throw Error("The whole must be nonzero to calculate a share.");
+      return { "Share (%)": (100 * a) / b };
+    },
   ),
   mode(
     "Percentage change",
     [number("Original value", 200), number("New value", 250)],
     ([a, b]) => ({
-      "Change (%)": ((b - a) / a) * 100,
+      "Change (%)":
+        a === 0 ? "Undefined for a zero starting value" : ((b - a) / a) * 100,
       "Absolute change": b - a,
     }),
   ),
@@ -146,7 +151,13 @@ export const percentageModes: Mode[] = [
   mode(
     "Recover the original value",
     [number("Final value", 450), number("Signed change (%)", -10)],
-    ([a, b]) => ({ "Original value": a / (1 + b / 100) }),
+    ([a, b]) => {
+      if (b === -100)
+        throw Error(
+          "A 100% decrease leaves zero and cannot determine the original value.",
+        );
+      return { "Original value": a / (1 + b / 100) };
+    },
   ),
   mode(
     "Convert CGPA to percentage",

@@ -96,9 +96,10 @@ const engines: Record<string, { name: string; deps?: Record<string, string> }> =
       name: "CorpusSurvival",
       deps: { LifeEvents: "life-events" },
     },
+    "cash-flow-returns": { name: "CashFlowRates" },
     "custom-engine": {
       name: "CustomPlan",
-      deps: { GrowthEngine: "growth-engine" },
+      deps: { GrowthEngine: "growth-engine", CashFlowRates: "cash-flow-returns" },
     },
     "custom-report": {
       name: "CustomReport",
@@ -156,6 +157,7 @@ const controllers: Record<string, { file: string; deps: string[] }> = {
 function compatibilityModules(): Plugin {
   return {
     name: "tested-planner-modules",
+    enforce: "pre",
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const url = new URL(request.url || "/", "http://localhost");
@@ -175,6 +177,7 @@ function compatibilityModules(): Plugin {
       });
     },
     resolveId(id) {
+      if (id.endsWith("/bkp/cash-flow-returns.js")) return "\0planner:engine:cash-flow-returns";
       if (id.startsWith("planner:")) return "\0" + id;
     },
     load(id) {

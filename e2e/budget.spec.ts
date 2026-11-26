@@ -388,7 +388,7 @@ test("salary planner opens from homepage, saves a budget and projects twelve dep
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(base);
-  await page.getByRole("link", { name: /Plan my monthly budget/ }).click();
+  await page.locator("#explore").getByRole("link", { name: "Salary Plan", exact: true }).click();
   await expect(page).toHaveURL(/salary-budget\/$/);
   await page
     .getByRole("button", { name: "Load example plan", exact: true })

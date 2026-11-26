@@ -1,3 +1,4 @@
+import cashFlowRates from "../../bkp/cash-flow-returns.js";
 import { field, tool } from "./model";
 
 const money = (label: string, value: number, min = 0) =>
@@ -12,40 +13,14 @@ function irr(cash: number[], times: number[]) {
   if (!cash.some((value) => value < 0) || !cash.some((value) => value > 0)) {
     throw new Error("Include at least one investment and one receipt.");
   }
-  // Discount relative to the largest exponential so long holding periods cannot overflow.
-  const npv = (logGrowth: number) => {
-    const pivot = logGrowth < 0 ? Math.max(...times) : Math.min(...times);
-    return cash.reduce(
-      (sum, value, i) =>
-        sum + value * Math.exp(-(times[i] - pivot) * logGrowth),
-      0,
-    );
-  };
-  const intervals: [number, number][] = [];
-  let previousRate = -30,
-    previousValue = npv(previousRate);
-  for (let index = 1; index <= 1200; index++) {
-    const rate = -30 + index / 20,
-      value = npv(rate);
-    if (value === 0 || value * previousValue < 0)
-      intervals.push([previousRate, rate]);
-    previousRate = rate;
-    previousValue = value;
-  }
-  if (intervals.length !== 1)
+  const rates = cashFlowRates(cash, times);
+  if (rates.length !== 1)
     throw new Error(
-      intervals.length
+      rates.length
         ? "These cash flows yield multiple possible returns."
         : "No annual return was found for this cash-flow schedule.",
     );
-  let [low, high] = intervals[0];
-  if (npv(high) === 0) return 100 * Math.expm1(high);
-  for (let i = 0; i < 120; i++) {
-    const mid = (low + high) / 2;
-    if (Math.sign(npv(mid)) === Math.sign(npv(low))) low = mid;
-    else high = mid;
-  }
-  return 100 * Math.expm1((low + high) / 2);
+  return 100 * Math.expm1(rates[0]);
 }
 export const business = [
   tool(

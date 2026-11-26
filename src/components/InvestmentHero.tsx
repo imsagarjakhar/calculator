@@ -62,8 +62,7 @@ export function InvestmentHero() {
   });
   const end = rows[rows.length - 1],
     peak = Math.max(1, ...rows.map((row) => row.balance));
-  const samples = rows.filter((row) => row.month % 12 === 0);
-  const points = samples.map((row) => [
+  const points = rows.map((row) => [
     4 + (392 * row.month) / (years * 12),
     94 - (86 * row.balance) / peak,
   ]);

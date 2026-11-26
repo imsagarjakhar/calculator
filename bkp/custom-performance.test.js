@@ -6,6 +6,9 @@ const basic=()=>{const p=E.createPlan(new Date(2026,0,1));p.months=12;p.monthlyS
 const sample=[['2008-01-01',-10000],['2008-03-01',2750],['2008-10-30',4250],['2009-02-15',3250],['2009-04-01',2750]].map(([date,amount])=>({date,amount}));
 near(E.xirr(sample).rate,.373362535);near(E.xirr([...sample].reverse()).rate,.373362535);
 const day=offset=>new Date(Date.UTC(2025,0,1)+offset*86400000).toISOString().slice(0,10);
+const annualReturn = amounts => E.xirr(amounts.map((amount,i)=>({date:day(i*365),amount})));
+assert.equal(annualReturn([-100,201,-101]).status,'multiple'); // 0% and 1%.
+near(annualReturn([-100,220,-121]).rate,.1); // Double root, no sign crossing.
 const multi=E.xirr([{date:day(0),amount:-100},{date:day(365),amount:230},{date:day(730),amount:-132}]);assert.equal(multi.status,'multiple');assert.equal(multi.rate,null);
 assert.equal(E.xirr([{date:day(0),amount:-100},{date:day(0),amount:110}]).rate,null);
 assert.equal(E.xirr([{date:day(0),amount:-100},{date:day(365),amount:-10}]).rate,null);
