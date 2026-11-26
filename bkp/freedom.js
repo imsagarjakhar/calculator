@@ -100,7 +100,6 @@
 
   const m=n=>Number.isFinite(n)?money(n,a.currency):'No finite target',metric=(name,value,note)=>'<div class="metric"><span>'+name+'</span><strong>'+m(value)+'</strong><small>'+note+'</small></div>';
 
-  for(const node of document.querySelectorAll('.f-code'))node.textContent=a.currency;
 
   $('returnSlider').value=a.expectedReturn;
 
@@ -161,6 +160,7 @@
  }
 
  function update(){
+  for(const node of document.querySelectorAll('.f-code'))node.textContent=$('f-currency').value;
 
   const fromCorpus=$('f-incomeMode').value==='corpus';
 
@@ -238,8 +238,7 @@
  }});
 
  if(typeof scope!=='undefined'){
-  if(!restoredPlan){$('f-salary').value='';$('f-expenses').value='';$('f-retirementExpense').value='';}
-  scope.setupExample({'f-monthlyInvestment':fresh.monthlyInvestment,'f-corpus':fresh.corpus,'f-salary':fresh.salary,'f-expenses':fresh.expenses,'f-retirementExpense':fresh.retirementExpense},restoredPlan,update);
+  scope.setupExample({'f-monthlyInvestment':fresh.monthlyInvestment,'f-corpus':fresh.corpus,'f-salary':fresh.salary,'f-expenses':fresh.expenses,'f-retirementExpense':fresh.retirementExpense,'f-age':fresh.age,'f-targetAge':fresh.targetAge,'f-endAge':fresh.endAge},restoredPlan,update);
  }
  update();
 

@@ -158,10 +158,10 @@
   if(typeof ChartHover!=='undefined')ChartHover.attach($('bucketChart'),{currency:a.currency,top:t,bottom:h-b,points:o.path.map(p=>({x:x(p.month),ys:[y(p.spending),y(p.spending+p.emergency),y(p.total)],title:ageAt(a,p.month)+' · '+(p.month?'End of month '+p.month:'Starting allocation'),rows:[['Bucket 1 · Living costs',p.spending],['Bucket 2 · Emergency',p.emergency],['Bucket 3 · Long term',p.equity],['Total savings',p.total]]}))});
  }
  function update(){
+  for(const n of document.querySelectorAll('.b-code'))n.textContent=$('b-currency').value;
   pausePlayback();selectedPhase=0;
   try{
    const inputs=read(),o=E.project(inputs,events),a=o.openingSettings;current={a,o};events=o.events;
-   for(const n of document.querySelectorAll('.b-code'))n.textContent=a.currency;
    renderEvents(a);renderAllocation(a,o);renderExplorer();renderChart(a,o);renderTable();$('bucketError').textContent='';$('bucketReport').disabled=false;for(const id of ['bucketDate','bucketSlider','bucketPlay'])$(id).disabled=false;
    try{localStorage.setItem(KEY,JSON.stringify({version:1,settings:inputs,events}));$('bucketSave').textContent='Saved privately · Separate from all other planners';}catch{$('bucketSave').textContent='Browser saving unavailable. Download a report to keep this plan.';}
   }catch(e){
@@ -235,6 +235,6 @@
   selectedMonth=Number.isInteger(saved.inspection?.month)&&saved.inspection.month>=0&&saved.inspection.month<projection.months?saved.inspection.month:0;
   update();selectedPhase=Math.max(0,projection.rows[selectedMonth].phases.findIndex(p=>p.key===saved.inspection?.phase));renderExplorer();
  }});
- if(typeof scope!=='undefined')scope.setupExample({'b-corpus':E.defaults.corpus,'b-monthly':E.defaults.monthly,'b-emergency':E.defaults.emergency},restoredPlan,update);
+ if(typeof scope!=='undefined')scope.setupExample({'b-corpus':E.defaults.corpus,'b-monthly':E.defaults.monthly,'b-emergency':E.defaults.emergency,'b-age':E.defaults.age,'b-endAge':E.defaults.endAge},restoredPlan,update);
  update();
 })();

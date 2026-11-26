@@ -66,6 +66,7 @@
     if(typeof ChartHover!=='undefined')ChartHover.attach(get('survivalPlot'),{currency:a.currency,top:t,bottom:h-b,points:o.path.map((p,i)=>({x:x(p.age),ys:[y(p.balance)],title:'Age '+p.age.toFixed(2)+(o.path[i+1]?.age===p.age?' · Before expense':o.path[i-1]?.age===p.age?' · After expense':''),rows:[['Remaining corpus',p.balance]]}))});
   }
   function update() {
+    document.querySelectorAll('.s-currency-code').forEach(n=>n.textContent=get('s-currency').value);
     try {
       const a=read(),events=LifeEvents.load('survival',a.currency),start=projectionStart,o=projectSurvival(a,start,events),without=projectSurvival(a,start,[]),needed=requiredCorpus(a,start,events),money=n=>format(n,a.currency);last={a,o,events,needed};
       get('survivalStartStatus').textContent='Projection start: '+new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(o.start)+'. Imported plans keep their original start date.';
@@ -76,7 +77,6 @@
         eventsEditor.impact(o.expenseDue?'Scheduled expenses: '+money(o.expenseDue)+'. Funded: '+money(o.expensePaid)+'. Unfunded: '+money(o.expenseShortfall)+'. '+runway+' Ending corpus with expenses: '+money(o.balance)+'. Without expenses: '+money(without.balance)+'.':'No active expenses fall within this plan.');
       }
       get('survivalError').textContent='';get('survivalExport').disabled=false;get('survivalReport').disabled=false;get('survivalReportStatus').textContent='';
-      document.querySelectorAll('.s-currency-code').forEach(n=>n.textContent=a.currency);
       const depletionTiming=o.age>=a.endAge-1e-8?'at':'before';
       const dayCount=Math.floor(o.days+1e-8),elapsedYears=Math.floor(o.age-a.age+1e-8),months=Math.floor((o.age-a.age-elapsedYears)*12+1e-7);
       get('survivalOutput').innerHTML='<p class="helper"><strong>Goal: fund expenses through age '+a.endAge+'. Using the starting corpus is allowed.</strong></p><div class="result-label" style="margin-top:24px">'+(o.depleted?'ESTIMATED FUNDED TIME':'FUNDED THROUGH YOUR SELECTED HORIZON')+'</div><div class="survival-value">'+(o.depleted?'': 'At least ')+dayCount.toLocaleString()+' days</div><p class="muted">About '+elapsedYears+' years'+(months?' and '+months+' months':'')+' of spending covered.</p><div class="stats"><div class="stat"><span>'+(o.depleted?'Estimated age at depletion':'Plan end age')+'</span><strong>'+o.age.toFixed(1)+' years</strong></div><div class="stat"><span>Remaining corpus · future money</span><strong>'+money(o.balance)+'</strong></div><div class="stat"><span>Total funded withdrawals</span><strong>'+money(o.totalWithdrawn+o.expensePaid)+'</strong><small>Regular SWP: '+money(o.totalWithdrawn)+' · Life expenses: '+money(o.expensePaid)+'</small></div><div class="stat"><span>Investment growth / loss</span><strong>'+money(o.totalGrowth)+'</strong></div></div><p class="survival-notice">'+(o.depleted?(a.corpus===0?'There is no starting corpus to fund withdrawals.':(o.eventFailure?'A life expense cannot be fully funded. Your corpus runs out '+depletionTiming+' age ':'Your corpus runs out '+depletionTiming+' age ')+a.endAge+'. Try lowering the SWP amount or adjusting your assumptions.'):'Your corpus covers the plan through age '+a.endAge+'. This does not establish how long it will last beyond that age.')+'</p><p class="helper">Starting corpus needed for this horizon: <strong>'+money(needed)+'</strong>. '+(!o.depleted?'The remaining '+money(o.balance)+' is future money; its buying power is about <strong>'+money(o.balance/Math.pow(1+a.inflation/100,o.age-a.age))+'</strong> at today’s prices. ':'')+'Financial Freedom’s ongoing-income goal also aims to preserve purchasing power, so the targets can differ. The two calculators have separate future-expense lists.</p>';
@@ -122,6 +122,6 @@
   document.querySelectorAll('[data-screen]').forEach(button=>button.onclick=()=>{const name=button.dataset.screen;history.pushState(null,'',name==='home'?location.pathname+location.search:'#'+name);showScreen(name,true);});
   window.addEventListener('popstate',()=>showScreen(location.hash.slice(1),true));
   eventsEditor=LifeEvents.mount(get('survivalLifeEvents'),'survival',{currency:get('s-currency').value,months:(Number(get('s-endAge').value)-Number(get('s-age').value))*12,inflation:Number(get('s-inflation').value),age:Number(get('s-age').value)},update);
-  if(typeof scope!=='undefined')scope.setupExample({'s-corpus':defaults.corpus,'s-swp':defaults.swp},restoredPlan,update);
+  if(typeof scope!=='undefined')scope.setupExample({'s-corpus':defaults.corpus,'s-swp':defaults.swp,'s-age':defaults.age,'s-endAge':defaults.endAge},restoredPlan,update);
   update();showScreen(location.hash.slice(1));
 })();
