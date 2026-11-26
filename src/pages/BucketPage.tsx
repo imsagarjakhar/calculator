@@ -56,10 +56,10 @@ export const BucketPage = memo(function BucketPage() {
                   />
                 </label>
                 <p className="wide helper" id="bucketPriceBasis">
-                  Enter both amounts in today’s money. The plan uses them as the opening savings and first monthly withdrawal, even if you choose a later start month. Spending rises with inflation after each 12 plan months.
+                  Enter your expected retirement savings, monthly spending and emergency reserve in today’s money. The planner converts them to prices in your withdrawal start month using your inflation rate. This conversion assumes the same purchasing power at retirement.
                 </p>
                 <label htmlFor="b-age">
-                  Your current age
+                  Age when withdrawals start
                   <input
                     id="b-age"
                     type="number"
@@ -726,14 +726,11 @@ export const BucketPage = memo(function BucketPage() {
               </button>
             </div>
           </div>
-          <p className="helper">
-            End-of-period balances. Unfunded costs remain unpaid; they do not
-            create debt.
-          </p>
+          <p className="helper" id="bucketLedgerNote"></p>
           <div
             className="table-wrap"
             role="region"
-            aria-label="Bucket projection schedule"
+            aria-label="Bucket projection schedule" tabIndex={0}
           >
             <table>
               <thead id="bucketTableHead"></thead>

@@ -8,7 +8,7 @@ assert.deepEqual(p.initial,{spending:60000,emergency:100000,equity:840000});near
 const inflation={...base,inflation:5},inflated=E.project(inflation);near(inflated.target1,12000*(1+1.05+1.05**2+1.05**3+1.05**4));near(inflated.rows[11].dueLiving,1000);near(inflated.rows[12].dueLiving,1050);
 near(E.project({...inflation,spendingReturn:20}).target1,inflated.target1);
 // The rolling window removes paid withdrawals and adds new inflated ones at its far end.
-const seventy={...base,startMonth:'2026-10',monthly:70000,inflation:5};
+const seventy={...base,priceMonth:'2026-10',startMonth:'2026-10',monthly:70000,inflation:5};
 near(E.spendingTarget(seventy,12),E.spendingTarget(seventy,0)*1.05);
 near(E.spendingTarget(seventy,1),E.spendingTarget(seventy,0)-70000+70000*1.05**5);
 for(const offset of [0,1,11,12,13,59,60,121]){const window=E.spendingWindow(seventy,offset);assert.equal(window.reduce((s,r)=>s+r.months,0),60);assert.equal(window[0].from,offset);assert.equal(window.at(-1).to,offset+59);near(window.reduce((s,r)=>s+r.total,0),E.spendingTarget(seventy,offset));for(const r of window)near(r.total,r.months*r.monthly);}
@@ -80,3 +80,12 @@ assert.throws(()=>E.project(base,[{...event,month:0}]));assert.throws(()=>E.proj
 for(const startMonth of ['','2026-13','2026-00','1800-01','2151-01',123])assert.throws(()=>E.project({...base,startMonth}));
 assert.equal(E.validate({...base,startMonth:undefined}).startMonth,E.defaults.startMonth);
 console.log('Bucket engine passed: gross five-year allocation, annual inflation, return-independent targets, refill timing/priority, emergency costs, equity shocks, outside events, zero/negative returns, 100 cash-flow reconciliations and invalid inputs.');
+
+for(const years of [4,14]){
+ const future=E.project({...base,priceMonth:'2026-01',startMonth:(2026+years)+'-01',inflation:5},[
+  {...event,month:1,amount:100,inflate:true},{...event,id:'quoted',month:1,amount:50,inflate:false}]);
+ const factor=1.05**years,first=future.rows[0];
+ near(first.opening,base.corpus*factor);near(first.dueLiving,base.monthly*factor);
+ near(first.dueEmergency,100*factor+50);near(first.realTotal,first.total/(1.05**(years+1/12)));
+ near(future.years[0].realTotal,future.rows[11].total/(factor*1.05));
+}

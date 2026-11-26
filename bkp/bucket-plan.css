@@ -653,3 +653,9 @@
     background: #fff;
   }
 }
+
+#bucketTableRows td small, #transferRows th small { display:block; font-size:.77rem; line-height:1.5; color:#526257; }
+#bucketTableRows td small b { color:#243d30; font-weight:600; }
+#bucketTableRows td { font-variant-numeric:tabular-nums; }
+#bucketTableRows .ledger-real { background:#eaf3e8; color:#184b32; font-weight:700; }
+#bucketTableRows .ledger-closing { font-weight:650; }
