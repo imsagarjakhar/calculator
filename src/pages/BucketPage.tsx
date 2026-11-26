@@ -31,9 +31,10 @@ export const BucketPage = memo(function BucketPage() {
                   />
                 </label>
                 <label className="wide" htmlFor="b-corpus">
-                  Total retirement savings (<span className="b-code">INR</span>)
+                  Total retirement savings in today’s money (<span className="b-code">INR</span>)
                   <input
                     id="b-corpus"
+                    aria-describedby="bucketPriceBasis"
                     type="number"
                     min="0"
                     max="1000000000000"
@@ -42,10 +43,11 @@ export const BucketPage = memo(function BucketPage() {
                   />
                 </label>
                 <label className="wide" htmlFor="b-monthly">
-                  How much will you spend each month? (
+                  Monthly spending at today’s prices (
                   <span className="b-code">INR</span>)
                   <input
                     id="b-monthly"
+                    aria-describedby="bucketPriceBasis"
                     type="number"
                     min="0"
                     max="1000000000"
@@ -53,6 +55,9 @@ export const BucketPage = memo(function BucketPage() {
                     required
                   />
                 </label>
+                <p className="wide helper" id="bucketPriceBasis">
+                  Enter both amounts in today’s money. The plan uses them as the opening savings and first monthly withdrawal, even if you choose a later start month. Spending rises with inflation after each 12 plan months.
+                </p>
                 <label htmlFor="b-age">
                   Your current age
                   <input
