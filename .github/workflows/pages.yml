@@ -58,7 +58,8 @@ jobs:
     name: Deploy selected branch to GitHub Pages
     if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', vars.PAGES_DEPLOY_BRANCH || 'main')
     needs: check
-    runs-on: [self-hosted, Windows, X64]
+    # Publish the verified artifact independently of the Windows build runner's DNS.
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       pages: write

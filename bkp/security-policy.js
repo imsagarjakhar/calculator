@@ -21,13 +21,17 @@ function securePage(source){
  const match=html.match(/<meta charset="utf-8">/i);if(!match)throw new Error('Missing early charset declaration.');
  return html.replace(/<meta charset="utf-8">\s*/i,match[0]+'\n'+metadata);
 }
+// Hash the LF script bytes that Git distributes, including on Windows runners.
+function normalizePageScripts(pageNames){
+  const scripts=new Set(pageNames.flatMap(page=>[...fs.readFileSync(page,'utf8').matchAll(/<script\b[^>]*\bsrc="([a-z0-9-]+\.js)"/gi)].map(m=>m[1])));
+  for(const script of scripts){const source=fs.readFileSync(script,'utf8');if(source.includes('\r'))fs.writeFileSync(script,source.replace(/\r\n?/g,'\n'));}
+}
 if(require.main===module){
  let failed=false;
  if(!process.argv.includes('--check')){
-  const scripts=new Set(pages.flatMap(page=>[...fs.readFileSync(page,'utf8').matchAll(/<script\b[^>]*\bsrc="([a-z0-9-]+\.js)"/gi)].map(m=>m[1])));
-  for(const script of scripts){const source=fs.readFileSync(script,'utf8');if(source.includes('\r'))fs.writeFileSync(script,source.replace(/\r\n?/g,'\n'));}
+  normalizePageScripts(pages);
  }
  for(const page of pages){const source=fs.readFileSync(page,'utf8'),secured=securePage(source);if(process.argv.includes('--check')){if(source!==secured){console.error(page+': security hashes are stale; run node security-policy.js');failed=true;}}else fs.writeFileSync(page,secured);}
  if(failed)process.exitCode=1;else console.log(process.argv.includes('--check')?'Security policies and script integrity hashes are current.':'Security policies and script integrity hashes updated.');
 }
-module.exports={securePage,digest};
+module.exports={securePage,digest,normalizePageScripts};

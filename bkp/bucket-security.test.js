@@ -1,6 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),{securePage,digest}=require('./security-policy'),R=require('./calculator-report'),E=require('./bucket-engine');
-const html=fs.readFileSync('bucket-plan.html','utf8');assert.equal(html,securePage(html));
+const html=fs.readFileSync('bucket-plan.html','utf8');assert.ok(html===securePage(html),'Bucket security metadata is stale. Run node bucket-security.js from bkp and commit the updated files.');
 const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];for(const rule of ["default-src 'none'","connect-src 'none'","script-src-attr 'none'","object-src 'none'"])assert.ok(csp.includes(rule));
 for(const [,src,integrity] of html.matchAll(/<script src="([^"]+)"[^>]*integrity="([^"]+)"/g))assert.equal(integrity,digest(fs.readFileSync(src)));
 assert.ok(html.includes('noindex,nofollow'));assert.ok(!/\son\w+="/i.test(html));
